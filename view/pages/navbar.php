@@ -1,3 +1,4 @@
+
 <header class="main-header">
 
     <!-- Logo -->
@@ -18,19 +19,16 @@
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           
-          <?php if ( $_SESSION['perfil'] == 2 ): ?>
+          
             <!-- Notifications Menu -->
           <li class="dropdown notifications-menu">
             <!-- Menu toggle button -->
-            <a href="#" class="dropdown-toggle"onclick="load_solicitudesNvas();" >
+            <a href="#" class="dropdown-toggle" onclick="" >
               <i class="fa fa-bell-o"></i>
               <span class="label label-danger campanita">0</span>
             </a>
-            
           </li>
             
-          <?php endif ?>
-          
           <li class="dropdown user user-menu">
             <!-- Menu Toggle Button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -44,27 +42,9 @@
               <li class="user-header">
                 <img src="view/dist/img/scv_icon.png" class="img-circle" alt="User Image">
 
-                <p class="profile_name"></p>
+                <p class="profile_name">NOMBRE DE USUARIO</p>
                 <p>
-                  <small><?php 
-                  switch ($_SESSION['perfil']) {
-                    case '1':
-                      echo "SOLICITANTE";
-                      break;
-                    case '2':
-                      echo "SOPORTE TÉCNICO";
-                      break;
-                    case '3':
-                      echo "TECNOLOGÍAS DE LA INFORMACIÓN";
-                      break;
-                    case '4':
-                      echo "BIENES";
-                      break;
-                    case '5':
-                      echo "";
-                      break;
-                  }
-                  ?></small>
+                  <small><?=$_SESSION['perfil']?></small>
                 </p>
               </li>
               
@@ -78,13 +58,8 @@
               </li>
             </ul>
           </li>
-          <!-- Control Sidebar Toggle Button -->
-          <?php if ( $_SESSION['perfil'] == 2 ): ?>
-            <li>
-              <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-            </li>
-          <?php endif ?>
         </ul>
       </div>
     </nav>
   </header>
+

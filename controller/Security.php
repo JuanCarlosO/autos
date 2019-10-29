@@ -2,12 +2,12 @@
 /**
  * Clase encargada en cifrar y descifrar passwords
  */
-include_once '../model/conection.php';
+require_once '../model/conection.php';
 define('METHOD','AES-256-CBC');
 define('SECRET_KEY','$J@M35$_');
 define('SECRET_IV','22242522');
 
-class Security
+class Security 
 {
 	public $pdo ;
 	public $pass;

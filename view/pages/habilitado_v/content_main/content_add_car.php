@@ -9,19 +9,6 @@
                             <button type="button" class="btn btn-box-tool" data-widget="collapse">
                                 <i class="fa fa-minus"></i>
                             </button>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-box-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa fa-laptop"></i>
-                                </button>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a href="#">Ver algo</a></li>
-                                    <li><a href="#">Ver otra cosa</a></li>
-                                    <li><a href="#">Algo más</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="#">Equipo asignado</a></li>
-                                </ul>
-                            </div> 
-                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                         </div>
                     </div>
                     <!-- /.box-header -->
@@ -158,7 +145,8 @@
         -------------------------->
     </section>
     <!-- /.content -->
-    <form id="frm-add-tipov" method="post" action="#">
+    <form id="frm_add_tipov" method="post" action="#">
+        <input type="hidden" id="option" name="option" value="10">
         <div class="modal fade" id="modal-add-tipov">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -171,18 +159,20 @@
                     <div class="row">
                         <div class="col-md-12">
                             <label for="">Escriba un tipo de vehículo nuevo</label>
+                            <input type="text" id="tipo_nvo" name="tipo_nvo" value="" placeholder="Stratus Sedan" class="form-control" autocomplete="off">
                         </div>  
                     </div>
                 </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
-                        <button type="button" class="btn btn-primary">Guardar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
                     </div>
                 </div>
             </div>
         </div>
     </form>
-    <form action="#" method="post">
+    <form id="frm_add_marcav" action="#" method="post">
+        <input type="hidden" id="option" name="option" value="11">
         <div class="modal fade" id="modal-add-marcav">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -195,10 +185,15 @@
                     <div class="row">
                         <div class="col-md-12">
                             <label>Nombre de la marca nueva </label>
-                            <input type="text" id="marca_nvo" name="marca_nvo" value="" placeholder="Chrysler..." class="form-control">
+                            <input type="text" id="marca_nvo" name="marca_nvo" value="" placeholder="Chrysler..." class="form-control" autocomplete="off">
                         </div>
                     </div>
                 </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                        <button type="button" c
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>

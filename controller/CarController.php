@@ -68,6 +68,18 @@ class CarController
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}
 	}
+	public function saveTipov($post)
+	{
+		return $this->model->saveTipov($post);
+	}
+	public function saveMarcav($post)
+	{
+		return $this->model->saveMarcav($post);
+	}
+	public function updateStatus($v)
+	{
+		return $this->model->updateStatus($v);
+	}
 }
 
 

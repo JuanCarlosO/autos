@@ -8,11 +8,15 @@ spl_autoload_register(function ($class) {
 /*DECLARACIÓN DE LAS CLASES*/
 $car = new CarController;
 $sol = new SolicitanteController;
+$person = new PersonController;
+$hab = new HabilitadoController;
 /***/
 
 if ( isset( $_POST['option'] ) ) 
 {
+
 	$option = $_POST['option'] ;
+
 	switch ( $option ) {
 		case '1':
 			session_start();
@@ -86,15 +90,39 @@ if ( isset( $_POST['option'] ) )
 		case '9':
 			echo $car->getMarcas();
 			break;
-		
+		case '10':
+			echo $car->saveTipov($_POST);#guardar tipo de vehiculo
+			break;
+		case '11':
+			echo $car->saveMarcav($_POST);#guardar marca de vehiculo
+			break;
+		case '12':
+			echo $car->updateStatus($_POST['v']);#guardar marca de vehiculo
+			break;
+		case '13':
+			echo $person->getPerfil();#Recuperar la informacion del usuario logeado
+			break;
+		case '14':
+			echo $hab->saveTaller($_POST);#Recuperar la informacion del usuario logeado
+			break;
+		case '15':
+			echo $hab->delTaller($_POST['t']);#Dar de baja el taller
+			break;
+		case '16':
+			echo $hab->saveConductor( $_POST );#SIN FUNCIONAMIENTO 
+			break;
+		case '17':
+			echo $hab->saveSiniestro($_POST);
+			break;
 		default:
-			echo json_encode(array('estado'=>'error','message'=>'El puente no encontro la ruta a la que desea enlazarse.'));
+			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;
 	}
 }
 elseif( isset($_GET) )
 {
-	$option = $_GET['option'];
+
+	$option = ( isset($_GET['option']) ) ? $_GET['option'] : $_REQUEST['parametros']['option'];
 	switch ( $option ) {
 		case '1':
 			# Anexgrid de Listado de Vehiculos
@@ -115,8 +143,17 @@ elseif( isset($_GET) )
 		case '5':
 			echo $car->getMarcas();
 			break;
+		case '6':
+			echo $car->getCars();
+			break;
+		case '7':
+			echo $hab->getTalleres();
+			break;
+		case '8':
+			echo $hab->getSolicitudes();
+			break;
 		default:
-			echo json_encode(array('estado'=>'error','message'=>'El puente no encontro la ruta a la que desea enlazarse.'));
+			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));
 			break;
 	}
 }

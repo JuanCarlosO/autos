@@ -64,9 +64,28 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_main/content_add_car.php';
 							  		break;
 							  	case 'list_sol':
-							  		include 'view/pages/solicitante/content_header/header_general.php';
-							  		include 'view/pages/solicitante/content_main/content_general.php';
+							  		include 'view/pages/habilitado_v/content_header/header_list_solicitud.php';
+							  		include 'view/pages/habilitado_v/content_main/content_list_solicitud.php';
+							  		include 'view/pages/habilitado_v/modals/modal_detalle_solicitud.php';
+							  		include 'view/pages/habilitado_v/modals/modal_siniestros.php';
 							  		break;
+							  	case 'add_taller':
+							  		include 'view/pages/habilitado_v/content_header/header_add_taller.php';
+							  		include 'view/pages/habilitado_v/content_main/content_add_taller.php';
+							  		break;
+							  	case 'list_taller':
+							  		include 'view/pages/habilitado_v/content_header/header_list_taller.php';
+							  		include 'view/pages/habilitado_v/content_main/content_list_taller.php';
+							  		break;
+							  	case 'cedula_sol':
+							  		include 'view/pages/habilitado_v/content_header/header_cedula_sol.php';
+							  		include 'view/pages/habilitado_v/content_main/content_cedula_sol.php';
+							  		break;
+							  	case 'add_chofer':
+							  		include 'view/pages/habilitado_v/content_header/header_add_conductor.php';
+							  		include 'view/pages/habilitado_v/content_main/content_add_conductor.php';
+							  		break;
+							  		
 							}
 						}
 						else
@@ -83,7 +102,6 @@ date_default_timezone_set('America/Mexico_City');
 			?>
 		</div>
 		<?php include 'view/pages/footer.php'; ?>
-		<?php include 'view/pages/aside_lateral.php'; ?>
   	<div class="control-sidebar-bg"></div>
   </div>
 <?php include 'view/pages/scripts.php'; ?>

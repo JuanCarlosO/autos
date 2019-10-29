@@ -8,6 +8,11 @@
 <!-- AdminLTE App -->
 <script src="view/dist/js/adminlte.min.js"></script>
 
+<!-- InputMask -->
+<script src="view/plugins/input-mask/jquery.inputmask.js"></script>
+<script src="view/plugins/input-mask/jquery.inputmask.date.extensions.js"></script>
+<script src="view/plugins/input-mask/jquery.inputmask.extensions.js"></script>
+
 <!-- DataTables -->
 <script src="view/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="view/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
