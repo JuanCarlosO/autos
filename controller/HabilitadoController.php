@@ -43,6 +43,22 @@ class HabilitadoController
 	{
 		return $this->model->saveSiniestro($post);
 	}
+	public function getDetalleSol($sol)
+	{
+		return $this->model->getDetalleSol($sol);
+	}
+	public function saveAtencion($post)
+	{
+		return $this->model->saveAtencion($post);
+	}
+	public function getFallas($t)
+	{
+		return $this->model->getFallas($t);
+	}
+	public function getTipoFalla()
+	{
+		return $this->model->getTipoFalla();
+	}
 	
 }
 ?>

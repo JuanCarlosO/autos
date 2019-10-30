@@ -29,6 +29,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="view/dist/css/skins/_all-skins.min.css">
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  <link rel="stylesheet" href="view/bower_components/select2/dist/css/select2.min.css">
   <!-- DataTables -->
   <link rel="stylesheet" href="view/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
   <!-- Morris charts -->
@@ -36,6 +37,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- CSS PARA ESTILOS DEL AUTOCOMPLETE-->
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+  
 
 </head>
 <!--

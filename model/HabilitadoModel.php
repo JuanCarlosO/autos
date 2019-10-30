@@ -185,7 +185,7 @@ class HabilitadoModel extends Conection
 		try {
 
 			$aseguradora 	= mb_strtoupper($post['name_aseguradora'],'utf-8');
-			$observaciones  = (isset($post['observaciones'])) ? mb_strtoupper($post['observaciones'],'utf-8') : NULL ;;
+			$observaciones  = (isset($post['observaciones'])) ? mb_strtoupper($post['observaciones'],'utf-8') : NULL ;
 			$this->sql = "INSERT INTO siniestros (
 				id,
 				aseguradora,
@@ -236,6 +236,112 @@ class HabilitadoModel extends Conection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
-	
+	/*Recuperar toda la info de una solicitud*/
+	public function getDetalleSol($sol)
+	{
+		try {
+			$detalle = array();		
+			$this->sql = "
+				SELECT s.*,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS name_sol, a.nombre AS area FROM solicitudes AS s
+				INNER JOIN personal AS p ON p.id = s.solicitante
+				INNER JOIN area AS a ON a.id = p.area_id
+				WHERE s.id = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute(array($sol));
+			$solicitud = $this->stmt->fetch(PDO::FETCH_OBJ);
+			$auto = $solicitud->vehiculo;
+			#recuperar los datos del vehiculo
+			$this->sql = "
+				SELECT v.*,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS name_reguardatario 
+				FROM vehiculos AS v
+				INNER JOIN personal AS p ON p.id=v.resguardatario
+				WHERE v.id = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute(array($auto));
+			$vehiculo = $this->stmt->fetch(PDO::FETCH_ASSOC);
+			#recupera las reparaciones 
+			$this->sql = "
+				SELECT UPPER(c.nombre) AS falla, t.r_social AS taller 
+				FROM reparaciones AS r 
+				INNER JOIN catalogo_fallas AS c ON c.id = r.falla 
+				INNER JOIN talleres AS t ON t.id = r.taller 
+				WHERE r.solicitud = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute(array($sol));
+			$reparaciones = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			
+			$detalle['solicitud'] 	= $solicitud;
+			$detalle['vehiculo'] 	= $vehiculo;
+			for ($i=0; $i < count($reparaciones) ; $i++) { 
+				$detalle['reparaciones'][$i] = $reparaciones[$i];
+			}
+			return json_encode($detalle);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+
+	/*Guardar el siniestro*/
+	public function saveAtencion($post)
+	{
+		try {
+			
+			$obs = ( isset($post['observaciones']) ) ? mb_strtoupper($post['observaciones'],'utf-8') : NULL ;
+			$this->sql = "
+			INSERT INTO solicitudes_atendidas (id,solicitud,entrada_taller,salida_taller,entrada_uai,observaciones) 
+			VALUES ('',?,?,?,?,?);
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$post['solicitud_id'],PDO::PARAM_INT);
+			$this->stmt->bindParam(2,$post['f_entrada'],PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$post['f_salida'],PDO::PARAM_STR);
+			$this->stmt->bindParam(4,$post['entrada_uai'],PDO::PARAM_STR);
+			$this->stmt->bindParam(5,$obs,PDO::PARAM_STR);
+			$this->stmt->execute();
+			return json_encode( array('status'=>'success','message'=>'SE A ATENDIDO CORRECTAMENTE LA SOLICITUD.') );
+
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	/*recuperar el */
+	public function getTipoFalla()
+	{
+		try {
+			$this->sql = "
+			SELECT * FROM tipo_fallas 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			/*Carga de anexGrid*/
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+
+	/*recuperar el catalogo_fallas*/
+	public function getFallas($t)
+	{
+		try {
+			$this->sql = "
+			SELECT * FROM catalogo_fallas WHERE tipo_id = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$t);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			/*Carga de anexGrid*/
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+
 }
 ?>

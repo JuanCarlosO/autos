@@ -12,6 +12,7 @@ function getURL() {
 	if ( URLsearch == '?menu=list_sol'  ) {
 		$('#tree_list').addClass('active');
 		$('#list_sol').addClass('active');
+		$('.select2').select2();
 		/*Carga el listado completo de vehiculos*/
 		all_sol();
 		/*Carga de evento de botones*/
@@ -21,6 +22,7 @@ function getURL() {
 		});
 		/*Carga de formularios*/
 		frm_add_siniestro();
+		frm_atender_sol();
 	}else if ( URLsearch == '?menu=list_car' || URLsearch == '?menu=general' ) {
 		$('#tree_list').addClass('active');
 		$('#list_car').addClass('active');
@@ -69,7 +71,14 @@ function all_sol() {
 	        
 	    ],
 	    modelo: [
-	        { propiedad: 'id',class:'text-center' },
+	        { propiedad: 'id',class:'text-center',formato:function(tr,obj,celda) {
+	        	if (obj.estado =='Creada') {
+	        		tr.addClass('bg-yellow');
+	        	}else{
+	        		tr.addClass('bg-aqua');
+	        	}
+	        	return obj.id;
+	        } },
 	        { propiedad: 'folio' },
 	        { propiedad: 'full_name'},
 	        { formato: function(tr,obj,celda){
@@ -467,22 +476,122 @@ function frm_add_siniestro() {
 	return false;
 }
 /*Recuperar la informacion del detalle */
-function getDetalleSol( solicitud ) {
+function getDetalleSol( solicitud ) 
+{
 	$.ajax({
 		url: 'controller/puente.php',
-		type: 'default GET (Other values: POST)',
-		dataType: 'default: Intelligent Guess (Other values: xml, json, script, or html)',
-		data: {param1: 'value1'},
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '18',sol:solicitud},
 	})
-	.done(function() {
-		console.log("success");
+	.done(function(response) {
+		if ( response.status == 'error') {
+			alert('Error: '+response.message);
+		}else{
+			$('#id').val(response.solicitud.id);
+			$('#folio').val(response.solicitud.folio);
+			$('#f_sol').val(response.solicitud.f_sol);
+			$('#km').val(response.solicitud.km);
+			$('#desc_sol').val(response.solicitud.descripcion);
+			/*aGREGAR LAS REPARACIONES*/
+			$('#reparaciones').html('');
+			$.each(response.reparaciones, function(i, val) {
+				$('#reparaciones').append('<li><b>Falla: </b>'+val.falla+ ' <b>reparado por</b> '+val.taller+'.</li>');
+			});
+			$('#resguardatario').val(response.vehiculo.name_reguardatario);
+			$('#area_sol').val(response.solicitud.area);
+			$('#name_sol').val(response.solicitud.name_sol);
+			$('#placas').val(response.vehiculo.placas);
+
+		}
 	})
-	.fail(function() {
-		console.log("error");
-	})
-	.always(function() {
-		console.log("complete");
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error al recuperar el detalle de la solicitud: '+jqXHR.responseText);
 	});
 	
+	return false;
+}
+/*Funcion para atender la solicitud*/
+function atender_sol() {
+	var solicitud = $('#solicitud_id').val();
+	getTipoFalla('t_falla');
+	$('#modal_atender_solicitud').modal('toggle');
+}
+function getTipoFalla(id) {
+	$.post('controller/puente.php', {option: '21'}, function(data, textStatus, xhr) {
+		$.each(data, function(i, val) {
+			$('#'+id).append('<option value="'+val.id+'">'+val.nombre+'</option>');
+		});
+	},'json');
+	$('#'+id).change( function(e){
+		e.preventDefault();
+		getFallas( 'fallas',$(this).val() );
+	} );
+	return false;
+}
+function getFallas( id,tipo ){
+	$('#'+id).html('');
+	$.post('controller/puente.php', {option: '20',t:tipo}, function(data, textStatus, xhr) {
+		$.each(data, function(i, val) {
+			$('#'+id).append('<option value="'+val.id+'">'+val.nombre+'</option>');
+		});
+	},'json');
+	return false;
+}
+/*Funcion para atender solicitud*/
+function frm_atender_sol() {
+	$('#frm_atender_sol').submit(function(event) {
+		event.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache: false,
+		})
+		.done(function(response) {
+			var clase_estado;
+			var label_estado;
+			if (response.status == 'success') {
+				label_estado = 'ÉXITO!';
+				clase_estado = 'alert-success';
+			}else{
+				label_estado = 'ERROR!';
+				clase_estado = 'alert-danger';
+			}
+			$('#alert_modal_atender').removeClass('hidden');
+			$('#alert_modal_atender').addClass(clase_estado);
+			$('#a_mod_atender_estado').text(label_estado);
+			$('#a_mod_atender_message').text(response.message);
+			setTimeout(function(){
+				$('#alert_modal_atender').addClass('hidden');
+				$('#alert_modal_atender').removeClass(clase_estado);
+				$('#a_mod_atender_estado').text('');
+				$('#a_mod_atender_message').text('');
+				document.getElementById('frm_atender_sol').reset();
+				$('#modal_atender_solicitud').modal('toggle');
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			label_estado = 'ERROR!';
+			clase_estado = 'alert-danger';
+
+			$('#alert_modal_atender').removeClass('hidden');
+			$('#alert_modal_atender').addClass(clase_estado);
+			$('#a_mod_atender_estado').text(label_estado);
+			$('#a_mod_atender_message').text(jqXHR.responseText);
+			setTimeout(function(){
+				$('#alert_modal_atender').addClass('hidden');
+				$('#alert_modal_atender').removeClass(clase_estado);
+				$('#a_mod_atender_estado').text('');
+				$('#a_mod_atender_message').text('');
+				document.getElementById('frm_atender_sol').reset();
+				$('#modal_atender_solicitud').modal('toggle');
+			},5000);
+		});
+		
+	});
 	return false;
 }

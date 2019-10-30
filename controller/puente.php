@@ -114,6 +114,18 @@ if ( isset( $_POST['option'] ) )
 		case '17':
 			echo $hab->saveSiniestro($_POST);
 			break;
+		case '18':
+			echo $hab->getDetalleSol($_POST['sol']);
+			break;
+		case '19':
+			echo $hab->saveAtencion($_POST);
+			break;
+		case '20':
+			echo $hab->getFallas($_POST['t']);
+			break;
+		case '21':
+			echo $hab->getTipoFalla();
+			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;

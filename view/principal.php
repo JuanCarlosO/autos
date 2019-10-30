@@ -68,6 +68,7 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_main/content_list_solicitud.php';
 							  		include 'view/pages/habilitado_v/modals/modal_detalle_solicitud.php';
 							  		include 'view/pages/habilitado_v/modals/modal_siniestros.php';
+							  		include 'view/pages/habilitado_v/modals/modal_atender_solicitud.php';
 							  		break;
 							  	case 'add_taller':
 							  		include 'view/pages/habilitado_v/content_header/header_add_taller.php';

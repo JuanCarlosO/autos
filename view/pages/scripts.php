@@ -21,6 +21,7 @@
 <script src="view/dist/js/morris.min.js"></script>
 <!-- Select2 -->
 <script src="view/dist/js/select2.min.js"></script>
+<script src="view/bower_components/select2/dist/js/select2.full.min.js"></script>
 
 
 <?php 
@@ -51,7 +52,7 @@ if ( isset($_SESSION['perfil']) )
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js" type="text/javascript" ></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js" type="text/javascript" ></script>
 <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js " type="text/javascript" ></script>
-<!-- SCRIPTS DE AUTOCOMPLETADO-->
+
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="view/dist/js/jquery.anexgrid.js"></script>
 
