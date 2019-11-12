@@ -1,30 +1,42 @@
-<div class="modal fade" id="modal_detalle_solicitud">
+<div class="modal fade" id="modal_detalle_solicitud" style="overflow-y: scroll;">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>
         </button>
-        <h4 class="modal-title">Detalle de solicitud</h4>
+        <h4 class="modal-title"> <center>DETALLE DE LA SOLICITUD</center> </h4>
       </div>
       <div class="modal-body">
         <input type="hidden" id="solicitud_id" name="solicitud_id" value="">
-        <div class="row" id="gtn_group_acciones">
+        <div class="row " id="gtn_group_acciones">
           <div class="col-md-3">
-            <button class="btn btn-success btn-block btn-flat" onclick="atender_sol();">
-              <i class="fa fa-wrench" ></i>
-              Atender solicitud
+            <button id="btn_ingreso" value="" class="btn btn-primary btn-block btn-flat hidden" data-toggle="modal" data-target="#modal_ingreso">
+              <i class="fa fa-gears"></i>
+              Ingresar al taller (1)
             </button>
           </div>
           <div class="col-md-3">
-            <button id="btn_siniestros" value=""  class="btn btn-warning btn-block btn-flat">
+            <button id="btn_cotizar" value="" class="btn btn-warning btn-block btn-flat " data-toggle="modal" data-target="#modal_cotizar" >
+              <i class="fa fa-dollar"></i>
+              Cotizar reparación (2)
+            </button>
+          </div>
+          <div class="col-md-3">
+            <button id="btn_final" value=""  class="btn btn-info btn-block btn-flat" data-toggle="modal" data-target="#modal_ingreso_fin">
+              <i class="fa fa-check-square-o"></i>
+              Entrega taller (3)
+            </button>
+          </div>
+          <div class="col-md-3">
+            <button id="btn_entrega" value="" class="btn btn-success btn-block btn-flat " data-toggle="modal" data-target="#modal_entrega">
               <i class="fa fa-car"></i>
-              Siniestros
+              Entrega a resguardatario (4)
             </button>
           </div>
-          
         </div>
         <hr>
+        
         <div class="row">
           <div class="col-md-2">
             <div class="form-group">
@@ -60,44 +72,57 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-5">
             <div class="form-group">
               <label>Solicitante</label>
               <input type="text" class="form-control" id="name_sol" name="name_sol" readonly>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-5">
             <div class="form-group">
               <label>Área solicitante</label>
               <input type="text" class="form-control" id="area_sol" name="area_sol" readonly>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-3">
+          <div class="col-md-2">
             <div class="form-group">
               <label>Kilometraje</label>
               <input type="text" class="form-control" id="km" name="km" readonly>
             </div>
           </div>
+        </div>
+        <div class="row">
+          
           <div class="col-md-3">
             <div class="form-group">
-              <label>Fecha de autorización</label>
+              <label>Fecha de entradad al taller</label>
               <input type="text" class="form-control" id="f_auto" name="f_auto" readonly>
             </div>
           </div>
           <div class="col-md-3">
             <div class="form-group">
-              <label>Fecha de salida a taller</label>
+              <label>Hora de entrada al taller</label>
+              <input type="text" class="form-control" id="h_entrada" name="f_entrada" readonly>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Fecha de salida del taller</label>
               <input type="text" class="form-control" id="f_salida" name="f_salida" readonly>
             </div>
           </div>
           <div class="col-md-3">
             <div class="form-group">
+              <label>Hora de salida del taller</label>
+              <input type="text" class="form-control" id="h_salida" name="h_salida" readonly>
+            </div>
+          </div>
+          <!-- <div class="col-md-3">
+            <div class="form-group">
               <label>Fecha de entrada a UAI</label>
               <input type="text" class="form-control" id="f_entrada" name="f_entrada" readonly>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="row">
           <div class="col-md-6">
@@ -114,7 +139,7 @@
           </div>
           
         </div>
-        <div class="row">
+        <!-- <div class="row">
           <div class="col-md-3">
             <div class="form-group">
               <label>Valor factura</label>
@@ -134,21 +159,37 @@
             </div>
           </div>
           
-        </div>
+        </div> -->
         <div class="row">
-          <div class="col-md-12">
-            <label>Reparaciones realizadas</label>
+          <div class="col-md-9">
+            <center><label>REPARACIONES REALIZADAS</label></center>
             <ol id="reparaciones" type="1" start="1">
               <li></li>
             </ol>
           </div>
+          <div class="col-md-3">
+            <button class="btn bg-orange btn-flat btn-block" onclick="add_reparacion();" data-toggle="tooltip" title="Agregar una reparación"><i class="fa fa-plus"></i>
+              Agregar Reparación
+            </button>
+          </div>
         </div>
-        
-        
+        <div class="row">
+          <div class="col-md-9">
+            <center><label>SINIESTROS PRESENTADOS</label></center>
+            <ol id="list_siniestros" type="1" start="1">
+              <li></li>
+            </ol>
+          </div>
+          <div class="col-md-3">
+            <button id="btn_siniestros" class="btn bg-orange btn-block btn-flat" data-toggle="tooltip" title="Agregar a la lista un siniestro.">
+              <i class="fa fa-plus"></i>
+              Agregar Siniestro
+            </button>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger pull-left" data-dismiss="modal">Cerrar</button>
-        
+        <button type="button" class="btn btn-danger btn-flat pull-left" data-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>

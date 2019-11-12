@@ -2,7 +2,14 @@ $(document).ready(function() {
 	console.log('Bienvenido al Habilitado Vehícular');
 	/*Cargar los tooltip*/
 	$('[data-toggle="tooltip"]').tooltip(); 
+	//Timepicker
+    $('.timepicker').timepicker({
+    	minuteStep: 1,
+    	showInputs: false,
+    	showMeridian: false
+    });
 	getURL();
+	eventos_programados();
 });
 
 /*Recuperar la pagina en la que se encuemntra*/
@@ -15,19 +22,42 @@ function getURL() {
 		$('.select2').select2();
 		/*Carga el listado completo de vehiculos*/
 		all_sol();
-		/*Carga de evento de botones*/
+		/*Carga de eventos*/
 		$('#btn_siniestros').click(function(event) {
 			event.preventDefault();
 			$('#modal_siniestro').modal('toggle');
 		});
+		$('#s_aceptacion').change(function(e){
+			e.preventDefault();
+			if ( $(this).val() == '2' ) {
+				$('#motivo').removeClass('hidden');
+				$('#txt_motivo').attr('required', '');
+			}else{
+				$('#motivo').addClass('hidden');
+				$('#txt_motivo').removeAttr('required');
+			}
+		});
+		
+		//Recuperar los talleres
+		getTalleres('ingreso_taller');
 		/*Carga de formularios*/
 		frm_add_siniestro();
 		frm_atender_sol();
+		frm_add_reparacion();
+		frm_add_fallas();
+		frm_ingreso();
+		frm_ingreso_fin();
+		frm_cotizar();
+		frm_entrega();
+		/*Autocomplete*/
+		autocompletado('sp_recibe','spr_id');
 	}else if ( URLsearch == '?menu=list_car' || URLsearch == '?menu=general' ) {
 		$('#tree_list').addClass('active');
 		$('#list_car').addClass('active');
 		/*Carga el listado completo de vehiculos*/
 		all_cars();
+		/*Carga de formularios*/
+		frm_baja_v();
 	}else if ( URLsearch == '?menu=add_car' ) {
 		$('#tree_add').addClass('active');
 		$('#add_car').addClass('active');
@@ -50,7 +80,13 @@ function getURL() {
 	}else if ( URLsearch == '?menu=add_chofer' ){
 		$('#tree_add').addClass('active');
 		$('#add_chofer').addClass('active');
-	}else{
+	}
+	else if ( URLsearch == '?menu=eventos' )
+	{
+		//Carga de fomularios 
+		frm_eventos();
+	}
+	else{
 
 		frm_add_taller();
 	}
@@ -131,8 +167,8 @@ function all_cars(){
 	    class: 'table-striped table-bordered',
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
-	        { leyenda: 'Tipo / Marca', style: 'width:100px;', columna: 'id',ordenable:true },
-	        { leyenda: 'Placa', columna: 'n_short', style:'width:100px;' },
+	        { leyenda: 'Resguardatario', style: 'width:100px;', columna: 'id',ordenable:true },
+	        { leyenda: 'Tipo / Marca / Placa', columna: 'n_short', style:'width:100px;' },
 	        { leyenda: 'Color / Modelo / Cilindros', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'NIV / No. Motor / Estado', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Observaciones', columna: 'n_short', style:'width:200px;' },
@@ -143,14 +179,18 @@ function all_cars(){
 	    modelo: [
 	        { propiedad: 'id',class:'text-center' },
 	        { formato: function(tr,obj,celda){
+	        	if ( obj.estado == 'BAJA' ) {
+	        		tr.css('background','red');
+	        	}
 	        	return '<ul>'+
-	        				'<li>'+'<label>Tipo:</label> '+obj.tip+'</li>'+
-	        				'<li>'+'<label>Marca:</label> '+obj.mar+'</li>'+
+	        				
 	        		   '<ul>';
 	        }},
 	        { propiedad: 'placas'},
 	        { formato: function(tr,obj,celda){
 	        	return '<ul>'+
+	        				'<li>'+'<label>Tipo:</label> '+obj.tip+'</li>'+
+	        				'<li>'+'<label>Marca:</label> '+obj.mar+'</li>'+
 	        				'<li>'+'<label>Color:</label> '+obj.color+'</li>'+
 	        				'<li>'+'<label>Modelo:</label> '+obj.modelo+'</li>'+
 	        				'<li>'+'<label>Cilindros:</label> '+obj.cil+'</li>'+
@@ -166,13 +206,16 @@ function all_cars(){
 	        { propiedad: 'observaciones',class:'text-justify'},
 	        
 	        { class:'text-center', formato:function(tr,obj,celda){
-	        	return anexGrid_boton({
-	        		class: 'btn btn-warning btn-flat',
-	        		contenido: '<i class="fa fa-arrow-down"></i>',
-	        		attr: [
-                    	'onclick="baja_veh('+obj.id+');"'
-                	]
-	        	});
+	        	if ( obj.estado != 'BAJA' ) {
+		        	return anexGrid_boton({
+		        		class: 'btn btn-warning btn-flat',
+		        		contenido: '<i class="fa fa-arrow-down"></i>',
+		        		attr: [
+	                    	'onclick="modal_baja_v();"',
+	                    	'title=" DAR DE BAJA EL VEHÍCULO"'
+	                	]
+		        	});
+	        	}
 	        	
 	        } },
 	    ],
@@ -209,16 +252,29 @@ function all_talleres() {
 	        
 	        { class:'text-center', formato:function(tr,obj,celda){
 	        	var id = obj.id;
-	        	return anexGrid_dropdown({
-	        		id:'opciones',
-	        		class: 'btn btn-warning btn-flat',
-	        		contenido: '<i class="fa fa-gears"></i>',
-	        		data:[{
-	        			href:'javascript:deleteTaller('+id+');',contenido:'Eliminar'
-	        		},{
-	        			href:'index.php?menu=add_taller&taller='+id,contenido:'Editar'
-	        		}]
-	        	});
+	        	if ( obj.estado == 'Baja' ) {
+	        		tr.addClass('bg-red-active');
+	        		return anexGrid_dropdown({
+	        			id:'opciones',
+	        			class: 'btn btn-warning btn-flat',
+	        			contenido: '<i class="fa fa-gears"></i>',
+	        			data:[{
+	        				href:'index.php?menu=add_taller&taller='+id,contenido:'Editar'
+	        			}]
+	        		});
+	        	}else{
+	        		return anexGrid_dropdown({
+	        			id:'opciones',
+	        			class: 'btn btn-warning btn-flat',
+	        			contenido: '<i class="fa fa-gears"></i>',
+	        			data:[{
+	        				href:'javascript:deleteTaller('+id+');',contenido:'Dar de baja'
+	        			},{
+	        				href:'index.php?menu=add_taller&taller='+id,contenido:'Editar'
+	        			}]
+	        		});
+	        	}
+	        	
 	        	
 	        } },
 	    ],
@@ -351,7 +407,72 @@ function frm_add_tipov() {
 	return false;
 }
 /*Dar de baja a un vehiculo*/
-function baja_veh(vehiculo) {
+function frm_baja_v() {
+	$('#frm_baja_v').submit(function(e) {
+		e.preventDefault();
+		var archivos = document.getElementsByName("archivo[]"); 
+		var dataForm = new FormData(document.getElementById("frm_baja_v"));
+		//var size = document.getElementById("archivo").files[0].size;
+		var validate_size = false;
+
+		for (var i = 0; i < archivos.length; i++) {
+			console.log( archivos[i].files[0].size );
+			
+		}
+		if (validate_size == true) {
+			$('#alert_baja_v').removeClass('hidden');
+			$('#alert_baja_v').addClass('alert-danger');
+			$('#a_baja_v_estado').text('ERROR!');
+			$('#a_baja_v_message').text('ALGUNO DE LOS ARCHIVO(S) SELECCIONADO(S) EXCEDE EL TAMAÑO ADMITIDO (10MB).');
+			setTimeout(function(){
+				$('#alert_baja_v').addClass('hidden');
+				$('#alert_baja_v').removeClass('alert-danger');
+				$('#a_baja_v_estado').text('');
+				$('#a_baja_v_message').text('');
+				//$('#modal_baja_v').modal('toggle');
+			},5000);
+		}else{
+			//
+			$.ajax({
+				url: 'controller/puente.php',
+				type: 'POST',
+				dataType: 'json',
+				data: dataForm,
+				async:false,
+				cache:false,
+				processData: false,
+				contentType: false,
+			})
+			.done(function(response) {
+				var clase, mensaje,estado;
+				if (response.status == 'error') {
+					clase = 'alert-danger';
+					mensaje = response.message;
+					estado = 'ERROR!';
+				}else{
+					clase = 'alert-success';
+					mensaje = response.message;
+					estado = 'ÉXITO!';
+				}
+				$('#alert_baja_v').removeClass('hidden');
+				$('#alert_baja_v').addClass(clase);
+				$('#a_baja_v_estado').text(estado);
+				$('#a_baja_v_message').text( mensaje );
+				setTimeout(function(){
+					$('#alert_baja_v').addClass('hidden');
+					$('#alert_baja_v').removeClass(clase);
+					$('#a_baja_v_estado').text('');
+					$('#a_baja_v_message').text('');
+					$('#modal_baja_v').modal('toggle');
+				},5000);
+			})
+			.fail(function(jqXHR,textStatus,errorThrown) {
+				alert(jqXHR.responseText);
+			});
+		}
+	});
+}
+function baja_veh(){
 	$.ajax({
 		url: 'controller/puente.php',
 		type: 'POST',
@@ -361,12 +482,17 @@ function baja_veh(vehiculo) {
 		async:false,
 	})
 	.done(function( response ) {
-		console.log("success");
+		alerta(response.status,response.message);
 	})
 	.fail(function() {
 		console.log("error");
 	});
 	
+	return false;
+}
+/*Abrir modal de baja vehicular*/
+function modal_baja_v() {
+	$('#modal_baja_v').modal('toggle');
 	return false;
 }
 /*Funcion para salir*/
@@ -406,7 +532,7 @@ function frm_add_taller() {
 }
 /*Eliminar el taller seleccionado*/
 function deleteTaller(taller) {
-	var respuesta = confirm('¿Seguro que quieres eliminar el ID '+taller+'?');
+	var respuesta = confirm('¿Seguro que quieres dar de baja el taller con ID '+taller+'?');
 	if (respuesta) {
 		$.post('controller/puente.php', {option: '15',t:taller}, function(data, textStatus, xhr) {
 			alerta(data.status,data.message);
@@ -483,6 +609,8 @@ function getDetalleSol( solicitud )
 		type: 'POST',
 		dataType: 'json',
 		data: {option: '18',sol:solicitud},
+		async:false,
+		cache:false,
 	})
 	.done(function(response) {
 		if ( response.status == 'error') {
@@ -493,7 +621,7 @@ function getDetalleSol( solicitud )
 			$('#f_sol').val(response.solicitud.f_sol);
 			$('#km').val(response.solicitud.km);
 			$('#desc_sol').val(response.solicitud.descripcion);
-			/*aGREGAR LAS REPARACIONES*/
+			/*AGREGAR LAS REPARACIONES*/
 			$('#reparaciones').html('');
 			$.each(response.reparaciones, function(i, val) {
 				$('#reparaciones').append('<li><b>Falla: </b>'+val.falla+ ' <b>reparado por</b> '+val.taller+'.</li>');
@@ -502,7 +630,40 @@ function getDetalleSol( solicitud )
 			$('#area_sol').val(response.solicitud.area);
 			$('#name_sol').val(response.solicitud.name_sol);
 			$('#placas').val(response.vehiculo.placas);
+			//Agregar la info de la solicitud atendida
+			if ( response.atendida.estado == 'empty' ) {
+				$('#btn_atender').removeClass('hidden');
+				$('#btn_ingreso').removeClass('hidden');
+			}else{
 
+				if (response.atendida.estado == "Reparado" || response.atendida.estado == "Entregado") {$('#btn_final').addClass('hidden');}
+				if (response.atendida.estado == "Entregado") {$('#btn_entrega').addClass('hidden');}
+				$('#ingreso_id').val(response.atendida.id);
+				$('#f_auto').val(response.atendida.f_ingreso);
+				$('#f_salida').val(response.atendida.f_salida);
+				$('#h_salida').val(response.atendida.h_salida);
+				$('#h_entrada').val(response.atendida.h_ingreso);
+				$('#desc_hv').val(response.atendida.observaciones);
+			}
+			//Agregar los siniestros
+			$('#list_siniestros').html('');
+			if (response.siniestro.estado == 'empty') {
+				$('#list_siniestros').html('');
+			}else{
+				$.each(response.siniestro, function(i, val) {
+					$('#list_siniestros').append(
+						'<li>  '+val.aseguradora+
+						'<ol type="a">'+
+							
+							'<li> <label> Fecha de hechos: </label> '+val.f_hechos+'</li>'+
+							'<li> <label> Entró al taller el:  </label> '+val.f_entrada+'</li>'+
+							'<li> <label> Salió del taller el:  </label> '+val.f_salida+'</li>'+
+							'<li> <label> Observaciones: </label> '+val.observaciones+'</li>'+
+						'</ol></li>'
+					);
+				});
+			}
+			
 		}
 	})
 	.fail(function(jqXHR,textStatus,errorThrown) {
@@ -514,24 +675,26 @@ function getDetalleSol( solicitud )
 /*Funcion para atender la solicitud*/
 function atender_sol() {
 	var solicitud = $('#solicitud_id').val();
-	getTipoFalla('t_falla');
 	$('#modal_atender_solicitud').modal('toggle');
 }
-function getTipoFalla(id) {
+function getTipoFalla(id,fallas) { //Obtener t_fallas (BD)
+	$('#'+id).html('');
 	$.post('controller/puente.php', {option: '21'}, function(data, textStatus, xhr) {
+		$('#'+id).append('<option value="">...</option>');
 		$.each(data, function(i, val) {
 			$('#'+id).append('<option value="'+val.id+'">'+val.nombre+'</option>');
 		});
 	},'json');
 	$('#'+id).change( function(e){
 		e.preventDefault();
-		getFallas( 'fallas',$(this).val() );
+		getFallas( fallas,$(this).val() );
 	} );
 	return false;
 }
-function getFallas( id,tipo ){
+function getFallas( id,tipo ){// Obtener catalogo_fallas (BD)
 	$('#'+id).html('');
 	$.post('controller/puente.php', {option: '20',t:tipo}, function(data, textStatus, xhr) {
+		$('#'+id).append('<option value="">...</option>');
 		$.each(data, function(i, val) {
 			$('#'+id).append('<option value="'+val.id+'">'+val.nombre+'</option>');
 		});
@@ -593,5 +756,582 @@ function frm_atender_sol() {
 		});
 		
 	});
+	return false;
+}
+/*Obtener la lista de talleres*/
+function getTalleres(select) {
+	$('#'+select).html('');
+	$('#'+select).append('<option value="">...</option>');
+	$.post('controller/puente.php', {option: '22'}, function(data, textStatus, xhr) {
+		$.each(data, function(i, val) {
+			$('#'+select).append('<option value="'+val.id+'">'+val.nombre+'</option>');
+		});
+	},'json');
+	return false;
+}
+function add_reparacion() {
+	//Recuperar la solicitud 
+	$('#modal_add_reparacion').modal('toggle');
+	getTipoFalla('t_falla','falla');
+	getTalleres('taller');
+}
+/*Guardar la reparacion de la solicitud*/
+function frm_add_reparacion() {
+	$('#frm_add_reparacion').submit(function(event) {
+		event.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache: false,
+		})
+		.done(function(response) {
+			var clase_estado;
+			var label_estado;
+			if (response.status == 'success') {
+				label_estado = 'ÉXITO!';
+				clase_estado = 'alert-success';
+			}else{
+				label_estado = 'ERROR!';
+				clase_estado = 'alert-danger';
+			}
+			$('#alert_modal_add_rep').removeClass('hidden');
+			$('#alert_modal_add_rep').addClass(clase_estado);
+			$('#a_mod_add_rep_estado').text(label_estado);
+			$('#a_mod_add_rep_message').text(response.message);
+			setTimeout(function(){
+				$('#alert_modal_add_rep').addClass('hidden');
+				$('#alert_modal_add_rep').removeClass(clase_estado);
+				$('#a_mod_add_rep_estado').text('');
+				$('#a_mod_add_rep_message').text('');
+				document.getElementById('frm_add_reparacion').reset();
+				$('#modal_add_reparacion').modal('toggle');
+				
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			label_estado = 'ERROR!';
+			clase_estado = 'alert-danger';
+
+			$('#alert_modal_add_rep').removeClass('hidden');
+			$('#alert_modal_add_rep').addClass(clase_estado);
+			$('#a_mod_add_rep_estado').text(label_estado);
+			$('#a_mod_add_rep_message').text(jqXHR.responseText);
+			setTimeout(function(){
+				$('#alert_modal_add_rep').addClass('hidden');
+				$('#alert_modal_add_rep').removeClass(clase_estado);
+				$('#a_mod_add_rep_estado').text('');
+				$('#a_mod_add_rep_message').text('');
+				document.getElementById('frm_add_reparacion').reset();
+				$('#modal_add_reparacion').modal('toggle');
+			},5000);
+		});
+		
+	});
+	return false;
+}
+//Crear un campo  de tipo de falla
+function add_campo_falla() {
+	var campo = 
+	'<div class="row">'+
+		'<div class="col-md-12">'+
+			'<div class="form-group">'+
+				'<label>Falla</label>'+
+				'<input type="text" name="fallas[]" class="form-control">'+
+			'</div>'+
+		'</div>'+
+	'</div>';
+	$('#div_fallas').append(campo);
+	return false;
+}
+
+//Mostrar modal de Agregar falla
+function modal_add_falla() {
+	$('#modal_add_fallas').modal('toggle');
+	return false;
+}
+
+function frm_add_fallas() {
+	$('#frm_add_fallas').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			var clase_estado;
+			var label_estado;
+			if (response.status == 'success') {
+				label_estado = 'ÉXITO!';
+				clase_estado = 'alert-success';
+			}else{
+				label_estado = 'ERROR!';
+				clase_estado = 'alert-danger';
+			}
+			$('#alert_modal_add_fallas').removeClass('hidden');
+			$('#alert_modal_add_fallas').addClass(clase_estado);
+			$('#a_mod_add_fallas_estado').text(label_estado);
+			$('#a_mod_add_fallas_message').text(response.message);
+			setTimeout(function(){
+				$('#alert_modal_add_fallas').addClass('hidden');
+				$('#alert_modal_add_fallas').removeClass(clase_estado);
+				$('#a_mod_add_fallas_estado').text('');
+				$('#a_mod_add_fallas_message').text('');
+				document.getElementById('frm_add_fallas').reset();
+				$('#modal_add_fallas').modal('toggle');
+				
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error encontrado: "+ jqXHR.responseText);
+		});
+		
+	});
+	return false;
+}
+//Guardar el ingreso al taller 
+function frm_ingreso() {
+	$('#frm_ingreso').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false
+		})
+		.done(function(response) {
+			var clase_estado;
+			var label_estado;
+			if (response.status == 'success') {
+				label_estado = 'ÉXITO!';
+				clase_estado = 'alert-success';
+			}else{
+				label_estado = 'ERROR!';
+				clase_estado = 'alert-danger';
+			}
+			$('#alert_modal_add_ingreso').removeClass('hidden');
+			$('#alert_modal_add_ingreso').addClass(clase_estado);
+			$('#a_mod_ingreso_estado').text(label_estado);
+			$('#a_mod_ingreso_message').text(response.message);
+			setTimeout(function(){
+				$('#alert_modal_add_ingreso').addClass('hidden');
+				$('#alert_modal_add_ingreso').removeClass(clase_estado);
+				$('#a_mod_ingreso_estado').text('');
+				$('#a_mod_ingreso_message').text('');
+				document.getElementById('frm_add_fallas').reset();
+				$('#modal_ingreso').modal('toggle');
+				document.getElementById('frm_ingreso').reset();
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error: "+jqXHR.responseText);
+		});
+		
+	});
+}
+
+/**/
+function frm_ingreso_fin() {
+	$('#frm_ingreso_fin').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false
+		})
+		.done(function(response) {
+			var clase_estado;
+			var label_estado;
+			if (response.status == 'success') {
+				label_estado = 'ÉXITO!';
+				clase_estado = 'alert-success';
+			}else{
+				label_estado = 'ERROR!';
+				clase_estado = 'alert-danger';
+			}
+			$('#alert_modal_ingreso_fin').removeClass('hidden');
+			$('#alert_modal_ingreso_fin').addClass(clase_estado);
+			$('#a_mod_ingreso_fin_estado').text(label_estado);
+			$('#a_mod_ingreso_fin_message').text(response.message);
+			setTimeout(function(){
+				$('#alert_modal_ingreso_fin').addClass('hidden');
+				$('#alert_modal_ingreso_fin').removeClass(clase_estado);
+				$('#a_mod_ingreso_fin_estado').text('');
+				$('#a_mod_ingreso_fin_message').text('');
+				$('#modal_ingreso_fin').modal('toggle');
+				document.getElementById('frm_ingreso_fin').reset();
+				getDetalleSol( $('#solicitud_id').val() );
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error: "+jqXHR.responseText);
+		});
+	});
+	return false;
+}
+function eventos_programados() {
+	init_events($('#external-events div.external-event'))
+	var date = new Date()
+	//Date for the calendar events (dummy data)
+	var d    = date.getDate(),
+	    m    = date.getMonth(),
+	    y    = date.getFullYear();
+
+	$('#calendar').fullCalendar({
+		lang: 'es',
+    	header    : {
+    		left  : 'prevYear,prev,next,nextYear today',
+    		center: 'title',
+    		right : 'addEventButton'
+    		//right : 'month,agendaWeek,agendaDay'
+    	},
+    	buttonText: {
+    		today: 'Hoy',
+    		month: 'Mes',
+    	},
+    	buttonIcons:{
+    		prev: 'left-single-arrow',
+			next: 'right-single-arrow',
+			prevYear: 'left-double-arrow',
+			nextYear: 'right-double-arrow'
+    	},
+    	themeButtonIcons:{
+			prev: 'circle-triangle-w',
+			next: 'circle-triangle-e',
+			prevYear: 'seek-prev',
+			nextYear: 'seek-next'
+		},
+		dayClick:function(date, jsEvent, view){
+			console.log(jsEvent);
+		},
+    	eventSources: [
+			{
+			  /*events: [
+			    {
+			    	title  : 'event1',
+			    	start  : '2019-11-01',
+			    	className:'bg-green',
+			    }
+			  ]*/
+			}
+		],
+	    editable  : true,
+		droppable : true, // this allows things to be dropped onto the calendar !!!
+		drop      : function (date, allDay) { // this function is called when something is dropped
+			console.log( $(this).data('eventObject') );
+			// retrieve the dropped element's stored Event Object
+			var originalEventObject = $(this).data('eventObject');
+			// we need to copy it, so that multiple events don't have a reference to the same object
+			var copiedEventObject = $.extend({}, originalEventObject);
+			// assign it the date that was reported
+			copiedEventObject.start           = date;
+			copiedEventObject.allDay          = allDay;
+			copiedEventObject.backgroundColor = $(this).css('background-color');
+			copiedEventObject.borderColor     = $(this).css('border-color');
+			// render the event on the calendar
+			$('#calendar').fullCalendar('renderEvent', copiedEventObject, true);		
+		},
+		eventClick: function(calEvent, jsEvent, view) {
+    		alert('Título: ' + calEvent.title);
+    		// change the border color just for fun
+    		$(this).css('border-color', 'red');
+  		},
+  		customButtons: {
+      		addEventButton: {
+	        	text: 'Agendar evento',
+		        click: function() {
+		        	$('#modal_eventos').modal('toggle');
+			    },
+     		},
+     		next: {
+		        click: function() {
+		        	$('#calendar').fullCalendar('next');
+		        	getEventos();
+			    },
+     		},
+     		prev: {
+		        click: function() {
+		        	$('#calendar').fullCalendar('prev');
+		        	getEventos();
+			    },
+     		},
+
+
+    	},
+
+	});
+	getEventos();
+}
+/* initialize the external events*/
+function init_events(ele) {
+	ele.each(function () {
+	    // create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
+	    // it doesn't need to have a start or end
+        var eventObject = {
+          title: $.trim($(this).text()) // use the element's text as the event title
+      	}
+	    // store the Event Object in the DOM element so we can get to it later
+	    $(this).data('eventObject', eventObject);
+
+	    // make the event draggable using jQuery UI
+	    $(this).draggable({
+	        zIndex        : 1070,
+	        revert        : true, // will cause the event to go back to its
+	        revertDuration: 0  //  original position after the drag
+	    });
+
+	});
+}
+/*Formulario de eventos del calendario*/
+function frm_eventos() {
+	$('#frm_eventos').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async: false,
+			cache: false,
+		})
+		.done(function(response) {
+			var clase_estado;
+			var label_estado;
+			if (response.status == 'success') {
+				label_estado = 'ÉXITO!';
+				clase_estado = 'alert-success';
+			}else{
+				label_estado = 'ERROR!';
+				clase_estado = 'alert-danger';
+			}
+			$('#alert_eventos').removeClass('hidden');
+			$('#alert_eventos').addClass(clase_estado);
+			$('#a_mod_eventos_estado').text(label_estado);
+			$('#a_mod_eventos_message').text(response.message);
+			setTimeout(function(){
+				$('#alert_eventos').addClass('hidden');
+				$('#alert_eventos').removeClass(clase_estado);
+				$('#a_mod_eventos_estado').text('');
+				$('#a_mod_eventos_message').text('');
+				$('#modal_eventos').modal('toggle');
+				document.getElementById('frm_eventos').reset();
+				//Actualizar la lista de eventos
+				document.location.reload();
+				
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert(jqXHR.responseText);
+		});
+	});
+}
+/*Recuperar la lista de eventos*/
+function getEventos() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '28'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		//Poner los eventos en el calendario.
+		$.each(response, function(i, val) {
+			if ( val.tipo_evento == 'Verificación' ) {
+				clase = 'bg-green';
+			}else{
+				clase = 'bg-red';
+			}
+			$('#calendar').fullCalendar('renderEvent', {
+				title: val.titulo,
+				start: val.fecha,
+				allDay: true,
+				className:clase,
+			});
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert( jqXHR.responseText );
+	});
+}
+/*Evento para entregar vehiculo*/
+function entregarVehiculo() {
+	var s = $('#solicitud_id').val();
+	$.post('controller/puente.php', {option: '29',s:s}, function(data, textStatus, xhr) {
+		alert(data.message);
+	},'json');
+	return false;
+}
+/*Formulario de cotizar*/
+function frm_cotizar() {
+	$('#frm_cotizar').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_cotizar"));
+		var size = document.getElementById("archivo").files[0].size;
+		if (size > 10485760 ) {
+			$('#alert_cotizar').removeClass('hidden');
+			$('#alert_cotizar').addClass('alert-danger');
+			$('#a_mod_cotizar_estado').text('ERROR!');
+			$('#a_mod_cotizar_message').text('EL ARCHIVO SELECCIONADO EXCEDE EL TAMAÑO ADMITIDO (10MB).');
+			setTimeout(function(){
+				$('#alert_cotizar').addClass('hidden');
+				$('#alert_cotizar').removeClass('alert-danger');
+				$('#a_mod_cotizar_estado').text('');
+				$('#a_mod_cotizar_message').text('');
+				$('#modal_cotizar').modal('toggle');
+			},5000);
+		}else{
+			$.ajax({
+				url: 'controller/puente.php',
+				type: 'POST',
+				dataType: 'json',
+				data: dataForm,
+				async:false,
+				cache:false,
+				processData: false,
+				contentType: false,
+			})
+			.done(function(response) {
+				var clase, mensaje,estado;
+				if (response.status == 'error') {
+					clase = 'alert-danger';
+					mensaje = response.message;
+					estado = 'ERROR!';
+				}else{
+					clase = 'alert-success';
+					mensaje = response.message;
+					estado = 'ÉXITO!';
+				}
+				$('#alert_cotizar').removeClass('hidden');
+				$('#alert_cotizar').addClass(clase);
+				$('#a_mod_cotizar_estado').text(estado);
+				$('#a_mod_cotizar_message').text( mensaje );
+				setTimeout(function(){
+					$('#alert_cotizar').addClass('hidden');
+					$('#alert_cotizar').removeClass(clase);
+					$('#a_mod_cotizar_estado').text('');
+					$('#a_mod_cotizar_message').text('');
+					$('#modal_cotizar').modal('toggle');
+				},5000);
+			})
+			.fail(function(jqXHR,textStatus,errorThrown) {
+				alert(jqXHR.responseText);
+			});
+		}
+		
+		
+	});
+}
+/*fORMULARIO DE ENTREGA DE VEHICULO*/
+function frm_entrega() {
+	$('#frm_entrega').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async: false,
+			cache: false,
+		})
+		.done(function(response) {
+			var clase, mensaje,estado;
+			if (response.status == 'error') {
+				clase = 'alert-danger';
+				mensaje = response.message;
+				estado = 'ERROR!';
+			}else{
+				clase = 'alert-success';
+				mensaje = response.message;
+				estado = 'ÉXITO!';
+			}
+			$('#alert_entrega').removeClass('hidden');
+			$('#alert_entrega').addClass(clase);
+			$('#a_mod_entrega_estado').text(estado);
+			$('#a_mod_entrega_message').text( mensaje );
+			setTimeout(function(){
+				$('#alert_entrega').addClass('hidden');
+				$('#alert_entrega').removeClass(clase);
+				$('#a_mod_entrega_estado').text('');
+				$('#a_mod_entrega_message').text('');
+				$('#modal_cotizar').modal('toggle');
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error: "+jqXHR.responseText);
+		});
+		
+	});
+	return false;
+}
+
+/*Autocompletao de personal de la unidad de asuntos internos */
+function autocompletado(input,hidden) {
+	$('#'+input).autocomplete({
+		source: "controller/puente.php?option=9",
+		minLength: 2,
+		select: function( event, ui ) {
+        	alert( "Selected value: " + ui.item.value + " ID " + ui.item.id );
+      	}
+	});
+	return false;
+}
+/**/
+function add_field_baja()
+{
+	if ( $('.file').length < 5 ) {
+		$('#documentos').append(
+			'<div class="row">'+
+				'<div class="col-md-4">'+
+					'<div class="form-group">'+
+						'<label>Tipo de documento</label>'+
+						'<select name="t_doc[]"  class="form-control">'+
+							'<option value=""></option>'+
+							'<option value="1">Acta de baja</option>'+
+							'<option value="2">Documento de Siniestro</option>'+
+							'<option value="3"> Dictamen taller </option>'+
+						'</select>'+
+					'</div>'+
+				'</div>'+
+				'<div class="col-md-8">'+
+					'<div class="form-group">'+
+						'<label>Buscar documento</label>'+
+						'<input type="file" id="archivo" name="archivo[]" value="" class="form-control file" accept="application/pdf" required>'+
+					'</div>'+
+				'</div>'+
+			'</div>'
+		);
+	}else{
+		$('#alert_baja_v').removeClass('hidden');
+		$('#alert_baja_v').addClass('alert-danger');
+		$('#a_baja_v_estado').text('ERROR!');
+		$('#a_baja_v_message').text('EL LIMITE DE ARCHIVOS ES DE 5!');
+		location.href = '#alert_baja_v'; 
+		setTimeout(function(){
+			$('#alert_baja_v').addClass('hidden');
+			$('#alert_baja_v').removeClass('alert-danger');
+			$('#a_baja_v_estado').text('');
+			$('#a_baja_v_message').text('');
+		},5000);	
+	}
+	
 	return false;
 }

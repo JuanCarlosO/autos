@@ -36,8 +36,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="view/dist/css/morris.css">
   <!-- CSS PARA ESTILOS DEL AUTOCOMPLETE-->
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
-  
+  <!-- Bootstrap time Picker -->
+  <link rel="stylesheet" href="view/plugins/timepicker/bootstrap-timepicker.min.css">
+  <!-- fullCalendar -->
+  <link rel="stylesheet" href="view/bower_components/fullcalendar/dist/fullcalendar.min.css">
+  <link rel="stylesheet" href="view/bower_components/fullcalendar/dist/fullcalendar.print.min.css" media="print">
 
 </head>
 <!--

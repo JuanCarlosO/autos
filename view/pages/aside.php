@@ -70,7 +70,16 @@
               <li id="list_sol"><a href="index.php?menu=list_sol"><i class="fa fa-book"></i> Solicitudes</a></li>
             </ul>
           </li>
-          
+          <li>
+            <a href="index.php?menu=eventos">
+              <i class="fa fa-calendar"></i> <span> Eventos programados </span>
+            </a>
+          </li> 
+          <!-- <li>
+                    <a href="pages/widgets.html">
+                      <i class="fa fa-trash"></i> <span>Bajas</span>
+                    </a>
+                  </li> -->        
         </ul>
       <?php endif ?>
     </section>

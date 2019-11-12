@@ -1,5 +1,5 @@
 <?php 
-#require_once 'model/HabilitadoModel.php';
+require_once 'model/HabilitadoModel.php';
 if (isset($_GET['taller'])) {
     $taller = new HabilitadoModel;
     $t = $taller->getTaller($_GET['taller']);
@@ -8,14 +8,15 @@ if (isset($_GET['taller'])) {
     $tel = (isset($t[0]->telefono)) ? $t[0]->telefono : NULL;
     $email = (isset($t[0]->correo)) ? $t[0]->correo : NULL;
     $dir = (isset($t[0]->domicilio)) ? $t[0]->domicilio : NULL;
-}else
+}
+else
 {
-    $t = NULL;
-    $rs = NULL;
-    $con = NULL;
-    $tel = NULL;
-    $email = NULL;
-    $dir = NULL;
+    $t      = NULL;
+    $rs     = NULL;
+    $con    = NULL;
+    $tel    = NULL;
+    $email  = NULL;
+    $dir    = NULL;
 }
 ?>
 <section class="content container-fluid">

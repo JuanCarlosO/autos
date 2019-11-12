@@ -54,10 +54,12 @@ date_default_timezone_set('America/Mexico_City');
 							  	case 'general':
 							  		include 'view/pages/habilitado_v/content_header/header_general.php';
 							  		include 'view/pages/habilitado_v/content_main/content_general.php';
+							  		include 'view/pages/habilitado_v/modals/modal_baja_vehiculo.php';
 							  		break;
 							  	case 'list_car':
 							  		include 'view/pages/habilitado_v/content_header/header_general.php';
 							  		include 'view/pages/habilitado_v/content_main/content_general.php';
+							  		include 'view/pages/habilitado_v/modals/modal_baja_vehiculo.php';
 							  		break;
 							  	case 'add_car':
 							  		include 'view/pages/habilitado_v/content_header/header_add_car.php';
@@ -68,7 +70,14 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_main/content_list_solicitud.php';
 							  		include 'view/pages/habilitado_v/modals/modal_detalle_solicitud.php';
 							  		include 'view/pages/habilitado_v/modals/modal_siniestros.php';
-							  		include 'view/pages/habilitado_v/modals/modal_atender_solicitud.php';
+							  		include 'view/pages/habilitado_v/modals/modal_add_reparacion.php';
+							  		include 'view/pages/habilitado_v/modals/modal_add_fallas.php';
+							  		include 'view/pages/habilitado_v/modals/modal_ingreso_taller.php';
+							  		include 'view/pages/habilitado_v/modals/modal_finalizar_ingreso.php';
+							  		include 'view/pages/habilitado_v/modals/modal_entrega_resguardatario.php';
+							  		#LISTA DE MODALES PARA LA COTIZACION Y FACTURACIÓN
+							  		include 'view/pages/habilitado_v/modals/modal_cotizacion.php';
+							  		
 							  		break;
 							  	case 'add_taller':
 							  		include 'view/pages/habilitado_v/content_header/header_add_taller.php';
@@ -86,7 +95,11 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_header/header_add_conductor.php';
 							  		include 'view/pages/habilitado_v/content_main/content_add_conductor.php';
 							  		break;
-							  		
+							  	case 'eventos':
+							  		include 'view/pages/habilitado_v/content_header/header_eventos.php';
+							  		include 'view/pages/habilitado_v/content_main/content_eventos.php';
+							  		include 'view/pages/habilitado_v/modals/modal_eventos.php';
+							  		break;
 							}
 						}
 						else

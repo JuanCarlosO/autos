@@ -27,5 +27,22 @@ class PersonModel extends Conection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
 		}
 	}
+	public function autoPersonal()
+	{
+		try {
+			$data = "%".$_REQUEST['term']."%";
+			$this->sql = "SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat) AS value , id FROM personal WHERE nombre LIKE ? OR ap_pat LIKE ? OR ap_mat = ? ";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$data,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$data,PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$data,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
 }
 ?>

@@ -14,6 +14,15 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
+                        <div  class="row">
+                            <div class="col-md-12">
+                                <div id="alerta" class="alert alert-dismissible hidden">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    <h4><i class="icon fa fa-check"></i> <label id="estado"></label> </h4>
+                                    <p id="message"></p>
+                                </div>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <div id="all_vehiculos"></div>
                         </div>

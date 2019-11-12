@@ -1,7 +1,11 @@
+<!--
+Se quito este modal porque las necesidades del sistemas 
+son diferentes a las que este apartado presenta
+-->
 <form id="frm_atender_sol" action="#" method="POST">
 	<input type="hidden" id="option" name="option" value="19">
 	<input type="hidden" name="solicitud_id" value="">	
-	<div class="modal fade modal-info" id="modal_atender_solicitud">
+	<div class="modal fade modal-success" id="modal_atender_solicitud">
 	  <div class="modal-dialog modal-lg">
 	    <div class="modal-content">
 	      <div class="modal-header">
@@ -36,7 +40,7 @@
 	      		<div class="col-md-4">
 	      			<div class="form-group">
 	      				<label>Fecha de entrada a la UAI</label>
-	      				<input type="date" id="entrada_uai" name="entrada_uai" data-toggle="tooltip" title="Fecha de entrada al taller" class="form-control">
+	      				<input type="date" id="entrada_uai" name="entrada_uai" data-toggle="tooltip" title="Fecha de entrada a la Unidad de Asuntos Internos." class="form-control">
 	      			</div>
 	      		</div>
 	      	</div>
@@ -48,31 +52,10 @@
 	      			</div>
 	      		</div>
 	      	</div>
-	      	<div class="row">
-	      		<div class="col-md-12">
-	      			<div class="form-group">
-	      				<label>Seleccione un tipo de falla</label>
-	      				<select id="t_falla" name="t_falla" class="form-control" required></select>
-	      			</div>
-	      		</div>
-	      	</div>
-	      	<div id="div_fallas">
-	      		<div class="row">
-	      			<div class="col-md-12">
-	      				<div class="form-group">
-	      					<label>Selecione una falla:</label>
-	      					<div class="input-group">
-	        					<select id="fallas" name="fallas[]" class="form-control" ></select>
-	        				</div>
-	      				</div>
-	      			</div>
-	      		</div>
-	      	</div>
-	      	
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
-	        <button type="submit" class="btn btn-success"> <i class="fa fa-floppy-o"></i> Atender solicitud</button>
+	        <button type="submit" class="btn btn-info btn-flat"> <i class="fa fa-floppy-o"></i> Atender solicitud</button>
 	      </div>
 	    </div>
 	  </div>

@@ -235,11 +235,11 @@ class CarModel extends Conection
 	public function updateStatus($v)
 	{
 		try {
-			$this->sql = "UPDATE vehiculos SET ";
+			$this->sql = "UPDATE vehiculos SET estado = 3 WHERE id = ? ";
 			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$v);
 			$this->stmt->execute();
-			$this->result = $this->stmt->fetchAll( PDO::FETCH_OBJ );
-			return json_encode( $this->result );
+			return json_encode( array('status'=>'success','message'=> 'EL VEHÍCULO A CAMBIADO SU ESTATUS A BAJA') );
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.0
+-- version 4.9.0.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 04-10-2019 a las 18:58:17
--- Versión del servidor: 10.1.31-MariaDB
--- Versión de PHP: 7.1.16
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 05-11-2019 a las 04:58:17
+-- Versión del servidor: 10.4.6-MariaDB
+-- Versión de PHP: 7.3.9
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -70,6 +70,120 @@ INSERT INTO `area` (`id`, `codigo_uni`, `nombre`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `catalogo_fallas`
+--
+
+CREATE TABLE `catalogo_fallas` (
+  `id` int(11) NOT NULL,
+  `nombre` text NOT NULL,
+  `tipo_id` int(11) NOT NULL COMMENT 'FK de la tabla de tipo de fallas'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `catalogo_fallas`
+--
+
+INSERT INTO `catalogo_fallas` (`id`, `nombre`, `tipo_id`) VALUES
+(1, 'Marcha', 1),
+(2, 'Llave o Switch', 1),
+(3, 'Batería y terminales', 1),
+(4, 'Alternador', 1),
+(5, 'Inyectores', 1),
+(6, 'Bomba de Gasolina', 1),
+(7, 'Sensores', 1),
+(8, 'Bujías y Cables de Bujía', 1),
+(9, 'Fusibles', 1),
+(10, 'Bobinas', 1),
+(11, 'Distribución General', 2),
+(12, 'Bandas y Cadenas', 2),
+(13, 'Poleas', 2),
+(14, 'Bomba de Agua', 3),
+(15, 'Radiador, tapón y motoventilador', 3),
+(16, 'Depósito de Anticongelante y tapón', 3),
+(17, 'Mangueras y Anticongelante', 3),
+(18, 'Termostato', 3),
+(19, 'Tomas de Agua', 3),
+(20, 'Opcional combinable: Cambio total de anticongelante', 3),
+(21, 'Horquillas, bujes, rótulas y bieletas', 4),
+(22, 'Amortiguadores, resortes y bases de amortiguadores', 4),
+(23, 'Espigas, terminales y brazos de dirección', 4),
+(24, 'Barra estabilizadora y dirección (completa)', 4),
+(25, 'Masas y baleros', 4),
+(26, 'Licuadora', 4),
+(27, 'Alineación y balanceo', 4),
+(28, 'Piezas en general internas y externas del motor (cigüeñal, árbol de levas, juego de juntas, bomba de aceite, buzos, cabeza y válvulas, sellos de válvulas)', 5),
+(29, 'Ajuste (pistones, anillos y metales)', 5),
+(30, 'Cárter de motor', 5),
+(31, 'Soportes de motor', 5),
+(32, 'Opcional combinable: Cambio total de aceite', 5),
+(33, 'Opcional combinable: Cambio total de anticongelante', 5),
+(34, 'Caja de velocidades (cuerpo de válvulas, engranes y cárter de caja)', 6),
+(35, 'Clutch (pastas, volanta, chicote y collarín)', 6),
+(36, 'Cuerpo de aceleración', 7),
+(37, 'Chicote de acelerador', 7),
+(38, 'Sensores (MAF, MAP o TPS)', 7),
+(39, 'Válvula PCV', 7),
+(40, 'Cambio de neumáticos', 8),
+(41, 'Rotación de neumáticos', 8),
+(42, 'Reparación de algún neumático (talacha)', 8),
+(43, 'Faros alta y baja (foco)', 9),
+(44, 'Cuartos (foco)', 9),
+(45, 'Cableado general', 9),
+(46, 'Palanca de luces', 9),
+(47, 'Relevadores y/o fusibles', 9),
+(48, 'Stop (foco)', 9),
+(49, 'Calaveras', 10),
+(50, 'Faros (unidad completa)', 10),
+(51, 'Rin de neumático', 10),
+(52, 'Tapón de rin', 10),
+(53, 'Birlos de rin', 10),
+(54, 'Plumas (limpiaparabrisas)', 10),
+(55, 'Cambio de balatas (delanteras y traseras)', 11),
+(56, 'Cambio de discos y /o tambores', 11),
+(57, 'Rectificado de discos y/o tambores', 11),
+(58, 'Limpieza y ajuste de frenos', 11),
+(59, 'Bases y pernos de balatas', 11),
+(60, 'Chicote (freno de mano)', 11),
+(61, 'Ajustadores y/o cilindros maestros de líquido de frenos', 11),
+(62, 'Purgadores de líquido de frenos', 11),
+(63, 'Booster', 11),
+(64, 'Depósito de líquido de frenos y tubería', 11),
+(65, 'Opcional combinable: Cambio total de líquido de frenos', 11),
+(66, 'Cambio de Panel o Tablero completo', 12),
+(67, 'Reseteo de indicadores de Panel', 12),
+(68, 'Bujías', 13),
+(69, 'Cambio de filtro (aceite, gasolina y aire)', 13),
+(70, 'Cambio de aceite', 13),
+(71, 'Lavado de inyectores y Cuerpo de aceleración', 13),
+(72, 'Cambio de Aceite', 14),
+(73, 'Cambio de Filtro de Aceite y Filtro de Aire', 14),
+(74, '1er Semestre', 15),
+(75, '2do Semestre', 15),
+(76, 'Pintado general de vehículo', 16);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `ingreso_taller`
+--
+
+CREATE TABLE `ingreso_taller` (
+  `id` int(11) NOT NULL,
+  `solicitud` int(11) NOT NULL COMMENT 'FK de la tabla solicitudes',
+  `taller` int(11) NOT NULL COMMENT 'FK de la tabla talleres',
+  `f_ingreso` date NOT NULL COMMENT 'fecha de ingreso',
+  `h_ingreso` time NOT NULL COMMENT 'hora de ingreso',
+  `f_salida` date DEFAULT NULL COMMENT 'fecha de salida',
+  `h_salida` time DEFAULT NULL COMMENT 'hora de salida',
+  `p_recibe` varchar(255) NOT NULL COMMENT 'Persona que recibe unidad',
+  `p_entrega` varchar(255) DEFAULT NULL COMMENT 'Persona que entrega unidad ',
+  `estado` enum('Entregado','Reparación','Reparado') NOT NULL DEFAULT 'Entregado',
+  `observaciones` longtext DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Seguimiento de la reparacion de la unidad ';
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `marcas`
 --
 
@@ -83,7 +197,7 @@ CREATE TABLE `marcas` (
 --
 
 INSERT INTO `marcas` (`id`, `nom`) VALUES
-(1, 'Volkswagen');
+(1, 'VOLKSWAGEN');
 
 -- --------------------------------------------------------
 
@@ -105,7 +219,9 @@ INSERT INTO `modulos` (`id`, `n_short`, `n_long`) VALUES
 (1, 'list_car', 'Listar Autos'),
 (2, 'add_car', 'Agregar autos'),
 (3, 'add_sol', 'Agregar Solicitud'),
-(4, 'list_sol', 'Listar Solicitudes');
+(4, 'list_sol', 'Listar Solicitudes'),
+(5, 'add_taller', 'Agregar taller'),
+(6, 'list_taller', 'Listar talleres');
 
 -- --------------------------------------------------------
 
@@ -125,7 +241,10 @@ CREATE TABLE `permisos` (
 
 INSERT INTO `permisos` (`id`, `user_id`, `model_id`) VALUES
 (1, 1, 1),
-(2, 1, 3);
+(2, 1, 2),
+(3, 1, 4),
+(4, 1, 5),
+(6, 1, 6);
 
 -- --------------------------------------------------------
 
@@ -379,15 +498,144 @@ INSERT INTO `personal` (`id`, `nombre`, `ap_pat`, `ap_mat`, `clave`, `area_id`, 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `resguardatario`
+-- Estructura de tabla para la tabla `personal_tecnico`
 --
 
-CREATE TABLE `resguardatario` (
+CREATE TABLE `personal_tecnico` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `siniestro_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Listao de las personas  responsables de lareparacion';
+
+--
+-- Volcado de datos para la tabla `personal_tecnico`
+--
+
+INSERT INTO `personal_tecnico` (`id`, `nombre`, `siniestro_id`) VALUES
+(1, 'TEC 1 ', 3),
+(2, 'TEC 2', 3),
+(3, 'TEC 3', 3),
+(4, 'TEC 1 ', 5),
+(5, 'TEC 2', 5),
+(6, 'TEC 3', 5),
+(7, 'TEC 1 ', 6),
+(8, 'TEC 2', 6),
+(9, 'TEC 3', 6),
+(10, 'QQQQ1', 7),
+(11, 'EEEEEE2', 7),
+(12, 'ASDASD', 8),
+(13, 'ÑLKJHGFDS', 8),
+(14, 'ZXCZXCZX', 9),
+(15, 'ADASDASD', 9),
+(16, 'POIUYTRE', 9),
+(17, 'ANA', 10),
+(18, 'MARIA', 10),
+(19, 'ROMERO', 10),
+(20, 'CAMACHO', 10),
+(21, 'EMMANUEL', 11),
+(22, 'MONTES ', 11),
+(23, 'LUGO', 11);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reparaciones`
+--
+
+CREATE TABLE `reparaciones` (
+  `id` int(11) NOT NULL,
+  `falla` int(11) NOT NULL COMMENT 'FK de la tabla de catalogo_fallas',
+  `solicitud` int(11) NOT NULL COMMENT 'FK de la tabla de solicitudes',
+  `taller` int(11) NOT NULL COMMENT 'FK de la tabla de talleres'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Lista de reparaciones realizadas ';
+
+--
+-- Volcado de datos para la tabla `reparaciones`
+--
+
+INSERT INTO `reparaciones` (`id`, `falla`, `solicitud`, `taller`) VALUES
+(1, 27, 1, 4),
+(2, 6, 1, 3),
+(6, 74, 1, 3),
+(7, 74, 1, 3),
+(8, 13, 1, 4),
+(9, 69, 1, 4),
+(10, 12, 1, 3),
+(11, 57, 1, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `siniestros`
+--
+
+CREATE TABLE `siniestros` (
+  `id` int(11) NOT NULL,
+  `aseguradora` varchar(255) NOT NULL,
+  `f_hechos` date NOT NULL COMMENT 'Fecha en la que ocurrieron los hechos ',
+  `f_entrada` date NOT NULL COMMENT 'Fecha en la que ingresa al taller el auto',
+  `f_salida` date NOT NULL COMMENT 'Fecha en la que salio el auto del taller',
+  `observaciones` text DEFAULT NULL,
+  `solicitud_id` int(11) NOT NULL COMMENT 'FK de la tabla de solicitudes',
+  `estatus` enum('Creada','En proceso','Finalizada') NOT NULL DEFAULT 'Creada' COMMENT 'Estado en el que se encuentra el siniestro',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Fecha de registro automatica'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Listado de siniestros ';
+
+--
+-- Volcado de datos para la tabla `siniestros`
+--
+
+INSERT INTO `siniestros` (`id`, `aseguradora`, `f_hechos`, `f_entrada`, `f_salida`, `observaciones`, `solicitud_id`, `estatus`, `created_at`) VALUES
+(10, 'SEGUROS ANA', '2019-10-01', '2019-10-16', '2019-10-08', 'SIN COMETARIOS ', 1, 'Creada', '2019-10-30 09:44:49'),
+(11, 'SEGUROS AXA', '2019-10-02', '2019-10-09', '2019-10-30', 'SIN COMENTARIOS', 1, 'Creada', '2019-10-30 09:48:09');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `solicitudes`
+--
+
+CREATE TABLE `solicitudes` (
   `id` int(11) NOT NULL COMMENT 'PK',
-  `vehiculo` int(11) NOT NULL COMMENT 'FK de la tabla vehiculos',
-  `persona` int(11) NOT NULL COMMENT 'FK de la tabla de personal',
-  `f_asignacion` datetime NOT NULL COMMENT 'fecha de asignacion '
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `folio` varchar(100) NOT NULL,
+  `f_sol` date NOT NULL,
+  `km` int(11) DEFAULT NULL,
+  `solicitante` int(11) NOT NULL COMMENT 'FK de la tabla personal',
+  `vehiculo` int(11) NOT NULL COMMENT 'FK de la  tabla vehiculos ',
+  `estado` enum('Creada','Atendida') DEFAULT NULL,
+  `descripcion` longtext DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Listado de solicitudes ';
+
+--
+-- Volcado de datos para la tabla `solicitudes`
+--
+
+INSERT INTO `solicitudes` (`id`, `folio`, `f_sol`, `km`, `solicitante`, `vehiculo`, `estado`, `descripcion`) VALUES
+(1, '2019-001', '2019-10-04', 230510, 186, 3, 'Creada', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `talleres`
+--
+
+CREATE TABLE `talleres` (
+  `id` int(11) NOT NULL,
+  `r_social` varchar(255) NOT NULL COMMENT 'Nombre de la razón social',
+  `contacto` varchar(255) NOT NULL COMMENT 'Nombre de la persona de contacto ',
+  `telefono` varchar(20) NOT NULL COMMENT 'Telefono de contacto',
+  `correo` varchar(255) DEFAULT NULL COMMENT 'Direccion de correo electronico',
+  `domicilio` text NOT NULL COMMENT 'Ubicacion del lugar',
+  `estado` enum('Activa','Baja') NOT NULL DEFAULT 'Activa'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Catalogo de talleres ';
+
+--
+-- Volcado de datos para la tabla `talleres`
+--
+
+INSERT INTO `talleres` (`id`, `r_social`, `contacto`, `telefono`, `correo`, `domicilio`, `estado`) VALUES
+(3, 'COCA COLA SA DE CV ', 'JUAN QUINTANA', '(722) 235-2235', 'cocas@coca.com', 'AVENIDA ADOLFO LOPEZ MATEOS\r\n', 'Activa'),
+(4, 'ISUZU SA DE CV', 'ARMANDO JIMENEZ', '(789) 512-5463', 'superescandalo_12@hotmail.com', 'SIN DIRECCIÓN ', 'Baja');
 
 -- --------------------------------------------------------
 
@@ -410,6 +658,39 @@ INSERT INTO `tipos_v` (`id`, `nom`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `tipo_fallas`
+--
+
+CREATE TABLE `tipo_fallas` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Listado de tipos de fallas';
+
+--
+-- Volcado de datos para la tabla `tipo_fallas`
+--
+
+INSERT INTO `tipo_fallas` (`id`, `nombre`) VALUES
+(1, 'Sistema de Arranque'),
+(2, 'Revisión de Distribución'),
+(3, 'Revisión de Sistema de Enfriamiento'),
+(4, 'Revisión de Suspensión y Dirección'),
+(5, 'Revisión de Motor'),
+(6, 'Revisión de Transmisión y Clutch'),
+(7, 'Revisión de Sistema de Aceleración'),
+(8, 'Revisión de Neumáticos'),
+(9, 'Revisión de Sistema Eléctrico'),
+(10, 'Revisión de Partes Externas de la Unidad (Vehículo)'),
+(11, 'Revisión de Frenos'),
+(12, 'Revisión de Panel de Instrumentos (Tablero)e Indicadores y Odómetro'),
+(13, 'Afinación Mayor'),
+(14, 'Afinación Menor'),
+(15, 'Verificaciones'),
+(16, 'Hojalatería y Pintura');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuario`
 --
 
@@ -419,7 +700,7 @@ CREATE TABLE `usuario` (
   `pass` varchar(255) NOT NULL COMMENT 'Contraseña del usuario',
   `person_id` int(11) NOT NULL COMMENT 'FK de la tabla personal',
   `area_id` int(11) NOT NULL COMMENT 'FK de la tabla área',
-  `perfil` enum('Solicitante','Habilidado','Vigilancia','Recursos Materiales','Directivo') NOT NULL,
+  `perfil` enum('Solicitante','Habilitado','Vigilancia','Recursos Materiales','Directivo') NOT NULL,
   `status` enum('Activo','Baja') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Listado de las cuentas de usuario';
 
@@ -428,7 +709,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `nick`, `pass`, `person_id`, `area_id`, `perfil`, `status`) VALUES
-(1, 'james', 'L3hDN1hsbVhkdzhLV2lEd1JGY09tdz09', 186, 26, 'Solicitante', 'Activo');
+(1, 'james', 'L3hDN1hsbVhkdzhLV2lEd1JGY09tdz09', 186, 26, 'Habilitado', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -447,17 +728,20 @@ CREATE TABLE `vehiculos` (
   `n_motor` varchar(100) NOT NULL COMMENT 'Numero del motor',
   `modelo` varchar(11) NOT NULL COMMENT 'año del auto',
   `cil` int(10) NOT NULL COMMENT 'Numero de cilindros',
+  `resguardatario` int(11) NOT NULL COMMENT 'FK de la tabla de personal ',
   `estado` enum('ACTIVO','DESCOMPUESTO') NOT NULL,
-  `observaciones` longtext,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha del alta del carro'
+  `observaciones` longtext DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Fecha del alta del carro'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Listado de Vehículos';
 
 --
 -- Volcado de datos para la tabla `vehiculos`
 --
 
-INSERT INTO `vehiculos` (`id`, `tipo`, `marca`, `placas`, `n_resguardo`, `color`, `niv`, `n_motor`, `modelo`, `cil`, `estado`, `observaciones`, `created_at`) VALUES
-(1, 1, 1, 'LXP8690', '123456789', 'ROJO', '0987654321', '7410852963', '2010', 4, 'ACTIVO', 'SIN COMENTARIOS', '2019-10-04 10:33:48');
+INSERT INTO `vehiculos` (`id`, `tipo`, `marca`, `placas`, `n_resguardo`, `color`, `niv`, `n_motor`, `modelo`, `cil`, `resguardatario`, `estado`, `observaciones`, `created_at`) VALUES
+(1, 1, 1, 'LXP8690', '123456789', 'ROJO', '0987654321', '7410852963', '2010', 4, 186, 'ACTIVO', 'SIN COMENTARIOS', '2019-10-04 10:33:48'),
+(2, 1, 1, 'NGH8690', '23456789', 'ROJO', '987654321', '567892340987', '2010', 4, 67, 'ACTIVO', 'JASJASJASDJASJD', '2019-10-21 23:09:09'),
+(3, 1, 1, 'MAL8690', '23456789', 'VINO', '987456321', '567892340987', '2010', 4, 51, 'ACTIVO', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', '2019-10-22 21:35:29');
 
 --
 -- Índices para tablas volcadas
@@ -467,6 +751,19 @@ INSERT INTO `vehiculos` (`id`, `tipo`, `marca`, `placas`, `n_resguardo`, `color`
 -- Indices de la tabla `area`
 --
 ALTER TABLE `area`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `catalogo_fallas`
+--
+ALTER TABLE `catalogo_fallas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `tipo_id` (`tipo_id`);
+
+--
+-- Indices de la tabla `ingreso_taller`
+--
+ALTER TABLE `ingreso_taller`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -498,17 +795,51 @@ ALTER TABLE `personal`
   ADD KEY `ua_id` (`area_id`);
 
 --
--- Indices de la tabla `resguardatario`
+-- Indices de la tabla `personal_tecnico`
 --
-ALTER TABLE `resguardatario`
+ALTER TABLE `personal_tecnico`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `reparaciones`
+--
+ALTER TABLE `reparaciones`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `vehiculo` (`vehiculo`),
-  ADD KEY `persona` (`persona`);
+  ADD KEY `falla` (`falla`),
+  ADD KEY `solicitud` (`solicitud`),
+  ADD KEY `taller` (`taller`);
+
+--
+-- Indices de la tabla `siniestros`
+--
+ALTER TABLE `siniestros`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `solicitud_id` (`solicitud_id`);
+
+--
+-- Indices de la tabla `solicitudes`
+--
+ALTER TABLE `solicitudes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `solicitante` (`solicitante`),
+  ADD KEY `vehiculo` (`vehiculo`);
+
+--
+-- Indices de la tabla `talleres`
+--
+ALTER TABLE `talleres`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `tipos_v`
 --
 ALTER TABLE `tipos_v`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `tipo_fallas`
+--
+ALTER TABLE `tipo_fallas`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -525,7 +856,8 @@ ALTER TABLE `usuario`
 ALTER TABLE `vehiculos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `marca` (`marca`),
-  ADD KEY `tipo` (`tipo`);
+  ADD KEY `tipo` (`tipo`),
+  ADD KEY `resguardatario` (`resguardatario`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -538,6 +870,18 @@ ALTER TABLE `area`
   MODIFY `id` int(15) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
+-- AUTO_INCREMENT de la tabla `catalogo_fallas`
+--
+ALTER TABLE `catalogo_fallas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+
+--
+-- AUTO_INCREMENT de la tabla `ingreso_taller`
+--
+ALTER TABLE `ingreso_taller`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `marcas`
 --
 ALTER TABLE `marcas`
@@ -547,13 +891,13 @@ ALTER TABLE `marcas`
 -- AUTO_INCREMENT de la tabla `modulos`
 --
 ALTER TABLE `modulos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos`
 --
 ALTER TABLE `permisos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `personal`
@@ -562,16 +906,46 @@ ALTER TABLE `personal`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=227;
 
 --
--- AUTO_INCREMENT de la tabla `resguardatario`
+-- AUTO_INCREMENT de la tabla `personal_tecnico`
 --
-ALTER TABLE `resguardatario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK';
+ALTER TABLE `personal_tecnico`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
+-- AUTO_INCREMENT de la tabla `reparaciones`
+--
+ALTER TABLE `reparaciones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `siniestros`
+--
+ALTER TABLE `siniestros`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `solicitudes`
+--
+ALTER TABLE `solicitudes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `talleres`
+--
+ALTER TABLE `talleres`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `tipos_v`
 --
 ALTER TABLE `tipos_v`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `tipo_fallas`
+--
+ALTER TABLE `tipo_fallas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
@@ -583,11 +957,17 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `vehiculos`
 --
 ALTER TABLE `vehiculos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'PK', AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `catalogo_fallas`
+--
+ALTER TABLE `catalogo_fallas`
+  ADD CONSTRAINT `catalogo_fallas_ibfk_1` FOREIGN KEY (`tipo_id`) REFERENCES `tipo_fallas` (`id`);
 
 --
 -- Filtros para la tabla `permisos`
@@ -603,11 +983,25 @@ ALTER TABLE `personal`
   ADD CONSTRAINT `personal_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `area` (`id`);
 
 --
--- Filtros para la tabla `resguardatario`
+-- Filtros para la tabla `reparaciones`
 --
-ALTER TABLE `resguardatario`
-  ADD CONSTRAINT `resguardatario_ibfk_1` FOREIGN KEY (`vehiculo`) REFERENCES `vehiculos` (`id`),
-  ADD CONSTRAINT `resguardatario_ibfk_2` FOREIGN KEY (`persona`) REFERENCES `personal` (`id`);
+ALTER TABLE `reparaciones`
+  ADD CONSTRAINT `reparaciones_ibfk_1` FOREIGN KEY (`falla`) REFERENCES `catalogo_fallas` (`id`),
+  ADD CONSTRAINT `reparaciones_ibfk_2` FOREIGN KEY (`solicitud`) REFERENCES `solicitudes` (`id`),
+  ADD CONSTRAINT `reparaciones_ibfk_3` FOREIGN KEY (`taller`) REFERENCES `talleres` (`id`);
+
+--
+-- Filtros para la tabla `siniestros`
+--
+ALTER TABLE `siniestros`
+  ADD CONSTRAINT `siniestros_ibfk_1` FOREIGN KEY (`solicitud_id`) REFERENCES `solicitudes` (`id`);
+
+--
+-- Filtros para la tabla `solicitudes`
+--
+ALTER TABLE `solicitudes`
+  ADD CONSTRAINT `solicitudes_ibfk_1` FOREIGN KEY (`solicitante`) REFERENCES `personal` (`id`),
+  ADD CONSTRAINT `solicitudes_ibfk_2` FOREIGN KEY (`vehiculo`) REFERENCES `vehiculos` (`id`);
 
 --
 -- Filtros para la tabla `usuario`
@@ -621,7 +1015,8 @@ ALTER TABLE `usuario`
 --
 ALTER TABLE `vehiculos`
   ADD CONSTRAINT `vehiculos_ibfk_1` FOREIGN KEY (`marca`) REFERENCES `marcas` (`id`),
-  ADD CONSTRAINT `vehiculos_ibfk_2` FOREIGN KEY (`tipo`) REFERENCES `tipos_v` (`id`);
+  ADD CONSTRAINT `vehiculos_ibfk_2` FOREIGN KEY (`tipo`) REFERENCES `tipos_v` (`id`),
+  ADD CONSTRAINT `vehiculos_ibfk_3` FOREIGN KEY (`resguardatario`) REFERENCES `personal` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

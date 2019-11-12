@@ -23,14 +23,12 @@ if ( isset( $_POST['option'] ) )
 			session_destroy();
 			# Buscar que el usuario y contraseña exista en la BD 
 			$acceso = new Security();
-			
-			
+						
 			$nick = isset($_POST['username']) ? $_POST['username'] : 0;
 			$pass = isset($_POST['userpass']) ? $_POST['userpass'] : 0;
 			
 			if ( $nick != '0' AND $pass != '0' ) 
 			{
-				
 				$result = $acceso->search_data_login($nick,$pass);
 				
 				if (is_object($result)) 
@@ -126,6 +124,39 @@ if ( isset( $_POST['option'] ) )
 		case '21':
 			echo $hab->getTipoFalla();
 			break;
+		case '22':
+			echo $hab->getListTalleres();
+			break;
+		case '23':
+			echo $hab->saveReparacion($_POST);
+			break;
+		case '24':
+			echo $hab->saveFallas($_POST);
+			break;
+		case '25':
+			echo $hab->saveIngreso($_POST);
+			break;
+		case '26':
+			echo $hab->saveSalida($_POST);
+			break;
+		case '27':
+			echo $hab->saveEvent($_POST);
+			break;
+		case '28':
+			echo $hab->getEvents();
+			break;
+		case '29':
+			echo $hab->entregaAuto($_POST['s']);
+			break;
+		case '30':
+			echo $hab->saveCotizacion();
+			break;
+		case '31':
+			echo $hab->saveEntrega();
+			break;
+		case '32':
+			echo $hab->saveBaja();
+			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;
@@ -163,6 +194,9 @@ elseif( isset($_GET) )
 			break;
 		case '8':
 			echo $hab->getSolicitudes();
+			break;
+		case '9':
+			echo $person->autoPersonal($_REQUEST);
 			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));

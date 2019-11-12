@@ -59,6 +59,52 @@ class HabilitadoController
 	{
 		return $this->model->getTipoFalla();
 	}
+	public function getListTalleres()
+	{
+		return $this->model->getListTalleres();
+	}
+	public function saveReparacion($post)
+	{
+		return $this->model->saveReparacion($post);
+	}
+	public function saveFallas($post)
+	{
+		return $this->model->saveFallas($post);
+	}
+	public function saveIngreso($post)
+	{
+		return $this->model->saveIngreso($post);
+	}
+	public function saveSalida($post)
+	{
+		return $this->model->saveSalida($post);
+	}
+	public function saveEvent($post)
+	{
+		return $this->model->saveEvent($post);
+	}
+	public function getEvents()
+	{
+		return $this->model->getEvents();
+	}
+	public function entregaAuto($s)
+	{
+		return $this->model->entregaAuto($s);
+	}
+	public function saveCotizacion()
+	{
+		
+		return $this->model->saveCotizacion();
+	}
+	public function saveEntrega()
+	{
+		return $this->model->saveEntrega();
+	}
+	public function saveBaja()
+	{
+		return $this->model->saveBaja();
+	}
+	
 	
 }
 ?>

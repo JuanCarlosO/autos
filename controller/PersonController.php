@@ -14,5 +14,9 @@ class PersonController
 	{
 		return $this->model->getPerfil();
 	}
+	public function autoPersonal()
+	{
+		return $this->model->autoPersonal();
+	}
 }
 ?>
