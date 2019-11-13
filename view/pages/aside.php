@@ -70,9 +70,14 @@
               <li id="list_sol"><a href="index.php?menu=list_sol"><i class="fa fa-book"></i> Solicitudes</a></li>
             </ul>
           </li>
-          <li>
+          <li id="eventos">
             <a href="index.php?menu=eventos">
               <i class="fa fa-calendar"></i> <span> Eventos programados </span>
+            </a>
+          </li>
+          <li id="registro_es">
+            <a href="index.php?menu=es">
+              <i class="fa fa-calendar"></i> <span> REGISTRO E/S </span>
             </a>
           </li> 
           <!-- <li>

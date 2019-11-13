@@ -80,6 +80,10 @@ class CarController
 	{
 		return $this->model->updateStatus($v);
 	}
+	public function getESToday()
+	{
+		return $this->model->getESToday();
+	}
 }
 
 

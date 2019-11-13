@@ -54,6 +54,7 @@ function getURL() {
 	}else if ( URLsearch == '?menu=list_car' || URLsearch == '?menu=general' ) {
 		$('#tree_list').addClass('active');
 		$('#list_car').addClass('active');
+
 		/*Carga el listado completo de vehiculos*/
 		all_cars();
 		/*Carga de formularios*/
@@ -61,7 +62,9 @@ function getURL() {
 	}else if ( URLsearch == '?menu=add_car' ) {
 		$('#tree_add').addClass('active');
 		$('#add_car').addClass('active');
-		
+		/*autocompletado de nombre*/
+		autocompletado( 'personal','personal_id' );
+
 		frm_add_car();//Agregar vehiculos
 		getMarcas();
 		getTipos();
@@ -83,8 +86,17 @@ function getURL() {
 	}
 	else if ( URLsearch == '?menu=eventos' )
 	{
+		$('li#eventos').addClass('active');
 		//Carga de fomularios 
 		frm_eventos();
+	}
+	else if ( URLsearch == '?menu=es' )
+	{
+		$('li#registro_es').addClass('active');
+		//Carga de listados
+		all_es();
+		//Carga de fomularios 
+		frm_historico_es();
 	}
 	else{
 
@@ -183,6 +195,8 @@ function all_cars(){
 	        		tr.css('background','red');
 	        	}
 	        	return '<ul>'+
+	        				'<li> <b>Nombre:</b>'+obj.responsable+'</li>'+
+	        				'<li> <b>Número de resguardo:</b>'+obj.n_resguardo+'</li>'+
 	        				
 	        		   '<ul>';
 	        }},
@@ -211,7 +225,7 @@ function all_cars(){
 		        		class: 'btn btn-warning btn-flat',
 		        		contenido: '<i class="fa fa-arrow-down"></i>',
 		        		attr: [
-	                    	'onclick="modal_baja_v();"',
+	                    	'onclick="modal_baja_v('+obj.id+');"',
 	                    	'title=" DAR DE BAJA EL VEHÍCULO"'
 	                	]
 		        	});
@@ -416,9 +430,12 @@ function frm_baja_v() {
 		var validate_size = false;
 
 		for (var i = 0; i < archivos.length; i++) {
-			console.log( archivos[i].files[0].size );
-			
+			var size = archivos[i].files[0].size;
+			if ( size > 10485760) {
+				validate_size = true;
+			}
 		}
+		//alert( validate_size );
 		if (validate_size == true) {
 			$('#alert_baja_v').removeClass('hidden');
 			$('#alert_baja_v').addClass('alert-danger');
@@ -429,7 +446,7 @@ function frm_baja_v() {
 				$('#alert_baja_v').removeClass('alert-danger');
 				$('#a_baja_v_estado').text('');
 				$('#a_baja_v_message').text('');
-				//$('#modal_baja_v').modal('toggle');
+
 			},5000);
 		}else{
 			//
@@ -464,6 +481,7 @@ function frm_baja_v() {
 					$('#a_baja_v_estado').text('');
 					$('#a_baja_v_message').text('');
 					$('#modal_baja_v').modal('toggle');
+					all_cars();
 				},5000);
 			})
 			.fail(function(jqXHR,textStatus,errorThrown) {
@@ -491,7 +509,8 @@ function baja_veh(){
 	return false;
 }
 /*Abrir modal de baja vehicular*/
-function modal_baja_v() {
+function modal_baja_v(v) {
+	$('#vehiculo_id').val( v );
 	$('#modal_baja_v').modal('toggle');
 	return false;
 }
@@ -1289,7 +1308,7 @@ function autocompletado(input,hidden) {
 		source: "controller/puente.php?option=9",
 		minLength: 2,
 		select: function( event, ui ) {
-        	alert( "Selected value: " + ui.item.value + " ID " + ui.item.id );
+        	$('#'+hidden).val(ui.item.id);
       	}
 	});
 	return false;
@@ -1334,4 +1353,128 @@ function add_field_baja()
 	}
 	
 	return false;
+}
+function frm_historico_es() {
+	$('#frm_historico_es').submit(function(e) {
+		e.preventDefault();
+		var inicio, fin ;
+		inicio 	= $('#f_inicio').val();
+		fin 	= $('#f_fin').val();
+		var es = {
+		    class: 'table-striped table-bordered',
+		    columnas: [
+		        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
+		        { leyenda: 'Vehículo', style: 'width:100px;', ordenable:false,filtro:false },
+		        { leyenda: 'Datos salida', style:'width:100px;',ordenable:false },
+		        { leyenda: 'Datos de entrada', style:'width:200px;' },
+		        { leyenda: 'Observaciones', style:'width:200px;',ordenable:false, filtro:false },
+		    ],
+		    modelo: [
+		        { propiedad: 'id'},
+		        {  formato:function (tr,obj,celda) {
+		        	return  '<ul>'+
+		        			'<li> <b>PLACAS:</b> '+obj.placa+'</li>'+
+		        			'<li> <b>MARCA:</b> '+obj.marca+'<l/i>'+
+		        			'<li> <b>TIPO:</b> '+obj.t_vehiculo+'</li>'+
+		        			'<li> <b>¿QUIEN CONDUCE?:</b> '+obj.chofer+'</li>'+
+		        		'</ul>';
+		        	} 
+		        },
+		       {  formato:function (tr,obj,celda) {
+		        	return  '<ul>'+
+		        			'<li> <b>FECHA Y HORA:</b> '+obj.salida+'</li>'+
+		        			'<li> <b>NIVEL DE GAS:</b> '+obj.gas_salida+' % <l/i>'+
+		        			'<li> <b>KILOMETRAJE:</b> '+obj.km_salida+'</li>'+
+		        		'</ul>';
+		        	} 
+		        },
+		       {formato:function (tr,obj,celda) {
+			       	if ( obj.entrada != null ) {
+			       		return  '<ul>'+
+			       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
+			       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
+			       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
+			       			'</ul>';
+			       	}else{
+			       		return  '<ul>'+
+		        			'<li> <b>FECHA Y HORA:</b> SIN REGISTRAR</li>'+
+		        			'<li> <b>NIVEL DE GAS:</b> SIN REGISTRAR <l/i>'+
+		        			'<li> <b>KILOMETRAJE:</b> SIN REGISTRAR </li>'+
+		        		'</ul>';
+			       	}
+		        	
+		        }},
+		       { propiedad: 'observaciones'}
+		    ],
+		    url: 'controller/puente.php?option=10',
+		    type:'POST',
+		    limite: [25,50,100],
+		    columna: 'id',
+		    columna_orden: 'DESC',
+		    paginable:true,
+		    filtrable: false,
+		    parametros: {desde:inicio,hasta:fin}
+
+		};
+		$("#historico").anexGrid(es);	
+	});
+}
+/*Recuperar las entradas y salidas de los vehiculos*/
+function all_es() {
+	var es = {
+	    class: 'table-striped table-bordered',
+	    columnas: [
+	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
+	        { leyenda: 'Vehículo', style: 'width:100px;', ordenable:false,filtro:false },
+	        { leyenda: 'Datos salida', style:'width:100px;',ordenable:false },
+	        { leyenda: 'Datos de entrada', style:'width:200px;' },
+	        { leyenda: 'Observaciones', style:'width:200px;',ordenable:false, filtro:false },
+	    ],
+	    modelo: [
+	        { propiedad: 'id'},
+	        {  formato:function (tr,obj,celda) {
+	        	return  '<ul>'+
+	        			'<li> <b>PLACAS:</b> '+obj.placa+'</li>'+
+	        			'<li> <b>MARCA:</b> '+obj.marca+'<l/i>'+
+	        			'<li> <b>TIPO:</b> '+obj.t_vehiculo+'</li>'+
+	        			'<li> <b>¿QUIEN CONDUCE?:</b> '+obj.chofer+'</li>'+
+	        		'</ul>';
+	        	} 
+	        },
+	       {  formato:function (tr,obj,celda) {
+	        	return  '<ul>'+
+	        			'<li> <b>FECHA Y HORA:</b> '+obj.salida+'</li>'+
+	        			'<li> <b>NIVEL DE GAS:</b> '+obj.gas_salida+' % <l/i>'+
+	        			'<li> <b>KILOMETRAJE:</b> '+obj.km_salida+'</li>'+
+	        		'</ul>';
+	        	} 
+	        },
+	       {formato:function (tr,obj,celda) {
+		       	if ( obj.entrada != null ) {
+		       		return  '<ul>'+
+		       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
+		       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
+		       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
+		       			'</ul>';
+		       	}else{
+		       		return  '<ul>'+
+	        			'<li> <b>FECHA Y HORA:</b> SIN REGISTRAR</li>'+
+	        			'<li> <b>NIVEL DE GAS:</b> SIN REGISTRAR <l/i>'+
+	        			'<li> <b>KILOMETRAJE:</b> SIN REGISTRAR </li>'+
+	        		'</ul>';
+		       	}
+	        	
+	        }},
+	       { propiedad: 'observaciones'}
+	    ],
+	    url: 'controller/puente.php?option=10',
+	    type:'POST',
+	    limite: [25,50,100],
+	    columna: 'id',
+	    columna_orden: 'DESC',
+	    paginable:true,
+	    filtrable: false,
+
+	};
+	$("#es_today").anexGrid(es);
 }

@@ -639,48 +639,90 @@ class HabilitadoModel extends Conection
 	public function saveBaja()
 	{
 		try {
-			print_r($_FILES);exit;
-			$size = $_FILES['archivo']['size'];
-			$type = $_FILES['archivo']['type'];
-			$name = $_FILES['archivo']['name'];
-			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
-			
-			if ( $size > 10485760 ) 
-			{
-				throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+			$motivo 	= ( isset($_POST['motivo']) ) ? mb_strtoupper($_POST['motivo']) : '' ;
+			$vehiculo 	= ( isset($_POST['vehiculo_id']) ) ? (int)$_POST['vehiculo_id'] : 0 ;
+			$causa 		= ( isset($_POST['causa']) ) ? (int)$_POST['causa'] : 0 ;
+			if ( $vehiculo == 0 ) {
+				throw new Exception("NO SE INDENTIFCO EL VEHICULO QUE DESEA DAR DE BAJA.", 1);
 			}
-			else
-			{
-				if ( $type != 'application/pdf' ) 
+			if ( empty($motivo) ) {
+				throw new Exception("SE CONSIDERA INDISPENSABLE UNA RAZÓN DEL PORQUE EL BIEN SERÁ DADO DE BAJA.", 1);
+			}
+			/*INSERTAR LA INFO DE LA TABLA DE baja_vehiculos*/
+			$this->sql 	= "INSERT INTO baja_vehiculos (id,motivo,vehiculo,causa) VALUES ('',?,?,?);";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			
+			$this->stmt->bindParam(1,$motivo,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$vehiculo,PDO::PARAM_INT);
+			$this->stmt->bindParam(3,$causa,PDO::PARAM_INT);
+			$this->stmt->execute();
+			#RECUPERAR EL ID DEL ULTIMO REGISTRO GUARDADO 
+			$ultimo = $this->pdo->lastInsertId();
+			#PONER EN ESTATUS DE BAJA EL VEHICULO
+			$this->sql 	= "UPDATE vehiculos SET estado = 3 WHERE id = ? ";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$vehiculo,PDO::PARAM_INT);
+			$this->stmt->execute();
+			#####################################
+			if ( empty($ultimo) ) {
+				throw new Exception("NO SE PUDO DAR DE BAJA AL VEHÍCULO. ", 1);
+			}
+			
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			for ($i=0; $i < count($_FILES['archivo']['name']) ; $i++) { 
+				$size = $_FILES['archivo']['size'][$i];
+				$type = $_FILES['archivo']['type'][$i];
+				$name = $_FILES['archivo']['name'][$i];
+				$t_doc = $_POST['t_doc'][$i];
+				#NOMENCATURA PARA EL NOMBRE DEL DOCUMENTO QUE SE ALAMCENA 
+				#t_doc+$ultimo+fecha
+				$aux = "";
+				if ( $t_doc == 1 ) {
+					$aux = "ACTA_BAJA";
+				}else if ( $t_doc == 2 ){
+					$aux = "DOCUMENTO_SINIESTRO";
+				}else{
+					$aux = "DICTAMEN_TALLER";
+				}
+				$name_doc = $aux."_".$ultimo."_".date('Y')."_".date('m')."_".date('d');
+				if ( $size > 10485760 ) 
 				{
 					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
 				}
 				else
 				{
-					#convertir a bytes
-					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
-					$file = fopen($destiny.$name,'r');
-					$content = fread($file,$size);
-					$content = addslashes($content);
-					fclose($file);
-					#Insertar en la BD
-					$this->sql = "
-					INSERT INTO 
-					cotizaciones 
-						(id, fecha, monto, comentario, archivo)
-					VALUES 
-						('', ?, ?, ?, ?);
-					";
-					$this->stmt = $this->pdo->prepare( $this->sql );
-					$this->stmt->bindParam(1,$_POST['fecha'],PDO::PARAM_STR);
-					$this->stmt->bindParam(2,$_POST['costo'],PDO::PARAM_STR);
-					$this->stmt->bindParam(3,$_POST['comentario'],PDO::PARAM_STR);
-					$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
-					$this->stmt->execute();
-					unlink($destiny.$name);
-					return json_encode(array('status'=>'success','message'=>'SE GUARDO LA COTIZACIÓN EXITOSAMENTE'));
+					if ( $type != 'application/pdf' ) 
+					{
+						throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+					}
+					else
+					{
+						#convertir a bytes
+						move_uploaded_file($_FILES['archivo']['tmp_name'][$i],$destiny.$name);
+						$file = fopen($destiny.$name,'r');
+						$content = fread($file,$size);
+						$content = addslashes($content);
+						fclose($file);
+						#Insertar en la BD
+						$this->sql = "
+						INSERT INTO 
+						baja_documentos 
+							(id, baja, tipo, nombre	, archivo)
+						VALUES 
+							('', ?, ?, ?, ?);
+						";
+						$this->stmt = $this->pdo->prepare( $this->sql );
+						$this->stmt->bindParam(1,$ultimo,PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$t_doc,PDO::PARAM_INT);
+						$this->stmt->bindParam(3,$name_doc,PDO::PARAM_STR);
+						$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
+						$this->stmt->execute();
+						unlink($destiny.$name);
+						
+					}
 				}
-			}			
+			}
+			return json_encode(array('status'=>'success','message'=>'SE A DADO DE BAJA EL VEHÍCULO DE MANERA EXITOSA.'));		
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}

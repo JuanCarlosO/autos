@@ -24,6 +24,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <dic class="col-md-12">
+                                    <div class="form-group">
+                                        <label> Asignado a: </label>
+                                        <input type="text" id="personal" name="personal" value="" placeholder="Ej: Juan ..." required="" class="form-control">
+                                        <input type="hidden" id="personal_id" name="personal_id" value="">
+                                    </div>
+                                </dic>
+                            </div>
                     		<div class="row">
                     			<div class="col-md-6">
                     				<div class="form-group">

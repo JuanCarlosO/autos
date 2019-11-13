@@ -100,6 +100,11 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_main/content_eventos.php';
 							  		include 'view/pages/habilitado_v/modals/modal_eventos.php';
 							  		break;
+							  	case 'es':
+							  		include 'view/pages/habilitado_v/content_header/header_registro_es.php';
+							  		include 'view/pages/habilitado_v/content_main/content_registro_es.php';
+							  		
+							  		break;
 							}
 						}
 						else

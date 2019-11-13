@@ -24,9 +24,13 @@ class CarModel extends Conection
 				$wh = " 1=1 ";
 			}
 			
-			$this->sql = "SELECT v.*, m.nom AS mar, t.nom AS tip FROM vehiculos AS v
+			$this->sql = "
+			SELECT v.*, m.nom AS mar, t.nom AS tip,  
+				CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS responsable 
+			FROM vehiculos AS v
 							INNER JOIN marcas AS m ON m.id = v.marca
 							INNER JOIN tipos_v AS t ON t.id = v.tipo 
+							INNER JOIN personal AS p ON p.id = v.resguardatario
 						WHERE".$wh." ORDER BY $anexgrid->columna $anexgrid->columna_orden
             			LIMIT $anexgrid->pagina, $anexgrid->limite ";
 			$this->stmt = $this->pdo->prepare( $this->sql );
@@ -133,6 +137,7 @@ class CarModel extends Conection
 	public function saveCar($post)
 	{
 		try {
+			$obs = ( isset($post['obs']) ) ? mb_strtoupper($post['obs']) : '' ;
 			$this->sql = "INSERT INTO vehiculos (
 				id,
 				tipo,
@@ -144,8 +149,10 @@ class CarModel extends Conection
 				n_motor,
 				modelo,
 				cil,
+
 				estado,
-				observaciones
+				observaciones,
+				resguardatario
 			) VALUES (
 				'',
 				?,
@@ -158,6 +165,7 @@ class CarModel extends Conection
 				?,
 				?,
 				'1',
+				?,
 				?
 				
 			);";
@@ -171,7 +179,8 @@ class CarModel extends Conection
 			$this->stmt->bindParam(7,$post['n_motor'],PDO::PARAM_STR);
 			$this->stmt->bindParam(8,$post['modelo'],PDO::PARAM_STR);
 			$this->stmt->bindParam(9,$post['cilindros'],PDO::PARAM_INT);
-			$this->stmt->bindParam(10,$post['obs'],PDO::PARAM_STR);
+			$this->stmt->bindParam(10,$obs,PDO::PARAM_STR);
+			$this->stmt->bindParam(11,$post['personal_id'],PDO::PARAM_INT);
 			
 			$this->stmt->execute();
 
@@ -240,6 +249,50 @@ class CarModel extends Conection
 			$this->stmt->bindParam(1,$v);
 			$this->stmt->execute();
 			return json_encode( array('status'=>'success','message'=> 'EL VEHÍCULO A CAMBIADO SU ESTATUS A BAJA') );
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+
+	public function getESToday()
+	{
+		try {
+			if ( !empty($_REQUEST['parametros']['desde']) && !empty($_REQUEST['parametros']['hasta']) ) {
+				$wh = 'DATE(r.salida) BETWEEN "'.$_REQUEST['parametros']['desde'] .'" AND "'.$_REQUEST['parametros']['hasta'].'"';
+			}else{
+				$wh = 'DATE(r.salida) = DATE(NOW())';
+			}
+			$anexgrid = new AnexGrid();
+			$this->sql = "
+			SELECT 
+				r.*,
+				(SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat ) AS full_name FROM personal WHERE id = r.registra) AS registro,
+				(SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat ) AS full_name FROM personal WHERE id = r.conductor) AS chofer,
+				tv.nom AS t_vehiculo,
+				m.nom AS marca,
+				v.placas AS placa
+			FROM registro_es AS r
+			INNER JOIN vehiculos AS v ON v.id = r.vehiculo
+			LEFT JOIN tipos_v AS tv ON tv.id = v.tipo  
+			LEFT JOIN marcas AS m ON m.id = v.marca  
+				WHERE ".$wh."
+				ORDER BY $anexgrid->columna $anexgrid->columna_orden
+            			LIMIT $anexgrid->pagina, $anexgrid->limite 
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			
+			$this->stmt->execute();
+			$es = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+			$this->sql = "SELECT COUNT(*) AS cuenta FROM registro_es AS r
+			INNER JOIN vehiculos AS v ON v.id = r.vehiculo
+			LEFT JOIN tipos_v AS tv ON tv.id = v.tipo  
+			LEFT JOIN marcas AS m ON m.id = v.marca  
+				WHERE ".$wh;
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
+			return $anexgrid->responde($es, $cuenta);
+			
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}

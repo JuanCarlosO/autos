@@ -12,6 +12,7 @@ $person = new PersonController;
 $hab = new HabilitadoController;
 /***/
 
+
 if ( isset( $_POST['option'] ) ) 
 {
 
@@ -197,6 +198,9 @@ elseif( isset($_GET) )
 			break;
 		case '9':
 			echo $person->autoPersonal($_REQUEST);
+			break;
+		case '10':
+			echo $car->getESToday();
 			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));
