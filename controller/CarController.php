@@ -84,6 +84,11 @@ class CarController
 	{
 		return $this->model->getESToday();
 	}
+	public function autoPlacas()
+	{
+		return $this->model->autoPlacas();
+	}
+	
 }
 
 

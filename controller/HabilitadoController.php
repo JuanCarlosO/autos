@@ -104,6 +104,15 @@ class HabilitadoController
 	{
 		return $this->model->saveBaja();
 	}
+	public function saveSolHistorica()
+	{
+		return $this->model->saveSolHistorica();
+	}
+	public function getTiposDoc()
+	{
+		return $this->model->getTiposDoc();
+	}
+	
 	
 	
 }

@@ -158,6 +158,12 @@ if ( isset( $_POST['option'] ) )
 		case '32':
 			echo $hab->saveBaja();
 			break;
+		case '33':
+			echo $hab->saveSolHistorica();
+			break;
+		case '34':
+			echo $hab->getTiposDoc();
+			break;	
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;
@@ -201,6 +207,9 @@ elseif( isset($_GET) )
 			break;
 		case '10':
 			echo $car->getESToday();
+			break;
+		case '11':
+			echo $car->autoPlacas();
 			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));

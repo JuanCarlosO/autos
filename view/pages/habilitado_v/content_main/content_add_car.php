@@ -25,13 +25,25 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <dic class="col-md-12">
+                                <div class="col-md-10">
                                     <div class="form-group">
                                         <label> Asignado a: </label>
                                         <input type="text" id="personal" name="personal" value="" placeholder="Ej: Juan ..." required="" class="form-control">
                                         <input type="hidden" id="personal_id" name="personal_id" value="">
                                     </div>
-                                </dic>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label> Estado del Vehículo </label>
+                                        <select class="form-control" name="estado" required>
+                                            <option value="">...</option>
+                                            <option value="1">Activo</option>
+                                            <option value="2">Descompuesto</option>
+                                            <option value="3">Baja</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                             </div>
                     		<div class="row">
                     			<div class="col-md-6">

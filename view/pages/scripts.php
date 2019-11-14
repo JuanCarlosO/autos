@@ -34,7 +34,8 @@
 
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="view/dist/js/jquery.anexgrid.js"></script>
-
+<!-- jQuery Knob -->
+<script src="view/bower_components/jquery-knob/js/jquery.knob.js"></script>
 <?php 
 if ( isset($_SESSION['perfil']) ) 
 {
@@ -50,8 +51,8 @@ if ( isset($_SESSION['perfil']) )
 			echo '<script src="view/bower_components/fullcalendar/dist/locale-all.js"></script>';
 			echo '<script src="view/bower_components/fullcalendar/dist/locale/es.js"></script>';
 			break;
-		case '3':
-			echo '<script src="view/dist/js/main.sti.js"></script>';
+		case 'Vigilancia':
+			echo '<script src="view/dist/js/main.vig.js"></script>';
 			break;
 		case '4':
 			echo '<script src="view/dist/js/main.bienes.js"></script>';

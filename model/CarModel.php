@@ -138,6 +138,7 @@ class CarModel extends Conection
 	{
 		try {
 			$obs = ( isset($post['obs']) ) ? mb_strtoupper($post['obs']) : '' ;
+			$estado = ( isset($post['estado']) ) ? mb_strtoupper($post['estado']) : 0 ;
 			$this->sql = "INSERT INTO vehiculos (
 				id,
 				tipo,
@@ -149,10 +150,9 @@ class CarModel extends Conection
 				n_motor,
 				modelo,
 				cil,
-
-				estado,
 				observaciones,
-				resguardatario
+				resguardatario,
+				estado
 			) VALUES (
 				'',
 				?,
@@ -164,7 +164,7 @@ class CarModel extends Conection
 				?,
 				?,
 				?,
-				'1',
+				?,
 				?,
 				?
 				
@@ -181,7 +181,7 @@ class CarModel extends Conection
 			$this->stmt->bindParam(9,$post['cilindros'],PDO::PARAM_INT);
 			$this->stmt->bindParam(10,$obs,PDO::PARAM_STR);
 			$this->stmt->bindParam(11,$post['personal_id'],PDO::PARAM_INT);
-			
+			$this->stmt->bindParam(12,$estado,PDO::PARAM_INT);
 			$this->stmt->execute();
 
 			return json_encode( array('status'=>'success','message'=>'SE A GUARDADO EL VEHÍCULO CORRECTAMENTE.' ) );
@@ -293,6 +293,21 @@ class CarModel extends Conection
 			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
 			return $anexgrid->responde($es, $cuenta);
 			
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+
+	public function autoPlacas()
+	{
+		try {
+			$term = "%".$_REQUEST['term']."%";
+			$this->sql = "SELECT id,UPPER(placas) AS value FROM vehiculos WHERE placas LIKE ? ;";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$term,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode( $this->result );
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}

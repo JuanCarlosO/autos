@@ -13,6 +13,13 @@
 				</div>
 				<div class="box-body">
 					<div class="row">
+						<div class="col-md-3 pull-right">
+							<button type="submit" class="btn btn-success btn-flat btn-block" data-toggle="modal" data-target="#modal_solicitud_historica">
+								<i class="fa fa-plus"></i> Agregar solicitud historica
+							</button>
+						</div>
+					</div>
+					<div class="row">
 					    <div class="col-md-12">
 					        <div id="alerta" class="alert hidden alert-dismissible ">
 					            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>

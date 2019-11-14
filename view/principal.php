@@ -77,7 +77,8 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/modals/modal_entrega_resguardatario.php';
 							  		#LISTA DE MODALES PARA LA COTIZACION Y FACTURACIÓN
 							  		include 'view/pages/habilitado_v/modals/modal_cotizacion.php';
-							  		
+							  		#
+							  		include 'view/pages/habilitado_v/modals/modal_solicitud_historica.php';
 							  		break;
 							  	case 'add_taller':
 							  		include 'view/pages/habilitado_v/content_header/header_add_taller.php';
@@ -112,6 +113,14 @@ date_default_timezone_set('America/Mexico_City');
 							echo " <script> location.href = 'http://localhost/aut/denegado.php' </script> ";
 						}
 						break;
+					case 'Vigilancia':#Perfil Habilitado Vehicular
+						#--------------------------------------------------------------------------------------
+						case 'general':
+					  		include 'view/pages/vigilancia/content_header/header_general.php';
+					  		include 'view/pages/vigilancia/content_main/content_general.php';
+					  		break;
+					  	#--------------------------------------------------------------------------------------
+						break;	
 					default:
 						echo " <script> alert('El perfil logeado no existe'); location.href = 'http://localhost/autos/denegado.php'; </script> ";
 						break;

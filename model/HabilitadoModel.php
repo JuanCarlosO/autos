@@ -156,7 +156,7 @@ class HabilitadoModel extends Conection
 			$this->sql = "
 			SELECT s.*,m.nom AS marca,t.nom AS tipo, v.placas, v.modelo, v.niv, CONCAT(p.nombre, ' ', p.ap_pat,' ',p.ap_mat) AS full_name FROM solicitudes AS s
 			INNER JOIN vehiculos AS v ON v.id = s.vehiculo
-			INNER JOIN personal AS p ON p.id = s.solicitante
+			LEFT JOIN personal AS p ON p.id = s.solicitante
 			INNER JOIN tipos_v AS t ON t.id = v.tipo
 			INNER JOIN marcas AS m ON m.id = v.marca
 			WHERE
@@ -167,7 +167,7 @@ class HabilitadoModel extends Conection
 			$modulos = $this->stmt->fetchAll(PDO::FETCH_OBJ);
 			$this->sql = "SELECT COUNT(*) AS cuenta FROM solicitudes AS s
 			INNER JOIN vehiculos AS v ON v.id = s.vehiculo
-			INNER JOIN personal AS p ON p.id = s.solicitante
+			LEFT JOIN personal AS p ON p.id = s.solicitante
 			INNER JOIN tipos_v AS t ON t.id = v.tipo
 			INNER JOIN marcas AS m ON m.id = v.marca";
 			$this->stmt = $this->pdo->prepare( $this->sql );
@@ -356,7 +356,6 @@ class HabilitadoModel extends Conection
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
-			/*Carga de anexGrid*/
 			return json_encode( $this->result );
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
@@ -481,10 +480,20 @@ class HabilitadoModel extends Conection
 	public function saveSalida($post)
 	{
 		try {
+			$solicitud_id = ( isset( $_POST['solicitud_id'] ) ) ? $_POST['solicitud_id'] : 0; 
+			if ( $solicitud_id == 0  ) {
+				throw new Exception("NO SE RECUPERO LA SOLICITUD. \nNOTIFIQUE ESTO AL ÁREA DE SISTEMAS.", 1);
+			}
+			$this->sql  = " SELECT id FROM ingreso_taller WHERE solicitud = ? ";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$solicitud_id,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$ingreso = $this->stmt->fetch(PDO::FETCH_OBJ);
+
 			#Recuperar las observaciones antes escritas.
 			$this->sql = "SELECT observaciones FROM ingreso_taller WHERE id = ?";
 			$this->stmt = $this->pdo->prepare( $this->sql );
-			$this->stmt->execute( array($post['ingreso_id']) );
+			$this->stmt->execute( array( $ingreso->id ) );
 			$o = $this->stmt->fetch( PDO::FETCH_OBJ ); 
 			$obs = "";
 			$obs .= "AL INGRESO DEL TALLER: ".$o->observaciones."<br>";
@@ -601,8 +610,19 @@ class HabilitadoModel extends Conection
 	public function saveEntrega()
 	{
 		try {
-			$motivo = ( isset($_POST['txt_motivo']) ) ? $_POST['txt_motivo'] : NULL ; 
-			$this->sql = " INSERT INTO entrega_vehiculo (
+			#Rastrear el ID del ingreso al taller
+			$solicitud_id = ( isset( $_POST['solicitud_id'] ) ) ? $_POST['solicitud_id'] : 0; 
+			if ( $solicitud_id == 0  ) {
+				throw new Exception("NO SE RECUPERO LA SOLICITUD. \nNOTIFIQUE ESTO AL ÁREA DE SISTEMAS.", 1);
+			}
+			$this->sql  = " SELECT id FROM ingreso_taller WHERE solicitud = ? LIMIT 1";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$solicitud_id,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$ingreso = $this->stmt->fetch(PDO::FETCH_OBJ);
+			
+			$motivo = ( isset($_POST['txt_motivo']) ) ? mb_strtoupper($_POST['txt_motivo']) : NULL ; 
+			$this->sql = " INSERT INTO entrega_vehiculos (
 				id, 
 				fecha, 
 				hora, 
@@ -626,9 +646,13 @@ class HabilitadoModel extends Conection
 			); ";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$_POST['fecha'],PDO::PARAM_STR);
-			$this->stmt->bindParam(2,$_POST['costo'],PDO::PARAM_STR);
-			$this->stmt->bindParam(3,$_POST['comentario'],PDO::PARAM_STR);
-			$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
+			$this->stmt->bindParam(2,$_POST['hora'],PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$_POST['test'],PDO::PARAM_INT);
+			$this->stmt->bindParam(4,$_POST['sp_entrega'],PDO::PARAM_INT);
+			$this->stmt->bindParam(5,$_POST['sp_recibe'],PDO::PARAM_INT);
+			$this->stmt->bindParam(6,$_POST['s_aceptacion'],PDO::PARAM_INT);
+			$this->stmt->bindParam(7,$ingreso->id,PDO::PARAM_INT);
+			$this->stmt->bindParam(8,$motivo,PDO::PARAM_LOB);
 			$this->stmt->execute();
 			return json_encode(array('status'=>'success','message'=>'SE ENTREGO EL VEHÍCULO CORRECTAMENTE.'));			
 		} catch (Exception $e) {
@@ -727,7 +751,112 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
-	
-	
+
+	public function saveSolHistorica()
+	{
+		try {
+			#print_r( $_POST['t_doc'] );exit;
+			#print_r($_POST['tipo_doc'][0]);exit;
+			$folio 		= $_POST['folio'];
+			$placa 		= $_POST['auto'];
+			$falla 		= $_POST['falla_h'];
+			$compuesto 	= "";
+			$compuesto .= "Fecha de la reparación: ".$_POST['fecha'].PHP_EOL;
+			
+			#Buscar el ID del vehículo 
+			$this->sql = "SELECT id FROM vehiculos WHERE placas LIKE '%".$placa."%'";
+			$this->stmt = $this->pdo->prepare( $this->sql ) ;
+			$this->stmt->execute();
+			$auto = $this->stmt->fetch( PDO::FETCH_OBJ );
+			if ( empty( $auto->id ) ) {
+				throw new Exception("NO SE ENCONTRO LA PLACA DEL VEHÍCULO, INTENTE DE NUEVO.", 1);
+			}
+			
+			$vehiculo = $auto->id;
+			#recuperar el texto de la falla
+			$this->sql = "SELECT nombre FROM catalogo_fallas WHERE id = ?";
+			$this->stmt = $this->pdo->prepare( $this->sql ) ;
+			$this->stmt->bindParam(1,$falla , PDO::PARAM_STR);
+			$this->stmt->execute();
+			$falla = $this->stmt->fetch( PDO::FETCH_OBJ );
+			if ( empty( $falla->nombre ) ) {
+				throw new Exception("NO SE ENCONTRO LA FALLA SELECCIONADA.", 1);
+			}
+			$compuesto .= 'La falla que se presento fue: '.$falla->nombre.PHP_EOL;
+			$compuesto .= 'El costo de la reparación fue: '.$_POST['costo'].PHP_EOL;
+			$compuesto .= 'Observaciones: '.$_POST['obs'].PHP_EOL;
+			
+			/*INSERTAR solicitud historica*/
+			$this->sql 	= "INSERT INTO solicitudes (id, folio, f_sol, km, solicitante, vehiculo, estado, descripcion ) VALUES ('', ?, ?, NULL, NULL, ?, 3, ? );";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$folio,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$_POST['fecha'],PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$vehiculo,PDO::PARAM_INT);
+			$this->stmt->bindParam(4,$compuesto,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$ultima = $this->pdo->lastInsertId();
+			
+			#Insertar los documentos 
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			for ($i=0; $i < count($_FILES['archivo']['name']) ; $i++) { 
+				$size 	= $_FILES['archivo']['size'][$i];
+				$type 	= $_FILES['archivo']['type'][$i];
+				$name 	= $_FILES['archivo']['name'][$i];
+				$t_doc 	= $_POST['tipo_doc'][$i];
+							
+				if ( $size > 10485760 ) 
+				{
+					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+				}
+				else
+				{
+					if ( $type != 'application/pdf' ) 
+					{
+						throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+					}
+					else
+					{
+						#convertir a bytes
+						move_uploaded_file($_FILES['archivo']['tmp_name'][$i],$destiny.$name);
+						$file = fopen($destiny.$name,'r');
+						$content = fread($file,$size);
+						$content = addslashes($content);
+						fclose($file);
+						#Insertar en la BD
+						$this->sql = "
+						INSERT INTO 
+						solicitud_documentos 
+							(id, solicitud, tipo_doc, archivo)
+						VALUES 
+							('', ?, ?, ?);
+						";
+						$this->stmt = $this->pdo->prepare( $this->sql );
+						$this->stmt->bindParam(1,$ultima,PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$t_doc,PDO::PARAM_INT);
+						$this->stmt->bindParam(3,$content,PDO::PARAM_LOB);
+						$this->stmt->execute();
+						unlink($destiny.$name);
+						
+					}
+				}
+			}
+			return json_encode(array('status'=>'success','message'=>'SE AGREGO UNA SOLICITUD HISTORICA DE MANERA EXITOSA.'));		
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+
+	public function getTiposDoc()
+	{
+		try {
+			$this->sql = "SELECT * FROM t_doc";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll( PDO::FETCH_OBJ );
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
 }
 ?>

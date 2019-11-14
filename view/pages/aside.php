@@ -1,4 +1,3 @@
-
 <aside class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
@@ -54,7 +53,7 @@
             <ul class="treeview-menu">
               <li id="add_car"><a href="index.php?menu=add_car"><i class="fa fa-car"></i> Vehículo</a></li>
               <li id="add_taller"><a href="index.php?menu=add_taller"><i class="fa fa-building-o"></i> Taller</a></li>
-              <li id="add_chofer"><a href="index.php?menu=add_chofer"><i class="fa fa-users"></i> Conductores</a></li>
+              <!-- <li id="add_chofer"><a href="index.php?menu=add_chofer"><i class="fa fa-users"></i> Conductores</a></li> -->
             </ul>
           </li>
           <li class="treeview " style="height: auto;" id="tree_list">
@@ -77,14 +76,18 @@
           </li>
           <li id="registro_es">
             <a href="index.php?menu=es">
-              <i class="fa fa-calendar"></i> <span> REGISTRO E/S </span>
+              <i class="fa fa-calendar"></i> <span> Registro E/S </span>
             </a>
-          </li> 
-          <!-- <li>
-                    <a href="pages/widgets.html">
-                      <i class="fa fa-trash"></i> <span>Bajas</span>
-                    </a>
-                  </li> -->        
+          </li>       
+        </ul>
+      <?php elseif ( $_SESSION['perfil'] == 'Vigilancia' ): ?>
+        <ul class="sidebar-menu" data-widget="tree">
+          <li class="header">Perfil: Vigilancia </li>
+          <li id="">
+            <a href="index.php?menu=general ">
+              <i class="fa fa-car"></i> <span> Registrar salida </span>
+            </a>
+          </li>       
         </ul>
       <?php endif ?>
     </section>

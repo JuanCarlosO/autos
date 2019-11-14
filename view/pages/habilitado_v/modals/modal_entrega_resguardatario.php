@@ -1,6 +1,7 @@
 
 <form id="frm_entrega" action="#" method="POST">
 	<input type="hidden" id="option" name="option" value="31">
+	<input type="hidden" id="solicitud_id" name="solicitud_id" value="">
 	<div class="modal fade " id="modal_entrega">
 	  <div class="modal-dialog">
 	    <div class="modal-content">

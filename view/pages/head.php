@@ -41,7 +41,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- fullCalendar -->
   <link rel="stylesheet" href="view/bower_components/fullcalendar/dist/fullcalendar.min.css">
   <link rel="stylesheet" href="view/bower_components/fullcalendar/dist/fullcalendar.print.min.css" media="print">
-
+  <style type="text/css" media="screen">
+    .ui-autocomplete-input {
+      z-index: 2150000000;
+    }
+    .ui-front {
+      z-index: 9999;
+    }
+  </style>
 </head>
 <!--
 BODY TAG OPTIONS:

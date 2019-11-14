@@ -22,6 +22,7 @@ function getURL() {
 		$('.select2').select2();
 		/*Carga el listado completo de vehiculos*/
 		all_sol();
+
 		/*Carga de eventos*/
 		$('#btn_siniestros').click(function(event) {
 			event.preventDefault();
@@ -37,7 +38,7 @@ function getURL() {
 				$('#txt_motivo').removeAttr('required');
 			}
 		});
-		
+		getTipoFalla('t_falla_h','falla_h');
 		//Recuperar los talleres
 		getTalleres('ingreso_taller');
 		/*Carga de formularios*/
@@ -49,8 +50,17 @@ function getURL() {
 		frm_ingreso_fin();
 		frm_cotizar();
 		frm_entrega();
+		frm_solicitud_historica();
 		/*Autocomplete*/
+		autocompletado('sp_entrega','spe_id');
 		autocompletado('sp_recibe','spr_id');
+		//Agregar los ttpos de documentos
+		var docs = getTiposDoc();
+		var options = "<option value=''>...</option>";
+		$.each(docs, function(i, doc) {
+			options += "<option value='"+doc.id+"'>"+doc.nom+"</option>";
+		});
+		$('#t_doc').html(options);
 	}else if ( URLsearch == '?menu=list_car' || URLsearch == '?menu=general' ) {
 		$('#tree_list').addClass('active');
 		$('#list_car').addClass('active');
@@ -122,6 +132,8 @@ function all_sol() {
 	        { propiedad: 'id',class:'text-center',formato:function(tr,obj,celda) {
 	        	if (obj.estado =='Creada') {
 	        		tr.addClass('bg-yellow');
+	        	}else if (obj.estado =='Historica') {
+	        		tr.addClass('bg-gray-active');
 	        	}else{
 	        		tr.addClass('bg-aqua');
 	        	}
@@ -141,15 +153,20 @@ function all_sol() {
 	        { propiedad: 'descripcion',class:'text-justify'},
 	      
 	        { class:'text-center', formato:function(tr,obj,celda){
-	        	return anexGrid_boton({
-	        		contenido:'<i class="fa fa-archive"></i>',
-	        		class: 'btn btn-success btn-flat detalle',
-	        		attr:[
-					'data-toggle="tooltip" title="Mostrar el detalle de la solicitud"', 
-					],
-	        		type:'button',
-	        		value:obj.id
-	        	});
+	        	 if (obj.estado =='Historica') {
+	        		return '<b>Solicitud historica.</b>'; 
+	        	}else{
+	        		return anexGrid_boton({
+		        		contenido:'<i class="fa fa-archive"></i>',
+		        		class: 'btn btn-success btn-flat detalle',
+		        		attr:[
+						'data-toggle="tooltip" title="Mostrar el detalle de la solicitud"', 
+						],
+		        		type:'button',
+		        		value:obj.id
+	        		});
+	        	}
+	        	
 	        	
 	        } },
 	        
@@ -1291,7 +1308,7 @@ function frm_entrega() {
 				$('#alert_entrega').removeClass(clase);
 				$('#a_mod_entrega_estado').text('');
 				$('#a_mod_entrega_message').text('');
-				$('#modal_cotizar').modal('toggle');
+				$('#modal_entrega').modal('toggle');
 			},5000);
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
@@ -1309,7 +1326,7 @@ function autocompletado(input,hidden) {
 		minLength: 2,
 		select: function( event, ui ) {
         	$('#'+hidden).val(ui.item.id);
-      	}
+      	},
 	});
 	return false;
 }
@@ -1477,4 +1494,109 @@ function all_es() {
 
 	};
 	$("#es_today").anexGrid(es);
+}
+//Recuperar los tipos de documentos
+
+function getTiposDoc() {
+	var documentos;
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '34'},
+		async:false,
+	})
+	.done(function(data) {
+		documentos = data;
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	return documentos;
+}
+//Agregar campos de adjuntar documentos
+function add_field_document(div_id) {
+	if ( $('#'+div_id+'.file').length < 5 ) {
+		var documentos = getTiposDoc();
+		var options = "<option value=''>...</option>";
+		$.each(documentos, function(i, doc) {
+			options += "<option value='"+doc.id+"'>"+doc.nom+"</option>";
+		});
+		$('#'+div_id).append(
+			'<div class="row">'+
+				'<div class="col-md-6">'+
+					'<div class="form-group">'+
+						'<label>Tipo de documento</label>'+
+						'<select name="tipo_doc[]"  class="form-control">'+
+							options+
+						'</select>'+
+					'</div>'+
+				'</div>'+
+				'<div class="col-md-6">'+
+					'<div class="form-group">'+
+						'<label>Buscar documento</label>'+
+						'<input type="file" id="archivo" name="archivo[]" value="" class="form-control file" accept="application/pdf" required>'+
+					'</div>'+
+				'</div>'+
+			'</div>'
+		);
+	}else{
+		$('#alert_baja_v').removeClass('hidden');
+		$('#alert_baja_v').addClass('alert-danger');
+		$('#a_baja_v_estado').text('ERROR!');
+		$('#a_baja_v_message').text('EL LIMITE DE ARCHIVOS ES DE 5!');
+		location.href = '#alert_baja_v'; 
+		setTimeout(function(){
+			$('#alert_baja_v').addClass('hidden');
+			$('#alert_baja_v').removeClass('alert-danger');
+			$('#a_baja_v_estado').text('');
+			$('#a_baja_v_message').text('');
+		},5000);	
+	}
+}
+function frm_solicitud_historica() {
+	$('#frm_solicitud_historica').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_solicitud_historica"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache: false,
+			processData: false,
+			contentType: false,
+		})
+		.done(function(response) {
+			var clase, mensaje,estado;
+			if (response.status == 'error') {
+				clase = 'alert-danger';
+				mensaje = response.message;
+				estado = 'ERROR!';
+			}else{
+				clase = 'alert-success';
+				mensaje = response.message;
+				estado = 'ÉXITO!';
+			}
+			$('#alert_modal_solicitud_historica').removeClass('hidden');
+			$('#alert_modal_solicitud_historica').addClass(clase);
+			$('#a_mod_solicitud_historica_estado').text(estado);
+			$('#a_mod_solicitud_historica_message').text( mensaje );
+			setTimeout(function(){
+				$('#alert_modal_solicitud_historica').addClass('hidden');
+				$('#alert_modal_solicitud_historica').removeClass(clase);
+				$('#a_mod_solicitud_historica_estado').text('');
+				$('#a_mod_solicitud_historica_message').text('');
+				//$('#modal_solicitud_historica').modal('toggle');
+				//document.getElementById('frm_solicitud_historica').reset();
+			},5000);
+
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			console.log("Error: "+jqXHR.responseText);
+		});
+		
+	});
+	return false;
 }
