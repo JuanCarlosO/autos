@@ -54,8 +54,8 @@ if ( isset($_SESSION['perfil']) )
 		case 'Vigilancia':
 			echo '<script src="view/dist/js/main.vig.js"></script>';
 			break;
-		case '4':
-			echo '<script src="view/dist/js/main.bienes.js"></script>';
+		case 'Recursos Materiales':
+			echo '<script src="view/dist/js/main.rm.js"></script>';
 			break;
 		default:
 			echo '<script src="view/dist/js/main.other.js"></script>';

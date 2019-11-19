@@ -5,10 +5,15 @@ $(document).ready(function() {
 function getURL() {
 	var url = window.location.search;
 	if ( url == '?menu=general' ) {
+		$('#r_salida').addClass('active');
 		autocompletado('vigilante','vigilante_id');
 		autocompletado('chofer','chofer_id');
 		autocompletado_placas('placa','placa_id');
 		medidor_gas();
+		frm_salida();
+	}else if ( url == '?menu=listado' ) {
+		$('#l_salida').addClass('active');
+		all_es();
 	}
 }
 function getUser() {
@@ -87,4 +92,114 @@ function medidor_gas() {
 	        }
       }
     });
+}
+/**/
+function frm_salida() {
+	$('#frm_salida').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache: false,
+		})
+		.done(function(response) {
+			alerta(response.status,response.message);
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('error',jqXHR.responseText);
+		});
+		
+	});
+}
+function alerta( estado , mensaje ) {
+	var clase ;
+	var status;
+	if ( estado == 'success' ) {
+		clase 	= 'alert-success';
+		status 	= 'CORRECTO! ';
+	}else{
+		status 	= 'OCURRIO UN ERROR! ';
+		clase = 'alert-danger';
+	}
+	$('#alerta').removeClass('hidden');
+	$('#alerta').addClass(clase);
+	$('#estado').text(status);
+	$('#message').text(mensaje);
+	document.location.href = "#alerta";
+	setTimeout(function(){
+		$('#alerta').addClass('hidden');
+		$('#alerta').removeClass(clase);
+		$('#estado').text('');
+		$('#message').text('');
+		location.reload();
+	},5000);
+}
+
+function all_es() {
+	var es = {
+	    class: 'table-striped table-bordered',
+	    columnas: [
+	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
+	        { leyenda: 'Vehículo', style: 'width:200px;', ordenable:false,filtro:false },
+	        { leyenda: 'Datos salida', style:'width:200px;',ordenable:false },
+	        { leyenda: 'Datos de entrada', style:'width:200px;' },
+	        { leyenda: 'Observaciones', style:'width:200px;',ordenable:false, filtro:false },
+	    ],
+	    modelo: [
+	        { propiedad: 'id'},
+	        {  formato:function (tr,obj,celda) {
+	        	return  '<ul>'+
+	        			'<li> <b>PLACAS:</b> '+obj.placa+'</li>'+
+	        			'<li> <b>MARCA:</b> '+obj.marca+'<l/i>'+
+	        			'<li> <b>TIPO:</b> '+obj.t_vehiculo+'</li>'+
+	        			'<li> <b>¿QUIEN REGISTRO?:</b> '+obj.registro+'</li>'+
+	        			'<li> <b>¿QUIEN CONDUCE?:</b> '+obj.chofer+'</li>'+
+	        		'</ul>';
+	        	} 
+	        },
+	       {  formato:function (tr,obj,celda) {
+	        	return  '<ul>'+
+	        			'<li> <b>FECHA Y HORA:</b> '+obj.salida+'</li>'+
+	        			'<li> <b>NIVEL DE GAS:</b> '+obj.gas_salida+' % <l/i>'+
+	        			'<li> <b>KILOMETRAJE:</b> '+obj.km_salida+'</li>'+
+	        		'</ul>';
+	        	} 
+	        },
+	       {formato:function (tr,obj,celda) {
+		       	if ( obj.entrada != null ) {
+		       		return  '<ul>'+
+		       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
+		       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
+		       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
+		       			'</ul>';
+		       	}else{
+		       		return  '<ul>'+
+	        			'<li> <b>FECHA Y HORA:</b> SIN REGISTRAR</li>'+
+	        			'<li> <b>NIVEL DE GAS:</b> SIN REGISTRAR <l/i>'+
+	        			'<li> <b>KILOMETRAJE:</b> SIN REGISTRAR </li>'+
+	        		'</ul>';
+		       	}
+	        	
+	        }},
+	       { propiedad: 'observaciones',class:'text-justify'}
+	    ],
+	    url: 'controller/puente.php?option=12',
+	    type:'POST',
+	    limite: [25,50,100],
+	    columna: 'id',
+	    columna_orden: 'DESC',
+	    paginable:true,
+	    filtrable: false,
+
+	};
+	$("#es_today").anexGrid(es);
+}
+function logout() 
+{
+	location.href= 'login.php';
+	return false;
 }

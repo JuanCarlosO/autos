@@ -83,9 +83,28 @@
       <?php elseif ( $_SESSION['perfil'] == 'Vigilancia' ): ?>
         <ul class="sidebar-menu" data-widget="tree">
           <li class="header">Perfil: Vigilancia </li>
-          <li id="">
-            <a href="index.php?menu=general ">
+          <li id="r_salida">
+            <a href="index.php?menu=general">
               <i class="fa fa-car"></i> <span> Registrar salida </span>
+            </a>
+          </li>
+          <li id="l_salida">
+            <a href="index.php?menu=listado">
+              <i class="fa fa-car"></i> <span> Listado </span>
+            </a>
+          </li>       
+        </ul>
+      <?php elseif ( $_SESSION['perfil'] == 'Recursos Materiales' ): ?>
+        <ul class="sidebar-menu" data-widget="tree">
+          <li class="header">Perfil: Recursos Materiales </li>
+          <li id="listado_sol">
+            <a href="index.php?menu=general">
+              <i class="fa fa-car"></i> <span> Listado de solicitudes </span>
+            </a>
+          </li>
+          <li id="listado_es">
+            <a href="index.php?menu=listado_es">
+              <i class="fa fa-car"></i> <span> Listado de E/S </span>
             </a>
           </li>       
         </ul>

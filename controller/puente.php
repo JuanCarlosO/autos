@@ -6,10 +6,12 @@ spl_autoload_register(function ($class) {
     include $class.'.php';
 });
 /*DECLARACIÓN DE LAS CLASES*/
-$car = new CarController;
-$sol = new SolicitanteController;
+$car 	= new CarController;
+$sol 	= new SolicitanteController;
 $person = new PersonController;
-$hab = new HabilitadoController;
+$hab 	= new HabilitadoController;
+$vig 	= new VigilanteController;
+$rm 	= new RMController;
 /***/
 
 
@@ -163,7 +165,11 @@ if ( isset( $_POST['option'] ) )
 			break;
 		case '34':
 			echo $hab->getTiposDoc();
-			break;	
+			break;
+		case '35':
+			echo $vig->saveSalida();
+			break;
+			
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;
@@ -211,6 +217,13 @@ elseif( isset($_GET) )
 		case '11':
 			echo $car->autoPlacas();
 			break;
+		case '12':
+			echo $vig->getES();
+			break;
+		case '13':
+			echo $rm->getSolicitudes(); ;
+			break;
+		
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));
 			break;

@@ -9,7 +9,6 @@ class CarModel extends Conection
 	public $sql;
 	public $stmt;
 	public $result;
-	
 
 	public function getCars()
 	{

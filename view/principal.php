@@ -113,12 +113,44 @@ date_default_timezone_set('America/Mexico_City');
 							echo " <script> location.href = 'http://localhost/aut/denegado.php' </script> ";
 						}
 						break;
-					case 'Vigilancia':#Perfil Habilitado Vehicular
+					case 'Vigilancia':#Perfil Vigilancia
 						#--------------------------------------------------------------------------------------
-						case 'general':
-					  		include 'view/pages/vigilancia/content_header/header_general.php';
-					  		include 'view/pages/vigilancia/content_main/content_general.php';
-					  		break;
+						if ( isset($_GET['menu'] ) )
+						{
+							switch ( $_GET['menu'] )
+							{
+								case 'general':
+							  		include 'view/pages/vigilancia/content_header/header_general.php';
+							  		include 'view/pages/vigilancia/content_main/content_general.php';
+							  		break;
+							  	case 'listado':
+							  		include 'view/pages/vigilancia/content_header/header_listado.php';
+							  		include 'view/pages/vigilancia/content_main/content_listado.php';
+							  		break;
+							}
+						}
+						
+					  		
+					  	#--------------------------------------------------------------------------------------
+						break;
+					case 'Recursos Materiales':#Perfil Vigilancia
+						#--------------------------------------------------------------------------------------
+						if ( isset($_GET['menu'] ) )
+						{
+							switch ( $_GET['menu'] )
+							{
+								case 'general':
+							  		include 'view/pages/recursos_mat/content_header/header_general.php';
+							  		include 'view/pages/recursos_mat/content_main/content_general.php';
+							  		break;
+							  	case 'listado_es':
+							  		include 'view/pages/recursos_mat/content_header/header_registro_es.php';
+							  		include 'view/pages/recursos_mat/content_main/content_registro_es.php';
+							  		break;
+							}
+						}
+						
+					  		
 					  	#--------------------------------------------------------------------------------------
 						break;	
 					default:
