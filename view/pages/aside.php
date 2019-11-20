@@ -108,6 +108,27 @@
             </a>
           </li>       
         </ul>
+      <?php elseif ( $_SESSION['perfil'] == 'Directivo' ): ?>
+        <ul class="sidebar-menu" data-widget="tree">
+          <li class="header">Perfil: Directivo </li>
+          <li id="listado_sol">
+            <a href="index.php?menu=general">
+              <i class="fa fa-car"></i> <span> Listado de solicitudes </span>
+            </a>
+          </li>
+          <li class="treeview " style="height: auto;" id="tree_reports">
+            <a href="#">
+              <i class="fa fa-list"></i> <span>Reportes</span>
+              <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+            </a>
+            <ul class="treeview-menu">
+              <li id="historic"><a href="index.php?menu=historic"><i class="fa fa-history"></i> Histórico</a></li>
+              <li id="estadistic"><a href="index.php?menu=estadistic"><i class="fa fa-bar-chart"></i> Estadística </a></li>
+            </ul>
+          </li>       
+        </ul>
       <?php endif ?>
     </section>
   </aside>

@@ -12,6 +12,7 @@ $person = new PersonController;
 $hab 	= new HabilitadoController;
 $vig 	= new VigilanteController;
 $rm 	= new RMController;
+$dir 	= new DirectivoController;
 /***/
 
 
@@ -223,7 +224,9 @@ elseif( isset($_GET) )
 		case '13':
 			echo $rm->getSolicitudes(); ;
 			break;
-		
+		case '13':
+			echo $dir->getSolicitudes(); ;
+			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));
 			break;

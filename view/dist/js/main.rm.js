@@ -46,11 +46,10 @@ function all_sol() {
 	        {formato: function(tr,obj,celda){
 
 	        	return '<ul>'+
-	        				'<li>'+'<label># de solicitud:</label> '+obj.marca+'</li>'+
-	        				'<li>'+'<label>Fecha:</label> '+obj.tipo+'</li>'+
-	        				'<li>'+'<label>Solicitante:</label> '+obj.placas+'</li>'+
-	        				'<li>'+'<label>Área:</label> '+obj.modelo+'</li>'+
-	        				'<li>'+'<label>NIV:</label> '+obj.niv+'</li>'
+	        				'<li>'+'<label># de solicitud:</label> '+obj.solicitudes.id+'</li>'+
+	        				'<li>'+'<label>Fecha:</label> '+obj.solicitudes.f_sol+'</li>'+
+	        				'<li>'+'<label>Solicitante:</label> '+obj.solicitudes.solicitante_name+'</li>'+
+	        				'<li>'+'<label>Área:</label> '+obj.solicitudes.area_sol+'</li>'+
 	        		   '<ul>';
 	        }},
 	        {propiedad:'vehiculo',formato: function(tr,obj,celda){
@@ -59,8 +58,8 @@ function all_sol() {
 	        	var pos = parseInt(obj.solicitudes.id);
 	        	console.log(x[0].id);
 	        	return '<ul>'+
-	        				'<li>'+'<label>Marca:</label> '+x[0].marca+'</li>'+
-	        				'<li>'+'<label>Tipo:</label> '+x[0].tipo+'</li>'+
+	        				'<li>'+'<label>Marca:</label> '+x[0].marca_name+'</li>'+
+	        				'<li>'+'<label>Tipo:</label> '+x[0].tipo_name+'</li>'+
 	        				'<li>'+'<label>Placas:</label> '+x[0].placas+'</li>'+
 	        				'<li>'+'<label>Modelo:</label> '+x[0].modelo+'</li>'+
 	        				'<li>'+'<label>KM:</label> '+x[0].niv+'</li>'+
@@ -72,21 +71,18 @@ function all_sol() {
 	        }},
 	        { formato: function(tr,obj,celda){
 	        	return '<ul>'+
-	        				'<li>'+'<label>Desc. Solicitante:</label> '+obj.marca+'</li>'+
-	        				'<li>'+'<label>Desc. HV:</label> '+obj.tipo+'</li>'+
-	        				'<li>'+'<label>Fecha Autorización:</label> '+obj.placas+'</li>'+
-	        				'<li>'+'<label>Salida al taller:</label> '+obj.modelo+'</li>'+
-	        				'<li>'+'<label>Entrada a UAI:</label> '+obj.niv+'</li>'
+	        				'<li>'+'<label>Desc. Solicitante:</label> '+obj.solicitudes.descripcion+'</li>'+
+	        				
 	        		   '<ul>';
 	        }},
 	        { formato: function(tr,obj,celda){
-	        	return '<ul>'+
-	        				'<li>'+'<label>Desc. Solicitante:</label> '+obj.marca+'</li>'+
-	        				'<li>'+'<label>Desc. HV:</label> '+obj.tipo+'</li>'+
-	        				'<li>'+'<label>Fecha Autorización:</label> '+obj.placas+'</li>'+
-	        				'<li>'+'<label>Salida al taller:</label> '+obj.modelo+'</li>'+
-	        				'<li>'+'<label>Entrada a UAI:</label> '+obj.niv+'</li>'
-	        		   '<ul>';
+	        	
+	        	var lista = '<ul>';
+	        	for( i=0; i<obj.data_reparaciones.length; i++ ){
+	        		lista += '<li><label>Falla:</label>'+obj.data_reparaciones[i].falla+'<br> <label>Taller:</label>'+obj.data_reparaciones[i].r_social+'</li>';
+	        	}
+	        	lista += '</ul>';
+	        	return lista;
 	        }}
 	    ],
 	    url: 'controller/puente.php?option=13',

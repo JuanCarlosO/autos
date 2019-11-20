@@ -57,6 +57,9 @@ if ( isset($_SESSION['perfil']) )
 		case 'Recursos Materiales':
 			echo '<script src="view/dist/js/main.rm.js"></script>';
 			break;
+		case 'Directivo':
+			echo '<script src="view/dist/js/main.directivo.js"></script>';
+			break;
 		default:
 			echo '<script src="view/dist/js/main.other.js"></script>';
 			break;

@@ -104,7 +104,6 @@ date_default_timezone_set('America/Mexico_City');
 							  	case 'es':
 							  		include 'view/pages/habilitado_v/content_header/header_registro_es.php';
 							  		include 'view/pages/habilitado_v/content_main/content_registro_es.php';
-							  		
 							  		break;
 							}
 						}
@@ -149,10 +148,26 @@ date_default_timezone_set('America/Mexico_City');
 							  		break;
 							}
 						}
-						
-					  		
 					  	#--------------------------------------------------------------------------------------
 						break;	
+					case 'Directivo':#Perfil Vigilancia
+						#--------------------------------------------------------------------------------------
+						if ( isset($_GET['menu'] ) )
+						{
+							switch ( $_GET['menu'] )
+							{
+								case 'general':
+							  		include 'view/pages/directivo/content_header/header_general.php';
+							  		include 'view/pages/directivo/content_main/content_general.php';
+							  		break;
+							  	case 'listado_es':
+							  		include 'view/pages/directivo/content_header/header_general.php';
+							  		include 'view/pages/directivo/content_main/content_general.php';
+							  		break;
+							}
+						}
+					  	#--------------------------------------------------------------------------------------
+						break;
 					default:
 						echo " <script> alert('El perfil logeado no existe'); location.href = 'http://localhost/autos/denegado.php'; </script> ";
 						break;
