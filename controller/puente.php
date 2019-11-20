@@ -170,6 +170,7 @@ if ( isset( $_POST['option'] ) )
 		case '35':
 			echo $vig->saveSalida();
 			break;
+		
 			
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
@@ -178,8 +179,8 @@ if ( isset( $_POST['option'] ) )
 }
 elseif( isset($_GET) )
 {
-
 	$option = ( isset($_GET['option']) ) ? $_GET['option'] : $_REQUEST['parametros']['option'];
+
 	switch ( $option ) {
 		case '1':
 			# Anexgrid de Listado de Vehiculos
@@ -224,8 +225,14 @@ elseif( isset($_GET) )
 		case '13':
 			echo $rm->getSolicitudes(); ;
 			break;
-		case '13':
+		case '14':
 			echo $dir->getSolicitudes(); ;
+			break;
+		case '15':
+			echo $dir->getVehiculosByPlaca(); ;
+			break;
+		case '16':
+			echo $dir->getSolicitudesEsp();
 			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));

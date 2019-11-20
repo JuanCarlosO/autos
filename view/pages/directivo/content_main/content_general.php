@@ -17,7 +17,7 @@
                         <div class="row">
                         	<div class="col-md-12">
                         		<div class="table-responsive">
-                        			<div class="all_sol"></div>
+                        			<div id="all_sol"></div>
                         		</div>
                         	</div>
                         </div>

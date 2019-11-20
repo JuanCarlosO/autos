@@ -1,5 +1,6 @@
 <form id="frm_cotizar" action="#" method="POST" enctype="multipart/form-data">
 	<input type="hidden" id="option" name="option" value="30">
+	<input type="hidden" id="solicitud_id" name="solicitud_id">
 	<div class="modal fade " id="modal_cotizar">
 	  <div class="modal-dialog">
 	    <div class="modal-content">

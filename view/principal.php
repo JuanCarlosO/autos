@@ -150,7 +150,7 @@ date_default_timezone_set('America/Mexico_City');
 						}
 					  	#--------------------------------------------------------------------------------------
 						break;	
-					case 'Directivo':#Perfil Vigilancia
+					case 'Directivo':#Perfil Directivo
 						#--------------------------------------------------------------------------------------
 						if ( isset($_GET['menu'] ) )
 						{
@@ -160,9 +160,13 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/directivo/content_header/header_general.php';
 							  		include 'view/pages/directivo/content_main/content_general.php';
 							  		break;
-							  	case 'listado_es':
-							  		include 'view/pages/directivo/content_header/header_general.php';
-							  		include 'view/pages/directivo/content_main/content_general.php';
+							  	case 'historic':
+							  		include 'view/pages/directivo/content_header/header_historic.php';
+							  		include 'view/pages/directivo/content_main/content_historic.php';
+							  		break;
+							  	case 'estadistic':
+							  		include 'view/pages/directivo/content_header/header_estadistic.php';
+							  		include 'view/pages/directivo/content_main/content_estadistic.php';
 							  		break;
 							}
 						}
