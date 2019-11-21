@@ -170,6 +170,9 @@ if ( isset( $_POST['option'] ) )
 		case '35':
 			echo $vig->saveSalida();
 			break;
+		case '36':
+			echo $dir->getAutoMasCaro();
+			break;
 		
 			
 		default:

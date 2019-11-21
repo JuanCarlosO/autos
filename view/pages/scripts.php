@@ -36,6 +36,8 @@
 <script src="view/dist/js/jquery.anexgrid.js"></script>
 <!-- jQuery Knob -->
 <script src="view/bower_components/jquery-knob/js/jquery.knob.js"></script>
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <?php 
 if ( isset($_SESSION['perfil']) ) 
 {

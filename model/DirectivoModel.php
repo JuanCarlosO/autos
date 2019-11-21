@@ -123,6 +123,26 @@ class DirectivoModel extends Conection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
+	public function getAutoMasCaro()
+	{
+		try {
+			#Top 10 de los vehiculos que mas se caro an salido sus reparaciones
+			$this->sql = "
+			SELECT s.id AS solictud,s.vehiculo,COUNT(vehiculo) AS cuenta_v,SUM(c.monto) AS sumatoria, v.placas FROM solicitudes AS s
+				INNER JOIN cotizaciones AS c ON c.solicitud = s.id
+				INNER JOIN vehiculos AS v ON v.id = s.vehiculo
+			GROUP BY vehiculo
+			ORDER BY sumatoria DESC
+			LIMIT 0,10
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
 
 	
 }

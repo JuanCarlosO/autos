@@ -22,6 +22,10 @@ class DirectivoController
 	{
 		return $this->model->getSolicitudesEsp();
 	}
+	public function getAutoMasCaro()
+	{
+		return $this->model->getAutoMasCaro();
+	}
 	
 }
 

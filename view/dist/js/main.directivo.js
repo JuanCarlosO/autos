@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	getURL();getUser();
-	graficos();
+	
 });
 /*Recuperar la pagina en la que se encuemntra*/
 function getURL() {
@@ -16,6 +16,7 @@ function getURL() {
 	}else if ( url == '?menu=estadistic' ){
 		$('#tree_reports').addClass('active');
 		$('#estadistic').addClass('active');
+		graficos();
 	}
 	return false;
 }
@@ -119,25 +120,57 @@ function sol_by_cost( f_ini,f_fin,placa ) {
 }
 
 function graficos() {
-	var line = new Morris.Line({
-		element: 'line-chart',
-		resize: true,
-		data: [
-			{y: '2011 R1', item1: 2666},
-			{y: '2011 Q2', item1: 2778},
-			{y: '2011 Q3', item1: 4912},
-			{y: '2011 Q4', item1: 3767},
-			{y: '2012 Q1', item1: 6810},
-			{y: '2012 Q2', item1: 5670},
-			{y: '2012 Q3', item1: 4820},
-			{y: '2012 Q4', item1: 15073},
-			{y: '2013 Q1', item1: 10687},
-			{y: '2013 Q2', item1: 8432}
-		],
-		xkey: 'y',
-		ykeys: ['item1'],
-		labels: ['Item 1'],
-		lineColors: ['#3c8dbc'],
-		hideHover: 'auto'
+	//Generar el Ajax Necesarion para recuperar la informacion.
+	var etiquetas = [], datos = [];
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '36'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		if ( response.status == 'error' ) {
+			alert(response.message);
+		}else{
+			$.each(response, function(i, val) {
+				etiquetas.push(val.placas);
+				datos.push(val.sumatoria);
+			});
+		}
+	})
+	.fail(function(jqXHR,textStatus, errorThrow) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	
+	var ctx = document.getElementById('myChart').getContext('2d');
+	var myChart = new Chart(ctx, {
+	    type: 'bar',
+	    data: {
+	        labels: etiquetas,
+	        datasets: [{
+	            label: 'Suma de cotizaciones',
+	            data: datos,
+	            backgroundColor: [
+	                'rgba(255, 99, 132, 0.7)',
+	                'rgba(54, 162, 235, 0.7)',
+	                'rgba(255, 206, 86, 0.7)',
+	                'rgba(0, 166, 90, 0.7)',
+	                'rgba(153, 102, 255, 0.7)',
+	                'rgba(255, 159, 64, 0.7)'
+	            ],
+	            borderColor: [
+	                'rgba(255, 99, 132, 1)',
+	                'rgba(54, 162, 235, 1)',
+	                'rgba(255, 206, 86, 1)',
+	                'rgba(75, 192, 192, 1)',
+	                'rgba(153, 102, 255, 1)',
+	                'rgba(255, 159, 64, 1)'
+	            ],
+	            borderWidth: 1
+	        }]
+	    
+	    }
 	});
 }
