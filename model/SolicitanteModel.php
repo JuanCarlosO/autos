@@ -97,6 +97,19 @@ class SolicitanteModel extends Conection
 	{
 		try {
 			$desc = mb_strtoupper($desc,'utf-8');
+			#VALIDAR QUE NO TENGA LA LICENCIA VENCIDA
+			$this->sql = "SELECT IF( f_vencimiento <= DATE(NOW()),'denegado','permitido') AS permiso FROM licencias WHERE persona = ? ";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$solicitante,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$permiso = $this->stmt->fetch(PDO::FETCH_OBJ);
+
+			if (  !empty($permiso->permiso) AND $permiso->permiso == 'denegado' ) {
+				throw new Exception("LICENCIA DE CONDUCIR VENCIDA. DEBE RENOVAR SU LICENCIA DE CONDUCIR PARA PODER GENERAR SOLICITUDES.", 1);
+			}else if( empty($permiso) || !isset($permiso) ){
+				throw new Exception("AÚN NO CUENTAS CON EL PERMISO DE CONDUCIR UNA UNIDAD OFICIAL.", 1);
+			}
+
 			$this->sql = "INSERT INTO solicitudes(
 				id,folio,f_sol,km,solicitante,vehiculo,estado ,descripcion
 				) VALUES (

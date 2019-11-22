@@ -176,6 +176,9 @@ if ( isset( $_POST['option'] ) )
 		case '37':
 			echo $sol->generatePDF();
 			break;
+		case '38':
+			echo $hab->saveChofer();
+			break;
 		
 			
 		default:
@@ -242,6 +245,9 @@ elseif( isset($_GET) )
 			break;
 		case '17':
 			echo $sol->generatePDF($_GET['sol']);
+			break;
+		case '18':
+			echo $hab->getChoferes();
 			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en GET no encontro la ruta a la que desea enlazarse.'));

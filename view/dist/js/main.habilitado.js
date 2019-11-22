@@ -93,6 +93,12 @@ function getURL() {
 	}else if ( URLsearch == '?menu=add_chofer' ){
 		$('#tree_add').addClass('active');
 		$('#add_chofer').addClass('active');
+		autocompletado('sp','sp_id');
+		frm_add_chofer();
+	}else if ( URLsearch == '?menu=list_chofer' ){
+		$('#tree_list').addClass('active');
+		$('#list_chofer').addClass('active');
+		all_choferes();
 	}
 	else if ( URLsearch == '?menu=eventos' )
 	{
@@ -320,7 +326,67 @@ function all_talleres() {
 	};
 	$("#all_talleres").anexGrid(sol);
 }
+/*Listado completo de choferes*/
+function all_choferes(){
+	var choferes = {
+	    class: 'table-striped table-bordered table-hover',
+	    columnas: [
+	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
+	        { leyenda: 'Nombre completo', style: 'width:200px;' },
+	        { leyenda: 'Área', columna: 'n_short', style:'width:200px;' },
+	        { leyenda: 'Datos de la licencia', columna: 'n_short', style:'width:200px;' },
+	        { leyenda: 'Actualizar licencia', columna: 'n_short', style:'width:10px;' },
+	        { leyenda: 'Descargar licencia', columna: 'n_short', style:'width:10px;' },
+	        { leyenda: 'Eliminar', style: 'width:10px;'},
+	        
+	    ],
+	    modelo: [
+	        { propiedad: 'id',class:'text-center' },
+	        { propiedad: 'chofer' },
+	        { propiedad: 'area'},
+	        { formato: function(tr,obj,celda){
+	        	return '<ul>'+
+	        				'<li>'+'<label>Fecha de expedición:</label> '+obj.f_expedicion+'</li>'+
+	        				'<li>'+'<label>Fecha de vencimiento:</label> '+obj.f_vencimiento+'</li>'+
+	        				'<li>'+'<label>Estado de licencia:</label> '+obj.estado+'</li>'+
+	        				'<li>'+'<label>Tipo:</label> '+obj.tipo+'</li>'+
+	        				'<li>'+'<label>Número:</label> '+obj.numero+'</li>'+
+	        		   '<ul>';
+	        }},
+	        {class:'text-center', formato: function(tr,obj,celda){
+	        	return anexGrid_boton({
+	        		class: 'btn btn-primary btn-flat',
+	        		contenido: '<i class="fa fa-refresh"></i>',
+	        		attr: [
+	        			'data-toggle="modal"', 'data-target="#modal_update_licencia"'
+                	]
+	        	});
+	        }},
+	        
+	        { class:'text-center', formato:function(tr,obj,celda){
+	        	return anexGrid_boton({
+	        		class: 'btn btn-warning btn-flat',
+	        		contenido: '<i class="fa fa-arrow-down"></i>',
+	        		
+	        	});
+	        } },
+	        { class:'text-center', formato:function(tr,obj,celda){
+	        	return anexGrid_boton({
+	        		class: 'btn btn-danger btn-flat',
+	        		contenido: '<i class="fa fa-trash"></i>',
+	        	});
+	        } },
+	    ],
+	    url: 'controller/puente.php?option=18',
+	    type:'POST',
+	    limite: [10,20,50,100],
+	    columna: 'id',
+	    columna_orden: 'DESC',
+	    paginable:true
 
+	};
+	$("#all_choferes").anexGrid(choferes);
+}
 function frm_add_car(){
 	$('#frm_add_car').submit(function(e){
 		e.preventDefault();
@@ -1595,6 +1661,30 @@ function frm_solicitud_historica() {
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			console.log("Error: "+jqXHR.responseText);
+		});
+		
+	});
+	return false;
+}
+function frm_add_chofer() {
+	$('#frm_add_chofer').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_add_chofer"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache: false,
+			processData: false,
+			contentType: false,
+		})
+		.done(function(response) {
+			alerta(response.status,response.message);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error: "+jqXHR.responseText);
 		});
 		
 	});

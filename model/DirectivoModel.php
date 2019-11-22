@@ -16,8 +16,11 @@ class DirectivoModel extends Conection
 			
 			$anexgrid = new AnexGrid();
 			$this->sql = "
-			SELECT s.id, UPPER(s.descripcion) AS solicitante, UPPER(i.observaciones) AS habilitado FROM solicitudes AS s
+			SELECT s.*, UPPER(s.descripcion) AS solicitante, UPPER(i.observaciones) AS habilitado 
+			, CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS solicitante_name
+			FROM solicitudes AS s
 			INNER JOIN ingreso_taller AS i ON i.solicitud = s.id
+			INNER JOIN personal AS p ON p.id = s.solicitante
 				ORDER BY $anexgrid->columna $anexgrid->columna_orden
             	LIMIT $anexgrid->pagina, $anexgrid->limite 
 			";

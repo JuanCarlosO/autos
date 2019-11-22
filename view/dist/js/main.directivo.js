@@ -38,11 +38,21 @@ function all_sol() {
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:10%;',ordenable:true, columna:'id' },
-	        { leyenda: 'Descripcion del solicitante', style: 'width:45%;',class:'text-center' },
-	        { leyenda: 'Opinion del Habilitado Vehicular',  style:'width:45%;' ,class:'text-center' }, 	        
+	        { leyenda: 'Detalle de la solicitud', class:'text-center', style: 'width:20%;',ordenable:false, columna:'id' },
+	        { leyenda: 'Descripcion del solicitante', style: 'width:30%;',class:'text-center' },
+	        { leyenda: 'Opinion del Habilitado Vehicular',  style:'width:30%;' ,class:'text-center' }, 	        
 	    ],
 	    modelo: [
 	    	{propiedad:'id',class:'text-center'},
+	    	{formato:function(tr,obj,celda){
+	    		return 	'<ul>'+
+	    					'<li> <b>Folio: </b> 			'+obj.folio+'</li>'+
+	    					'<li> <b>Fecha: </b> 			'+obj.f_sol+'</li>'+
+	    					'<li> <b>Kilometraje: </b> 		'+obj.km+'</li>'+
+	    					'<li> <b>Estado: </b> 			'+obj.estado+'</li>'+
+	    					'<li> <b>Solicitante: </b> 		'+obj.solicitante_name+'</li>'+
+	    				'</ul>';
+	    	}},
 	    	{propiedad:'solicitante',class:'text-center'},
 	    	{propiedad:'habilitado',class:'text-center'},
 	        

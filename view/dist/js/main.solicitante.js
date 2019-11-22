@@ -1,13 +1,19 @@
 $(document).ready(function() {
 	$('[data-toggle="tooltip"]').tooltip();
 	getURL();
+	getUser();
 	
 });
-
+/*RECUPERAR EL NOMBRE Y PERFIL DEL USUARIO*/
+function getUser() {
+	$.post('controller/puente.php', {option: '13'}, function(data, textStatus, xhr) {
+		$('.profile_name').text(data.full_name);
+	},'json');
+	return false;
+}
 /*Funcion para salir*/
 function logout() 
 {
-	alert('Estás a punto de salir ');
 	location.href= 'login.php';
 	return false;
 }

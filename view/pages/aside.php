@@ -53,7 +53,7 @@
             <ul class="treeview-menu">
               <li id="add_car"><a href="index.php?menu=add_car"><i class="fa fa-car"></i> Vehículo</a></li>
               <li id="add_taller"><a href="index.php?menu=add_taller"><i class="fa fa-building-o"></i> Taller</a></li>
-              <!-- <li id="add_chofer"><a href="index.php?menu=add_chofer"><i class="fa fa-users"></i> Conductores</a></li> -->
+              <li id="add_chofer"><a href="index.php?menu=add_chofer"><i class="fa fa-users"></i> Conductores</a></li>
             </ul>
           </li>
           <li class="treeview " style="height: auto;" id="tree_list">
@@ -67,6 +67,7 @@
               <li id="list_car"><a href="index.php?menu=list_car"><i class="fa fa-car"></i> Vehículo</a></li>
               <li id="list_taller"><a href="index.php?menu=list_taller"><i class="fa fa-building-o"></i> Taller</a></li>
               <li id="list_sol"><a href="index.php?menu=list_sol"><i class="fa fa-book"></i> Solicitudes</a></li>
+              <li id="list_chofer"><a href="index.php?menu=list_chofer"><i class="fa fa-users"></i> Choferes</a></li>
             </ul>
           </li>
           <li id="eventos">

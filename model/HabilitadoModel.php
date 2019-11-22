@@ -545,7 +545,6 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
-
 	public function entregaAuto($s)
 	{
 		try {
@@ -560,7 +559,6 @@ class HabilitadoModel extends Conection
 	public function saveCotizacion()
 	{
 		try {
-
 			$size = $_FILES['archivo']['size'];
 			$type = $_FILES['archivo']['type'];
 			$name = $_FILES['archivo']['name'];
@@ -607,7 +605,6 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
-
 	public function saveEntrega()
 	{
 		try {
@@ -660,7 +657,6 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
-
 	public function saveBaja()
 	{
 		try {
@@ -752,7 +748,6 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
-
 	public function saveSolHistorica()
 	{
 		try {
@@ -846,7 +841,6 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
-
 	public function getTiposDoc()
 	{
 		try {
@@ -857,6 +851,96 @@ class HabilitadoModel extends Conection
 			return json_encode( $this->result );
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	public function saveChofer()
+	{
+		try {
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf' ) 
+				{
+					
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "
+					INSERT INTO 
+					licencias 
+						(id, persona, f_expedicion, f_vencimiento, tipo, numero, archivo)
+					VALUES 
+						('',?, ?, ?, ?, ?, ?);
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$_POST['sp_id'],PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$_POST['f_exp'],PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$_POST['f_ven'],PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$_POST['tipo'],PDO::PARAM_INT);
+					$this->stmt->bindParam(5,$_POST['num_lic'],PDO::PARAM_STR);
+					$this->stmt->bindParam(6,$content,PDO::PARAM_LOB);
+					$this->stmt->execute();
+					unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'SE GUARDO EL CONDUCTOR EXITOSAMENTE'));
+				}
+			}
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	/*Listar las solicitudes*/
+	public function getChoferes()
+	{
+		try {
+			$anexgrid = new AnexGrid();
+			/*Definir el Where*/
+			$folio = "";
+			if ( isset($_REQUEST['filtros']) ) {
+				$filtros = (object)$_REQUEST['filtros'][0];
+				$wh = $filtros->columna." LIKE '%".$filtros->valor."%'";
+			}else
+			{
+				$wh = " 1=1 ";
+			}
+			
+			$this->sql = "
+				SELECT CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS chofer, a.nombre AS area, 
+					l.id,l.persona,l.f_expedicion,l.f_vencimiento,l.tipo,
+					IF ( l.f_vencimiento <= DATE(NOW()),'VENCIDA','ACTIVA' ) AS estado
+				FROM licencias AS l
+				INNER JOIN personal AS p ON p.id = l.persona 
+				INNER JOIN area AS a ON a.id = p.area_id
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$modulos = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+			//print_r($modulos);exit;
+			$this->sql = "SELECT COUNT(*) AS cuenta FROM licencias AS l
+				INNER JOIN personal AS p ON p.id = l.persona 
+				INNER JOIN area AS a ON a.id = p.area_id";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
+			/*Carga de anexGrid*/
+			return $anexgrid->responde($modulos, $cuenta);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
 		}
 	}
 }

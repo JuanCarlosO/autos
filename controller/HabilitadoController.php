@@ -112,6 +112,14 @@ class HabilitadoController
 	{
 		return $this->model->getTiposDoc();
 	}
+	public function saveChofer()
+	{
+		return $this->model->saveChofer();
+	}
+	public function getChoferes()
+	{
+		return $this->model->getChoferes();
+	}
 	
 	
 	
