@@ -588,15 +588,16 @@ class HabilitadoModel extends Conection
 					$this->sql = "
 					INSERT INTO 
 					cotizaciones 
-						(id, fecha, monto, comentario, archivo)
+						(id, solicitud, fecha, monto, comentario, archivo)
 					VALUES 
-						('', ?, ?, ?, ?);
+						('',?, ?, ?, ?, ?);
 					";
 					$this->stmt = $this->pdo->prepare( $this->sql );
-					$this->stmt->bindParam(1,$_POST['fecha'],PDO::PARAM_STR);
-					$this->stmt->bindParam(2,$_POST['costo'],PDO::PARAM_STR);
-					$this->stmt->bindParam(3,$_POST['comentario'],PDO::PARAM_STR);
-					$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
+					$this->stmt->bindParam(1,$_POST['solicitud_id'],PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$_POST['fecha'],PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$_POST['costo'],PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$_POST['comentario'],PDO::PARAM_STR);
+					$this->stmt->bindParam(5,$content,PDO::PARAM_LOB);
 					$this->stmt->execute();
 					unlink($destiny.$name);
 					return json_encode(array('status'=>'success','message'=>'SE GUARDO LA COTIZACIÓN EXITOSAMENTE'));
@@ -648,8 +649,8 @@ class HabilitadoModel extends Conection
 			$this->stmt->bindParam(1,$_POST['fecha'],PDO::PARAM_STR);
 			$this->stmt->bindParam(2,$_POST['hora'],PDO::PARAM_STR);
 			$this->stmt->bindParam(3,$_POST['test'],PDO::PARAM_INT);
-			$this->stmt->bindParam(4,$_POST['sp_entrega'],PDO::PARAM_INT);
-			$this->stmt->bindParam(5,$_POST['sp_recibe'],PDO::PARAM_INT);
+			$this->stmt->bindParam(4,$_POST['spe_id'],PDO::PARAM_INT);
+			$this->stmt->bindParam(5,$_POST['spr_id'],PDO::PARAM_INT);
 			$this->stmt->bindParam(6,$_POST['s_aceptacion'],PDO::PARAM_INT);
 			$this->stmt->bindParam(7,$ingreso->id,PDO::PARAM_INT);
 			$this->stmt->bindParam(8,$motivo,PDO::PARAM_LOB);

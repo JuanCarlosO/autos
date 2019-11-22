@@ -43,6 +43,7 @@ function all_cars() {
 	        { leyenda: 'Descripcion', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Editar', style: 'width:50px;'},
 	        { leyenda: 'Eliminar', style: 'width:50px;'},
+	        { leyenda: 'PDF', style: 'width:50px;'},
 	        
 	    ],
 	    modelo: [
@@ -82,6 +83,16 @@ function all_cars() {
 	        	}
 	        	
 	        } },
+	        { class:'text-center', formato:function(tr,obj,celda){
+	        	return anexGrid_link({
+	        		class: 'btn btn-default  btn-flat',
+	        		contenido: '<i class="fa fa-file-pdf-o text-red" style="font-size:20px;"></i>',
+	        		
+                	href: 'controller/puente.php?option=17&sol='+obj.id,
+                	target: '_blank'
+		        });
+	        	
+	        } },
 	    ],
 	    url: 'controller/puente.php?option=1',
 	    limite: [20,50,100],
@@ -118,6 +129,25 @@ function editar_sol(sol) {
 function eliminar_sol(sol) {
 	var respuesta = confirm('¿Desea eliminar la solicitud # '+sol+'?');
 	return false;
+}
+
+function getPDF(solicitud) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		//dataType: 'xml, json, script, or html',
+		data: {option: '37'},
+		async:false,
+		cache:false
+	})
+	.done(function(response) {
+		console.log(response);
+		$('#pdf').load(response);
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	
 }
 
 function error_solicitud() 

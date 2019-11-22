@@ -38,7 +38,7 @@ function getURL() {
 				$('#txt_motivo').removeAttr('required');
 			}
 		});
-		getTipoFalla('t_falla_h','falla_h');
+		//getTipoFalla('t_falla_h','falla_h');
 		//Recuperar los talleres
 		getTalleres('ingreso_taller');
 		/*Carga de formularios*/

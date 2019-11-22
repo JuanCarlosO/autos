@@ -74,7 +74,7 @@ class SolicitanteModel extends Conection
 			FROM
 			    personal
 			WHERE
-			    (nombre LIKE :term OR ap_pat LIKE :term OR ap_mat LIKE :term) AND status = 'ALTA'
+			    (nombre LIKE :term OR ap_pat LIKE :term OR ap_mat LIKE :term) #AND status = 'ALTA'
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(':term',$valor,PDO::PARAM_STR);
@@ -142,6 +142,30 @@ class SolicitanteModel extends Conection
 			#exit;
 			$conteo = (int)$this->result->cuenta +1 ;
 			return $conteo;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getSolcitudEsp($s)
+	{
+		try {
+			$this->sql = "
+			SELECT s.*,CONCAT(p.nombre, ' ',p.ap_pat,' ',p.ap_mat) AS solicitante_name ,
+			a.nombre AS area_name,v.placas, m.nom AS marca, 
+			tv.nom AS tipo
+			FROM solicitudes AS s 
+			INNER JOIN personal AS p ON p.id = s.solicitante
+			INNER JOIN area AS a ON a.id = p.area_id
+			INNER JOIN vehiculos AS v ON v.id = s.vehiculo
+			INNER JOIN marcas AS m ON m.id = v.marca
+			INNER JOIN tipos_v AS tv ON tv.id = v.tipo
+			WHERE s.id = ?";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$s,PDO::PARAM_INT);
+			$this->stmt->execute();	
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ);
+			
+			return $this->result;
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}

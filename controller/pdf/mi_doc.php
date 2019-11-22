@@ -32,7 +32,7 @@ class PDF extends FPDF
 
 // Creación del objeto de la clase heredada
 $pdf = new PDF();
-$pdf->AliasNbPages();
+
 $pdf->AddPage();
 $pdf->SetFont('Times','',12);
 for($i=1;$i<=40;$i++)

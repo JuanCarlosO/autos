@@ -108,9 +108,7 @@ class CarModel extends Conection
 			    v.*,
 			    m.nom AS marca_name,
 			    t.nom AS tipo_name,
-			    CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS resguardatario,
-			    p.id AS resguardatario_id
-
+			    (SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat) FROM personal WHERE id = v.resguardatario) AS resguardatario
 			FROM
 			    vehiculos AS v
 			INNER JOIN tipos_v AS t
@@ -119,10 +117,7 @@ class CarModel extends Conection
 			INNER JOIN marcas AS m
 			ON
 			    m.id = v.marca
-			LEFT JOIN resguardatario AS r
-			ON
-			    r.vehiculo = v.id
-			RIGHT JOIN personal AS p ON p.id= r.persona
+			
 			WHERE v.id = :id";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(':id',$valor,PDO::PARAM_STR);
