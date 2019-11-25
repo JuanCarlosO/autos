@@ -64,7 +64,7 @@ function getURL() {
 	}else if ( URLsearch == '?menu=list_car' || URLsearch == '?menu=general' ) {
 		$('#tree_list').addClass('active');
 		$('#list_car').addClass('active');
-
+		autocomplete_placas();
 		/*Carga el listado completo de vehiculos*/
 		all_cars();
 		/*Carga de formularios*/
@@ -105,6 +105,7 @@ function getURL() {
 		$('li#eventos').addClass('active');
 		//Carga de fomularios 
 		frm_eventos();
+		frm_save_evidencia();
 	}
 	else if ( URLsearch == '?menu=es' )
 	{
@@ -113,6 +114,15 @@ function getURL() {
 		all_es();
 		//Carga de fomularios 
 		frm_historico_es();
+	}
+	else if ( URLsearch == '?menu=add_solicitud' )
+	{
+		$('#tree_add').addClass('active');
+		$('#add_solicitud').addClass('active');
+		autocompletado('solicitante_name','solicitante_h');
+		autocomplete_placas();
+		save_solicitud();
+		generateFolio();
 	}
 	else{
 
@@ -423,13 +433,13 @@ function alerta( estado , mensaje ) {
 	$('#alerta').addClass(clase);
 	$('#estado').text(status);
 	$('#message').text(mensaje);
-	document.location.href = "#alerta";
+	//document.location.href = "#alerta";
 	setTimeout(function(){
 		$('#alerta').addClass('hidden');
 		$('#alerta').removeClass(clase);
 		$('#estado').text('');
 		$('#message').text('');
-		location.reload();
+		//location.reload();
 	},5000);
 }
 //Recuperar el listado de las marcas 
@@ -1149,7 +1159,8 @@ function eventos_programados() {
 			$('#calendar').fullCalendar('renderEvent', copiedEventObject, true);		
 		},
 		eventClick: function(calEvent, jsEvent, view) {
-    		alert('Título: ' + calEvent.title);
+    		$('#modal_add_evidencia').modal('toggle');
+    		$('#evento_id').val(calEvent.id);
     		// change the border color just for fun
     		$(this).css('border-color', 'red');
   		},
@@ -1262,6 +1273,7 @@ function getEventos() {
 				clase = 'bg-red';
 			}
 			$('#calendar').fullCalendar('renderEvent', {
+				id:val.id,
 				title: val.titulo,
 				start: val.fecha,
 				allDay: true,
@@ -1688,5 +1700,174 @@ function frm_add_chofer() {
 		});
 		
 	});
+	return false;
+}
+// Autocomplete lista de vehiculos 
+function autocomplete_placas() {
+	$('#placa').autocomplete({
+        autoFocus:true,
+        source: 'controller/puente.php?option=4',
+        select: function( event, ui ){
+            $('#placa_h').val(ui.item.id);
+            detalle_v(ui.item.id);
+        },
+        delay:300
+    });
+	return false;
+}
+// Recuperar el detalle de un vehiculo 
+function detalle_v( vehiculo ) {
+	var data_vehiculo ;
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '5',v:vehiculo},
+		cache:false,
+		async:false,
+	})
+	.done(function(request) {
+		if ( request.estado == 'error' ) {
+			$('#message').text(request.message);
+			$('#alerta').addClass('alert-danger');
+			setTimeout(function(){
+				$('#message').text('');
+				$('#alerta').removeClass('alert-danger');
+			},5000);
+		}else{
+			$('#number_placa').text( request.placas );
+			$('#name_color').text( request.color );
+			$('#cve_serie').text( request.n_motor );
+			$('#num_cil').text( request.cil );
+			$('#resguardatario').val(request.resguardatario);
+			$('#resguardatario_h').val(request.resguardatario_id);
+		}
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	
+	return false;
+}
+function save_solicitud(){
+	$('#frm_add_sol').submit(function(e){
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			cache:false,
+			async:false,
+		})
+		.done(function(request) {
+			alerta( request.status,request.message );
+		})
+		.fail(function(jqXHR, textStatus,errorThrow) {
+			alerta('error',jqXHR.responseText );
+		});
+		
+		
+	});
+	return false;
+}
+//Generador de folio
+function generateFolio () {
+	var logger = $('#logger').val();
+	$.post('controller/puente.php', {option: '7',p:logger}, function(data, textStatus, xhr) {
+		if (textStatus == 'success') {
+			var fecha = new Date();
+			var folio;
+			if ( data.length == 1 ) {
+				folio = '000'+data;
+			}else if (data.length == 2){
+				folio = '00'+data;
+			}else if (data.length > 2){
+				folio = '0'+data;
+			}
+			folio += '-'+fecha.getFullYear();
+			$('#folio').val(folio);
+		}
+	});
+	return false;
+}
+function add_evidencia() {
+	$('#modal_save_evidencia').modal('toggle');
+	$('#evento').val( $('#evento_id').val() );
+}
+function add_field_evidencia() {
+	$('#evidencia_extra').append(
+		'<div class="row">'+
+			'<div class="col-md-12">'+
+				'<div class="form-group">'+
+					'<label>Buscar archivo</label>'+
+					'<input type="file" id="archivo" name="archivo[]" value="" class="form-control">'+
+				'</div>'+
+			'</div>'+
+		'</div>'
+	);
+	return false;
+}
+function frm_save_evidencia() {
+	$('#frm_save_evidencia').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_save_evidencia"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData:false,
+			contentType:false,
+			timeout:3000,
+			beforeSend:function(){
+				$('#loader').removeClass('hidden');
+
+			}
+		})
+		.done(function(response) {
+			$('#alert_evidencia').removeClass('hidden');
+			$('#alert_evidencia').addClass('alert-success');
+			$('#estado_evidencia').text('Éxito');
+			$('#mensaje_evidencia').text(response.message);
+			
+			//document.location.href = "#alerta";
+			setTimeout(function(){
+				
+				$('#alert_evidencia').addClass('hidden');
+				$('#alert_evidencia').removeClass('alert-success');
+				$('#estado_evidencia').text('');
+				$('#mensaje_evidencia').text('');
+				//location.reload();
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta("error",jqXHR.responseText);
+		}).always(function(){
+			$('#loader').addClass('hidden');
+		})
+		;
+		
+	});
+}
+
+function view_evidencia(){
+	$('#modal_view_evidencia').modal('toggle');
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '43',evento:$('#evento_id').val()},
+	})
+	.done(function(data) {
+		$('#evidencia').html(data);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert("Error: "+jqXHR.textStatus);
+	});
+	
 	return false;
 }

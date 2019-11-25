@@ -454,6 +454,11 @@ class HabilitadoModel extends Conection
 		try {
 			$obs 		= mb_strtoupper($post['observaciones'],'utf-8');
 			$p_recibe 	= mb_strtoupper($post['p_recibe'],'utf-8');
+			$this->sql = "UPDATE solicitudes SET estado = 1 WHERE id = ?;";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$post['solicitud_id'],PDO::PARAM_INT);
+			$this->stmt->execute();
+
 			$this->sql = "INSERT INTO ingreso_taller (id, solicitud, taller, f_ingreso, h_ingreso, p_recibe, observaciones) VALUES 
 			(
 				'', 
@@ -501,7 +506,7 @@ class HabilitadoModel extends Conection
 			$obs 		.= "AL SALIR DEL TALLER:".mb_strtoupper($post['observaciones'],'utf-8');
 			$p_entrega 	= mb_strtoupper($post['p_entrega'],'utf-8');
 			$this->sql = "
-			UPDATE ingreso_taller SET f_salida = ?, h_salida= ? , p_entrega = ? , estado = 3, observaciones = ? WHERE id = ? 
+			UPDATE ingreso_taller SET f_salida = ?, h_salida= ? , p_entrega = ? , estado = 1, observaciones = ? WHERE id = ? 
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$post['f_salida'],PDO::PARAM_STR);
@@ -548,7 +553,7 @@ class HabilitadoModel extends Conection
 	public function entregaAuto($s)
 	{
 		try {
-			$this->sql = "UPDATE ingreso_taller SET estado = 1 WHERE solicitud = ?";
+			$this->sql = "UPDATE ingreso_taller SET estado = 2 WHERE solicitud = ?";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute(array($s));
 			return json_encode(array('status'=>'error','message'=>'EL ESTADO DE LA REPARACIÓN CAMBIO A:  ENTREGADO AL RESGUARDATARIO'));
@@ -559,6 +564,13 @@ class HabilitadoModel extends Conection
 	public function saveCotizacion()
 	{
 		try {
+			#Validar que la reparacion no sea mayor al 30% del vehiculo
+			$cv =(int) $_POST['costo_veh'];
+			$cc =(int) $_POST['costo'];
+			$limite = (($cv * 30 )/100);
+			if ( $cc > $limite ) {
+				throw new Exception("EL COSTO DE LA REPARACIÓN EXCEDE EL 30%", 1);
+			}
 			$size = $_FILES['archivo']['size'];
 			$type = $_FILES['archivo']['type'];
 			$name = $_FILES['archivo']['name'];
@@ -613,6 +625,10 @@ class HabilitadoModel extends Conection
 			if ( $solicitud_id == 0  ) {
 				throw new Exception("NO SE RECUPERO LA SOLICITUD. \nNOTIFIQUE ESTO AL ÁREA DE SISTEMAS.", 1);
 			}
+			$this->sql = "UPDATE ingreso_taller SET estado = 2 WHERE solicitud = ?";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute(array($solicitud_id));
+
 			$this->sql  = " SELECT id FROM ingreso_taller WHERE solicitud = ? LIMIT 1";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$solicitud_id,PDO::PARAM_STR);
@@ -941,6 +957,124 @@ class HabilitadoModel extends Conection
 			return $anexgrid->responde($modulos, $cuenta);
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+	
+	public function saveSolicitud($f_sol,$km,$solicitante,$resguardatario,$placa,$desc,$folio)
+	{
+		try {
+			$desc = mb_strtoupper($desc,'utf-8');
+			#VALIDAR QUE NO TENGA LA LICENCIA VENCIDA
+			/*$this->sql = "SELECT IF( f_vencimiento <= DATE(NOW()),'denegado','permitido') AS permiso FROM licencias WHERE persona = ? ";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$solicitante,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$permiso = $this->stmt->fetch(PDO::FETCH_OBJ);
+
+			if (  !empty($permiso->permiso) AND $permiso->permiso == 'denegado' ) {
+				throw new Exception("LICENCIA DE CONDUCIR VENCIDA. DEBE RENOVAR SU LICENCIA DE CONDUCIR PARA PODER GENERAR SOLICITUDES.", 1);
+			}else if( empty($permiso) || !isset($permiso) ){
+				throw new Exception("AÚN NO CUENTAS CON EL PERMISO DE CONDUCIR UNA UNIDAD OFICIAL.", 1);
+			}*/
+
+			$this->sql = "INSERT INTO solicitudes(
+				id,folio,f_sol,km,solicitante,vehiculo,estado ,descripcion
+				) VALUES (
+					'',
+					?,
+					?,
+					?,
+					?,
+					?,
+					1,
+					?
+				);";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$folio,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$f_sol,PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$km,PDO::PARAM_INT);
+			$this->stmt->bindParam(4,$solicitante,PDO::PARAM_INT);
+			$this->stmt->bindParam(5,$placa,PDO::PARAM_INT);
+			$this->stmt->bindParam(6,$desc,PDO::PARAM_STR);
+			$this->stmt->execute();
+			return json_encode(array('status'=>'success','message'=>'LA SOLICITUD SE A INSERTADO CON ÉXITO.' ));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function saveEvidencia()
+	{
+		try {
+			$evento = $_POST['evento'];
+			for ($i=0; $i < count($_FILES['archivo']['name']); $i++) { 
+				$size = $_FILES['archivo']['size'][$i];
+				$type = $_FILES['archivo']['type'][$i];
+				$name = $_FILES['archivo']['name'][$i];
+				$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+				
+				if ( $size > 10485760 ) 
+				{
+					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+				}
+				else
+				{
+					if ( $type != 'application/pdf' AND $type != 'image/png' AND $type != 'image/jpeg' ) 
+					{
+						throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+					}
+					else
+					{
+						#convertir a bytes
+						move_uploaded_file($_FILES['archivo']['tmp_name'][$i],$destiny.$name);
+						$file = fopen($destiny.$name,'r');
+						$content = fread($file,$size);
+						$content = addslashes($content);
+						fclose($file);
+						#Insertar en la BD
+						$this->sql = "
+						INSERT INTO eventos_evidencia(id,tipo,archivo,evento) 
+						VALUES ('',?,?,?);
+						";
+						$this->stmt = $this->pdo->prepare( $this->sql );
+						$this->stmt->bindParam(1,$type,PDO::PARAM_STR);
+						$this->stmt->bindParam(2,$content,PDO::PARAM_LOB);
+						$this->stmt->bindParam(3,$evento,PDO::PARAM_INT);
+						$this->stmt->execute();
+						unlink($destiny.$name);
+						return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA SE GUARDO CON ÉXITO.' ));
+					}
+				}
+			}			
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getEvidencia()
+	{
+		try {
+			$evidencia = "";
+			$evento = $_POST['evento'];
+			$this->sql = "
+			SELECT * FROM eventos_evidencia WHERE evento = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$evento,PDO::PARAM_STR);
+			$this->stmt->execute();			
+			$datos_image = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$cuenta = $this->stmt->rowCount();
+			if ($cuenta >= 1) {
+				foreach ($datos_image as $key => $val) {
+					if ( $val->tipo == "image/jpeg" || $val->tipo == "image/png") {
+						$evidencia .= '<img class="img-responsive pad" src="data:'.$val->tipo.';base64,'.base64_encode(stripslashes($val->archivo)) .' "/>';
+					}
+				}
+				return $evidencia;
+			}else{
+				return "<h3> NO HAY EVIDENCIA </h3>";
+			}
+			
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}
 	}
 }

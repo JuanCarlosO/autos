@@ -18,5 +18,10 @@ class VigilanteController
 	{
 		return $this->model->getES();
 	}
+	public function saveEntrada()
+	{
+		return $this->model->saveEntrada();
+	}
+	
 }
  ?>

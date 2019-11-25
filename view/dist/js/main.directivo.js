@@ -17,6 +17,7 @@ function getURL() {
 		$('#tree_reports').addClass('active');
 		$('#estadistic').addClass('active');
 		graficos();
+		g_costos();
 	}
 	return false;
 }
@@ -178,6 +179,50 @@ function graficos() {
 	                'rgba(153, 102, 255, 1)',
 	                'rgba(255, 159, 64, 1)'
 	            ],
+	            borderWidth: 1
+	        }]
+	    
+	    }
+	});
+}
+/*Grafica de costos más elevados*/
+function g_costos() {
+	//Generar el Ajax Necesarion para recuperar la informacion.
+	var etiquetas = [], datos = [];
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '39'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		console.log(response);
+		var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+		if ( response.status == 'error' ) {
+			alert(response.message);
+		}else{
+			$.each(response, function(i, val) {
+				etiquetas.push( meses[i] );
+				datos.push(val.sumatoria);
+			});
+		}
+	})
+	.fail(function(jqXHR,textStatus, errorThrow) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	
+	var ctx = document.getElementById('chart_costos').getContext('2d');
+	var myChart = new Chart(ctx, {
+	    type: 'bar',
+	    data: {
+	        labels: etiquetas,
+	        datasets: [{
+	            label: etiquetas,
+	            data: datos,
+	            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+	            borderColor: 'rgba(54, 162, 235, 0.7)',
 	            borderWidth: 1
 	        }]
 	    

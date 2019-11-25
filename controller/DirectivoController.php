@@ -26,6 +26,10 @@ class DirectivoController
 	{
 		return $this->model->getAutoMasCaro();
 	}
+	public function getCostosElevados()
+	{
+		return $this->model->getCostosElevados();
+	}
 	
 }
 

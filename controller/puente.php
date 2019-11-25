@@ -179,8 +179,30 @@ if ( isset( $_POST['option'] ) )
 		case '38':
 			echo $hab->saveChofer();
 			break;
-		
-			
+		case '39':
+			echo $dir->getCostosElevados();
+			break;
+		case '40':
+			echo $vig->saveEntrada();
+			break;
+		case '41':
+			echo $hab->saveSolicitud($_POST);
+			break;
+		case '42':
+			echo $hab->saveEvidencia($_POST);
+			break;
+		case '43':
+			echo $hab->getEvidencia($_POST);
+			break;
+		case '44':
+			echo $rm->getPDFCotizacion($_POST);
+			break;
+		case '45':
+			echo $rm->getPDFactura($_POST);
+			break;
+		case '46':
+			echo $hab->generateBitacora();
+			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;

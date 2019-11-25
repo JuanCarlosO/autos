@@ -68,6 +68,25 @@ class VigilanteModel extends Conection
 			} catch (Exception $e) {
 				return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 			}
+	}
+	public function saveEntrada(){
+		try {
+			$id 	= $_POST['registro'];
+			$gas 	= $_POST['nivel_gas'];
+			$ent 	= $_POST['f_entrada'].' '.$_POST['hora'].':00';
+			$km 	= $_POST['km'];
+			$this->sql = "UPDATE registro_es SET entrada = ?,gas_entrada = ? , km_entrada = ? WHERE id = ?";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$ent,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$gas,PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$km,PDO::PARAM_INT);
+			$this->stmt->bindParam(4,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			return json_encode( array('status'=>'success','message'=> 'LA ENTRADA DEL VEHÍCULO A SIDO REGISTRADA CON ÉXITO.' ) );
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
+	}
+	
 }
 ?>

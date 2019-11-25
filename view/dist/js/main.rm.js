@@ -39,7 +39,8 @@ function all_sol() {
 	        { leyenda: 'Detalle de solicitud', style: 'width:300px;',class:'text-center' },
 	        { leyenda: 'Detalle de vehículo',  style:'width:300px;' ,class:'text-center' },
 	        { leyenda: 'Detalle de reparación', style:'width:300px;',class:'text-center' },
-	        { leyenda: 'Reparaciones', style:'width:300px;' }	        
+	        { leyenda: 'Reparaciones', style:'width:300px;' }	,
+	        { leyenda: 'Documentos', style:'width:10px;' }	        
 	    ],
 	    modelo: [
 	    	{propiedad:'solicitudes.id'},
@@ -56,7 +57,7 @@ function all_sol() {
 	        	
 	        	var x = obj.data_vehiculo;
 	        	var pos = parseInt(obj.solicitudes.id);
-	        	console.log(x[0].id);
+	        	//console.log(x[0].id);
 	        	return '<ul>'+
 	        				'<li>'+'<label>Marca:</label> '+x[0].marca_name+'</li>'+
 	        				'<li>'+'<label>Tipo:</label> '+x[0].tipo_name+'</li>'+
@@ -83,6 +84,17 @@ function all_sol() {
 	        	}
 	        	lista += '</ul>';
 	        	return lista;
+	        }},
+	        { class:'text-center',formato: function(tr,obj,celda){
+	        	return anexGrid_boton({
+	        		type:'button',
+	        		contenido: '<i class="fa fa-file-pdf-o"></i>',
+	        		class:'btn btn-default btn-flat',
+	        		style: 'color:#ea0a0a;font-size:20px;',
+	        		attr:[
+	        			'onclick="modal_docs('+obj.solicitudes.id+');"'
+	        		]
+	        	});
 	        }}
 	    ],
 	    url: 'controller/puente.php?option=13',
@@ -219,4 +231,49 @@ function frm_historico_es() {
 		};
 		$("#historico").anexGrid(es);	
 	});
+}
+function modal_docs(id) {
+	$('[name="solicitud"]').val(id);
+	$('#modal_docs').modal('toggle');
+	return false;
+}
+
+function view_cotizacion (){
+	var sol = $('[name="solicitud"]').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '44', s:sol},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#carga_doc').html(response);
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	
+	$('#modal_view_doc').modal('toggle');
+	return false;
+}
+function view_factura (){
+	var sol = $('[name="solicitud"]').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '45', s:sol},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#carga_doc').html(response);
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	$('#modal_view_doc').modal('toggle');
+	return false;
 }

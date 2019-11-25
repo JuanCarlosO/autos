@@ -27,12 +27,22 @@
 		      				<input type="date" id="fecha" name="fecha" value="" required class="form-control" >
 		      			</div>
 		      		</div>
-		      		<div class="col-md-6">
+		      		<div class="col-md-3">
 		      			<div class="form-group">
 		      				<label>Costo de la cotización</label>
 			      			<div class="input-group">
 				            	<span class="input-group-addon">$</span>
 				            	<input type="text" class="form-control" id="costo" name="costo" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;">
+				            	<!-- <span class="input-group-addon">.00</span> -->
+				            </div>
+		      			</div>
+		      		</div>
+		      		<div class="col-md-3">
+		      			<div class="form-group">
+		      				<label>Costo actual del vehículo</label>
+			      			<div class="input-group">
+				            	<span class="input-group-addon">$</span>
+				            	<input type="text" class="form-control" id="costo_veh" name="costo_veh" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;">
 				            	<!-- <span class="input-group-addon">.00</span> -->
 				            </div>
 		      			</div>

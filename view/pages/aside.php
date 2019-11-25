@@ -54,6 +54,7 @@
               <li id="add_car"><a href="index.php?menu=add_car"><i class="fa fa-car"></i> Vehículo</a></li>
               <li id="add_taller"><a href="index.php?menu=add_taller"><i class="fa fa-building-o"></i> Taller</a></li>
               <li id="add_chofer"><a href="index.php?menu=add_chofer"><i class="fa fa-users"></i> Conductores</a></li>
+              <li id="add_solicitud"><a href="index.php?menu=add_solicitud"><i class="fa fa-pencil"></i> Solicitud</a></li>
             </ul>
           </li>
           <li class="treeview " style="height: auto;" id="tree_list">

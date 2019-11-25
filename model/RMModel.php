@@ -68,5 +68,39 @@ class RMModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
 		}
 	}
+	public function getPDFCotizacion()
+	{
+		try {
+			$doc ="";
+			$s = $_POST['s'];
+			$this->sql  = "
+				SELECT * FROM cotizaciones WHERE solicitud = ?
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute(array( $s ));
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ);
+			$doc .= '<object data="data:application/pdf;base64,'.base64_encode($this->result->archivo).'" type="application/pdf" style="height:500px;width:100%"></object>';
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	public function getPDFactura()
+	{
+		try {
+			$doc ="";
+			$s = $_POST['s'];
+			$this->sql  = "
+				SELECT * FROM solicitud_documentos WHERE solicitud = ? AND tipo_doc = 2
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute(array( $s ));
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ);
+			$doc .= '<object data="data:application/pdf;base64,'.base64_encode($this->result->archivo).'" type="application/pdf" style="height:500px;width:100%"></object>';
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
 }
 ?>

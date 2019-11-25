@@ -55,11 +55,13 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_header/header_general.php';
 							  		include 'view/pages/habilitado_v/content_main/content_general.php';
 							  		include 'view/pages/habilitado_v/modals/modal_baja_vehiculo.php';
+							  		include 'view/pages/habilitado_v/modals/modal_generate_bitacora.php';
 							  		break;
 							  	case 'list_car':
 							  		include 'view/pages/habilitado_v/content_header/header_general.php';
 							  		include 'view/pages/habilitado_v/content_main/content_general.php';
 							  		include 'view/pages/habilitado_v/modals/modal_baja_vehiculo.php';
+							  		include 'view/pages/habilitado_v/modals/modal_generate_bitacora.php';
 							  		break;
 							  	case 'add_car':
 							  		include 'view/pages/habilitado_v/content_header/header_add_car.php';
@@ -100,6 +102,9 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_header/header_eventos.php';
 							  		include 'view/pages/habilitado_v/content_main/content_eventos.php';
 							  		include 'view/pages/habilitado_v/modals/modal_eventos.php';
+							  		include 'view/pages/habilitado_v/modals/modal_action_evidencia.php';
+							  		include 'view/pages/habilitado_v/modals/modal_add_evidencia.php';
+							  		include 'view/pages/habilitado_v/modals/modal_view_evidencia.php';
 							  		break;
 							  	case 'es':
 							  		include 'view/pages/habilitado_v/content_header/header_registro_es.php';
@@ -110,6 +115,12 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_main/content_list_chofer.php';
 							  		include 'view/pages/habilitado_v/modals/modal_actualiza_licencia.php';
 							  		break;
+							  	case 'add_solicitud':
+							  		include 'view/pages/habilitado_v/content_header/header_add_solicitud.php';
+							  		include 'view/pages/habilitado_v/content_main/content_add_solicitud.php';
+							  		#include 'view/pages/habilitado_v/modals/modal_actualiza_licencia.php';
+							  		break;
+							  		
 							}
 						}
 						else
@@ -130,6 +141,7 @@ date_default_timezone_set('America/Mexico_City');
 							  	case 'listado':
 							  		include 'view/pages/vigilancia/content_header/header_listado.php';
 							  		include 'view/pages/vigilancia/content_main/content_listado.php';
+							  		include 'view/pages/vigilancia/modals/modal_entrada_vehicular.php';
 							  		break;
 							}
 						}
@@ -137,7 +149,7 @@ date_default_timezone_set('America/Mexico_City');
 					  		
 					  	#--------------------------------------------------------------------------------------
 						break;
-					case 'Recursos Materiales':#Perfil Vigilancia
+					case 'Recursos Materiales':#Perfil RM
 						#--------------------------------------------------------------------------------------
 						if ( isset($_GET['menu'] ) )
 						{
@@ -146,6 +158,8 @@ date_default_timezone_set('America/Mexico_City');
 								case 'general':
 							  		include 'view/pages/recursos_mat/content_header/header_general.php';
 							  		include 'view/pages/recursos_mat/content_main/content_general.php';
+							  		include 'view/pages/recursos_mat/modals/modal_solicitud_docs.php';
+							  		include 'view/pages/recursos_mat/modals/modal_documento.php';
 							  		break;
 							  	case 'listado_es':
 							  		include 'view/pages/recursos_mat/content_header/header_registro_es.php';

@@ -14,6 +14,9 @@ function getURL() {
 	}else if ( url == '?menu=listado' ) {
 		$('#l_salida').addClass('active');
 		all_es();
+		datepicker();
+		frm_entrada_vehicular();
+		medidor_gas();
 	}
 }
 function getUser() {
@@ -148,6 +151,7 @@ function all_es() {
 	        { leyenda: 'Datos salida', style:'width:200px;',ordenable:false },
 	        { leyenda: 'Datos de entrada', style:'width:200px;' },
 	        { leyenda: 'Observaciones', style:'width:200px;',ordenable:false, filtro:false },
+	        { leyenda: 'Entrada', style:'width:10px;',ordenable:false, filtro:false },
 	    ],
 	    modelo: [
 	        { propiedad: 'id'},
@@ -185,7 +189,22 @@ function all_es() {
 		       	}
 	        	
 	        }},
-	       { propiedad: 'observaciones',class:'text-justify'}
+	       { propiedad: 'observaciones',class:'text-justify'},
+	       { class:'text-justify', formato:function(tr,obj,celda){
+
+	       		if( obj.km_entrada == null || obj.km_entrada == '' ){
+	       			return anexGrid_boton({
+	       				type: 'button',
+	       				class: 'bun btn-success btn-flat',
+	       				contenido:'<i class="fa fa-car"></i> ',
+	       				attr:[
+	       					'tittle="Entrada de vehículo"',
+	       					'data-toggle="modal" data-target="#modal_entrada_vehicular"',
+	       					'onclick="add_value('+obj.id+')"'
+	       				]
+	       			});
+	       		}
+	       }}
 	    ],
 	    url: 'controller/puente.php?option=12',
 	    type:'POST',
@@ -201,5 +220,64 @@ function all_es() {
 function logout() 
 {
 	location.href= 'login.php';
+	return false;
+}
+function datepicker() {
+	//Timepicker
+    $('.timepicker').timepicker({
+      	showInputs: false,
+      	showMeridian: false,
+    });
+}
+//Formulario de entrada vehicular
+function frm_entrada_vehicular()
+{
+	$('#frm_entrada_vehicular').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta(response.status,response.message);
+		})
+		.fail(function() {
+			console.log("error");
+		});
+	});
+	return false;
+}
+
+function alerta( estado , mensaje ) {
+	var clase ;
+	var status;
+	if ( estado == 'success' ) {
+		clase 	= 'alert-success';
+		status 	= 'CORRECTO! ';
+	}else{
+		status 	= 'OCURRIO UN ERROR! ';
+		clase = 'alert-danger';
+	}
+	$('#alerta').removeClass('hidden');
+	$('#alerta').addClass(clase);
+	$('#estado').text(status);
+	$('#message').text(mensaje);
+	document.location.href = "#alerta";
+	setTimeout(function(){
+		$('#alerta').addClass('hidden');
+		$('#alerta').removeClass(clase);
+		$('#estado').text('');
+		$('#message').text('');
+		location.reload();
+	},5000);
+}
+
+function add_value(id) {
+	$('#registro').val( id );
 	return false;
 }

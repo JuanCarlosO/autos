@@ -14,5 +14,14 @@ class RMController
 	{
 		return $this->model->getSolicitudes();
 	}
+	public function getPDFCotizacion()
+	{
+		return $this->model->getPDFCotizacion();
+	}
+	public function getPDFactura()
+	{
+		return $this->model->getPDFactura();
+	}
+	
 }
 ?>

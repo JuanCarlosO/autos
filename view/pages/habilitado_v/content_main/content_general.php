@@ -23,6 +23,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-2 pull-right">
+                                <button type="button" class="btn btn-success btn-flat btn-block" data-toggle="modal" data-target="#modal_generate_bitacora">
+                                    <i class="fa fa-file-pdf-o"></i>
+                                    Bitacora
+                                </button>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <div id="all_vehiculos"></div>
                         </div>
