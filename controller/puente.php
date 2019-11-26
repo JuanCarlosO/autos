@@ -203,6 +203,9 @@ if ( isset( $_POST['option'] ) )
 		case '46':
 			echo $hab->generateBitacora();
 			break;
+		case '47':
+			echo $hab->generateFullSol();
+			break;
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;

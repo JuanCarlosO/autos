@@ -244,7 +244,114 @@ class HabilitadoController
 		}
 		$pdf->Output();
 	}
-	
+	public function generateFullSol()
+	{
+		#Recuperar el ID de la solicitud 
+		#$solicitud = $this->model->getSolcitudEsp($s);
+
+		$pdf = new PDF3('P','mm','Letter');
+		$pdf->AliasNbPages();
+		$pdf->AddPage();
+    	// Arial bold 15
+        $pdf->SetFont('Arial','B',14);
+    	
+    	// Título
+        $pdf->Cell(195,5,utf8_decode('SOLICITUD DE MANTENIMIENTO PREVENTIVO	 Y/O CORRECTIVO'),0,1,'C');
+    	// Salto de línea
+        $pdf->Ln(5);
+        $pdf->SetFont('Helvetica','',8);
+        $pdf->Cell(148,5,'',0,0,'R');
+        $pdf->Cell(20,5,'Fecha:',1,0,'R');
+		$pdf->Cell(30,5, date('d-m-Y') ,1,0,'R');
+		$pdf->Ln(5);
+		$pdf->Cell(148,5,'',0,0,'R');
+        $pdf->Cell(20,5,'Folio:',1,0,'R');
+		$pdf->Cell(30,5, 'Mi-Folio' ,1,0,'R');
+		$pdf->Ln(10);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->SetFillColor(105, 227, 251);
+		$pdf->Cell(192	,5,utf8_decode('ADSCRIPCIÓN DEL VEHÍCULO'),1,0,'C',true);
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(60,5,utf8_decode('Dirección general:'),1,0,'R');
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(60,5,utf8_decode('Subdirección:'),1,0,'R');
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(60,5,utf8_decode('Departamento:'),1,0,'R');
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(60,5,utf8_decode('Oficina:'),1,0,'R');
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(60,5,utf8_decode('Resguardatario:'),1,0,'R');
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(60,5,utf8_decode('Nombre de usuario:'),1,0,'R');
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Ln(7);$pdf->SetFillColor(105, 227, 251);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(192,5,'',1,0,'R',1);
+		$pdf->SetFont('Helvetica','',12 );
+		$pdf->Ln(7);
+		$pdf->Cell(48,12,'',1,0,'R');
+		$pdf->Cell(48,12,'',1,0,'R');
+		$pdf->Cell(48,12,'',1,0,'R');
+		$pdf->Cell(48,12,'',1,0,'R');
+		$pdf->Ln(12);
+		$pdf->Cell(38,12,'',1,0,'R');
+		$pdf->Cell(38,12,'',1,0,'R');
+		$pdf->Cell(40,12,'',1,0,'R');
+		$pdf->Cell(38,12,'',1,0,'R');
+		$pdf->Cell(38,12,'',1,0,'R');
+		$pdf->Ln(12);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(192,5,'SERVICIO SOLICITADO',1,0,'C',1);
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','',10);
+		$pdf->Cell(48,12,utf8_decode('TRANSMISIÓN'),1,0,'R');
+		$pdf->Cell(48,12,'FRENOS',1,0,'R');
+		$pdf->Cell(48,12,'LLANTAS',1,0,'R');
+		$pdf->Cell(48,12,utf8_decode('SUSPENSIÓN'),1,0,'R');
+		$pdf->Ln(12);
+		$pdf->Cell(48,12,utf8_decode('VERIFICACIÓN'),1,0,'R');
+		$pdf->Cell(48,12,utf8_decode('AFINACIÓN MENOR'),1,0,'R');
+		$pdf->Cell(48,12,utf8_decode('AFINACIÓN MAYOR'),1,0,'R');
+		$pdf->Cell(48,12,utf8_decode('HOJALATERÍA Y PINTURA'),1,0,'R');
+		$pdf->Ln(12);
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(192,5,'OTRAS REPARACIONES',1,0,'C',1);
+		$pdf->Ln(5);
+		$pdf->SetFont('Helvetica','',10);
+		$pdf->MultiCell(192,10,'esto es una reparacion diferente',1);
+		$pdf->MultiCell(192,10,'esto es una reparacion diferente',1);
+		$pdf->MultiCell(192,10,'esto es una reparacion diferente',1);
+
+		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(192,5,'FIRMAS',1,0,'C',1);
+		$pdf->SetFont('Helvetica','',10);
+		$pdf->Ln(5);
+		$pdf->MultiCell(95,12,utf8_decode('Elaboró'.PHP_EOL.'C. GERARDO LOPEZ SALAZAR '.PHP_EOL.'Habilitado de control vehicular'),1,'C');
+		$x=$pdf->GetX();
+		$y=$pdf->GetY();
+		$pdf->SetXY($x+95,$y-36);
+		$pdf->MultiCell(95,12,utf8_decode('Autorizó'.PHP_EOL.'Sergio Lara Ahuatzi'.PHP_EOL.'Titular de apoyo administrativo.'),1,'C');
+		$pdf->MultiCell(192,12,utf8_decode('Vo. Bo. '.PHP_EOL.'Mtra. Maria de la Luz Nuñes Camacho'.PHP_EOL.'Titular de la UAI'),1,'C');
+		
+		$pdf->Output();
+	}
 	
 }
 
@@ -270,6 +377,32 @@ class PDF2 extends FPDF
 	    $this->SetFont('Arial','I',8);
 	    // Número de página
 	    $this->Image('pdf/img/footer.png',1,197,282,18);
+	    $this->Cell(0,5,utf8_decode('Página '.$this->PageNo().'/{nb}'),0,0,'C');
+	}
+}
+
+class PDF3 extends FPDF
+{
+	// Cabecera de página
+	function Header()
+	{
+	    // Logo
+	    $this->Image('pdf/img/header.png',0,-6,215,30);
+	    // Arial bold 15
+	    $this->SetFont('Arial','B',15);
+	    
+	    // Salto de línea
+	    $this->Ln(7);
+	}
+
+	// Pie de página
+	function Footer(){
+	    // Posición: a 1,5 cm del final
+	    $this->SetY(-15);
+	    // Arial italic 8
+	    $this->SetFont('Arial','I',8);
+	    // Número de página
+	    $this->Image('pdf/img/footer.png',1,252,217,25);
 	    $this->Cell(0,5,utf8_decode('Página '.$this->PageNo().'/{nb}'),0,0,'C');
 	}
 }

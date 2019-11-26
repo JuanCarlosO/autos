@@ -142,6 +142,7 @@ function all_sol() {
 	        { leyenda: 'Vehículo', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Descripcion', columna: 'n_short', style:'width:250px;' },
 	        { leyenda: 'Detalle', style: 'width:15px;'},
+	        { leyenda: 'PDF', style: 'width:15px;'},
 	        
 	    ],
 	    modelo: [
@@ -182,6 +183,17 @@ function all_sol() {
 		        		value:obj.id
 	        		});
 	        	}
+	        	
+	        	
+	        } },
+	        { class:'text-center', formato:function(tr,obj,celda){
+	        	return '<form action="controller/puente.php" method="post" target="_blank">'+
+							'<input type="hidden" name="option" value="47">'+
+							'<button type="submit" class="btn btn-default btn-flat">'+
+								'<i class="fa fa-file-pdf-o" style="font-size: 20px; color:#dd4b39;"></i>'+
+							'</button>'+
+						'</form>';
+	        	
 	        	
 	        	
 	        } },
