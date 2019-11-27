@@ -18,6 +18,7 @@ function getURL() {
 		$('#estadistic').addClass('active');
 		graficos();
 		g_costos();
+		frm_estadistic_year();
 	}
 	return false;
 }
@@ -228,4 +229,57 @@ function g_costos() {
 	    
 	    }
 	});
+}
+
+function frm_estadistic_year() {
+	var myChart;
+	$('#frm_estadistic_year').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false
+		})
+		.done(function(response) {
+			var etiquetas = [], datos = [];
+			var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+			if ( response.status == 'error' ) {
+				alert(response.message);
+			}else{
+				if ( response.length > 0 ) {
+					$.each(response, function(i, val) {
+						etiquetas.push( meses[i] );
+						datos.push(val.sumatoria);
+					});
+					var ctx = document.getElementById('chart_costos').getContext('2d');
+					
+					myChart = new Chart(ctx, {
+					    type: 'bar',
+					    data: {
+					        labels: etiquetas,
+					        datasets: [{
+					            label: etiquetas,
+					            data: datos,
+					            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+					            borderColor: 'rgba(54, 162, 235, 0.7)',
+					            borderWidth: 1
+					        }]
+					    
+					    }
+					});
+				}else{
+					alert('No hay datos del año seleccionado');
+				}
+			}
+		})
+		.fail(function() {
+			console.log("error");
+		});
+		
+		
+	});
+	return false;
 }

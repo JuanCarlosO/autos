@@ -28,6 +28,10 @@ function getURL() {
 			event.preventDefault();
 			$('#modal_siniestro').modal('toggle');
 		});
+		$('#btn_garantia').click(function(event) {
+			event.preventDefault();
+			$('#modal_add_garantia').modal('toggle');
+		});
 		$('#s_aceptacion').change(function(e){
 			e.preventDefault();
 			if ( $(this).val() == '2' ) {
@@ -52,6 +56,7 @@ function getURL() {
 		frm_entrega();
 		frm_solicitud_historica();
 		frm_upload_sol();
+		frm_add_garantia();
 		/*Autocomplete*/
 		autocompletado('sp_entrega','spe_id');
 		autocompletado('sp_recibe','spr_id');
@@ -808,6 +813,26 @@ function getDetalleSol( solicitud )
 							'<li> <label> Salió del taller el:  </label> '+val.f_salida+'</li>'+
 							'<li> <label> Observaciones: </label> '+val.observaciones+'</li>'+
 						'</ol></li>'
+					);
+				});
+			}
+			//Agregar devoluciones por garantia
+			$('#list_garantias').html('');
+			if (response.garantias.estado == 'empty') {
+				$('#list_garantias').html('');
+				
+			}else{
+				var boton = "";
+				$.each(response.garantias, function(i, val) {
+					if (response.garantias[i].f_salida == null) {
+						boton = '<button type="button" class="btn btn-success btn-flat pull-right" onclick="terminar_garantia('+response.garantias[i].id+');">Terminar</button>';
+					}
+					$('#list_garantias').append(
+						'<li>'+boton+
+								'<ul>'+'<b>Fecha de entrada:</b>'+response.garantias[i].f_entrada+'</ul>'+
+								'<ul>'+'<b>Fecha de salida:</b>'+response.garantias[i].f_salida+'</ul>'+
+								'<ul>'+'<b>Observaciones:</b>'+response.garantias[i].observaciones.toUpperCase()+'</ul>'+
+							' </li>'
 					);
 				});
 			}
@@ -1992,6 +2017,67 @@ function frm_upload_sol() {
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			alert("Error: "+jqXHR.responseText);
+		});
+		
+	});
+	return false;
+}
+//Terminar la solicitud
+function terminar_garantia(id) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '51',id:id},
+		async:false
+	})
+	.done(function(response) {
+		alert(response.message);
+		var s = $('#solicitud_id').val();
+		getDetalleSol( s );
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	
+	return false;
+}
+
+function frm_add_garantia() {
+	$('#frm_add_garantia').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false
+		})
+		.done(function(response) {
+			var estado , clase;
+			$('#alert_garantia').removeClass('hidden');
+			if ( response.status == 'success' ) {
+				estado = 'ÉXITO!';
+				clase = 'alert-success';
+			}else{
+				estado = 'ERROR!';
+				clase = 'alert-danger';
+			}
+			$('#alert_garantia').addClass(clase);
+			$('#estado_garantia').text(estado);
+			$('#message_garantia').text(response.message);
+			setTimeout(function(){
+				$('#alert_garantia').addClass('hidden');
+				$('#alert_garantia').removeClass(clase);
+				$('#estado_garantia').text('');
+				$('#message_garantia').text('');
+				var s = $('#solicitud_id').val();
+				getDetalleSol( s );
+			},5000);
+		})
+		.fail(function() {
+			console.log("error");
 		});
 		
 	});

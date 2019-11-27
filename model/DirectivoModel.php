@@ -165,6 +165,27 @@ class DirectivoModel extends Conection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
+	public function getCostosElevadosByYear()
+	{
+		try {
+			
+			$this->sql = "
+			SELECT c.id,c.solicitud,SUM(c.monto) AS sumatoria, v.placas, MONTH(s.f_sol) AS mes
+			FROM cotizaciones AS c 
+			INNER JOIN solicitudes AS s ON s.id = c.solicitud
+			INNER JOIN vehiculos AS v ON v.id = s.vehiculo
+			WHERE YEAR(s.f_sol) = ".$_POST['year']."
+			GROUP BY MONTH(s.f_sol) 
+			ORDER BY c.monto DESC LIMIT 0,12
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
 	
 	
 }

@@ -212,6 +212,15 @@ if ( isset( $_POST['option'] ) )
 		case '49':
 			echo $hab->savePDFSolicitud();
 			break;
+		case '50':
+			echo $dir->getCostosElevadosByYear();
+			break;
+		case '51':
+			echo $hab->finalizarGarantia();
+			break;
+		case '52':
+			echo $hab->saveGarantia();
+			break;
 		
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));

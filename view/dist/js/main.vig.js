@@ -179,6 +179,7 @@ function all_es() {
 		       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
 		       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
 		       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
+		       				'<li> <b>RECORRIDO:</b> '+(obj.km_entrada - obj.km_salida)+'</li>'+
 		       			'</ul>';
 		       	}else{
 		       		return  '<ul>'+

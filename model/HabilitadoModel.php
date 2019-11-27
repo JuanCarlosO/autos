@@ -310,6 +310,21 @@ class HabilitadoModel extends Conection
 			for ($i=0; $i < count($reparaciones) ; $i++) { 
 				$detalle['reparaciones'][$i] = $reparaciones[$i];
 			}
+			#Agregar las garantias 
+			$this->sql = "
+				SELECT *
+				FROM garantias
+				WHERE solicitud = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute(array($sol));
+			$garantias = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+			if ( isset($garantias) && !empty($garantias) ) {
+				$detalle['garantias'] = $garantias;
+			}else{
+				$garantias = array('estado'=>'empty','message'=>'Sin garantias');
+				$detalle['garantias'] = $garantias;
+			}
 			return json_encode($detalle);
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
@@ -1136,6 +1151,46 @@ class HabilitadoModel extends Conection
 					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA SE GUARDO CON ÉXITO.' ));
 				}
 			}
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function finalizarGarantia()
+	{
+		try {
+			#finalizar en la BD
+			$this->sql = "
+			UPDATE garantias SET f_salida = DATE(NOW()) WHERE id = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$_POST['id'],PDO::PARAM_INT);
+			$this->stmt->execute();
+			return json_encode(array('status'=>'success','message'=>'LA GARANTIA FINALIZÓ CON ÉXITO.' ));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function saveGarantia()
+	{
+		try {
+			$o = mb_strtoupper($_POST['observaciones'],'utf-8');
+			$this->sql = "
+			INSERT INTO garantias(id, solicitud, f_entrada, f_salida, observaciones) 
+			VALUES 
+			(
+				'',
+				?,
+				?,
+				NULL,
+				?
+			)
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$_POST['solicitud_id'],PDO::PARAM_INT);
+			$this->stmt->bindParam(2,$_POST['f_entrada'],PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$o,PDO::PARAM_STR);
+			$this->stmt->execute();
+			return json_encode(array('status'=>'success','message'=>'LA GARANTIA SE CREÓ CON ÉXITO.' ));
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}

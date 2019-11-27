@@ -30,6 +30,10 @@ class DirectivoController
 	{
 		return $this->model->getCostosElevados();
 	}
+	public function getCostosElevadosByYear()
+	{
+		return $this->model->getCostosElevadosByYear();
+	}
 	
 }
 

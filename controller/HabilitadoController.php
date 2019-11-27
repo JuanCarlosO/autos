@@ -360,6 +360,15 @@ class HabilitadoController
 	{
 		return $this->model->savePDFSolicitud();
 	}
+	public function finalizarGarantia()
+	{
+		return $this->model->finalizarGarantia();
+	}
+	public function saveGarantia()
+	{
+		return $this->model->saveGarantia();
+	}
+	
 }
 
 class PDF2 extends FPDF

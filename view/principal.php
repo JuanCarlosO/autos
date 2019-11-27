@@ -82,6 +82,7 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/modals/modal_cotizacion.php';
 							  		#
 							  		include 'view/pages/habilitado_v/modals/modal_solicitud_historica.php';
+							  		include 'view/pages/habilitado_v/modals/modal_add_garantia.php';
 							  		break;
 							  	case 'add_taller':
 							  		include 'view/pages/habilitado_v/content_header/header_add_taller.php';

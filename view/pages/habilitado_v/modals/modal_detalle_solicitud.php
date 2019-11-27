@@ -191,6 +191,20 @@
             </button>
           </div>
         </div>
+        <div class="row">
+          <div class="col-md-9">
+            <center><label>GARANTIAS APLICADAS</label></center>
+            <ol id="list_garantias" type="1" start="1">
+              <li></li>
+            </ol>
+          </div>
+          <div class="col-md-3">
+            <button id="btn_garantia" class="btn bg-orange btn-block btn-flat" data-toggle="tooltip" title="Agregar una devolución por garantia">
+              <i class="fa fa-plus"></i>
+              Aplicar garantia
+            </button>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger btn-flat pull-left" data-dismiss="modal">Cerrar</button>
