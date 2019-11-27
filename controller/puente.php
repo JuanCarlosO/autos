@@ -206,6 +206,13 @@ if ( isset( $_POST['option'] ) )
 		case '47':
 			echo $hab->generateFullSol();
 			break;
+		case '48':
+			echo $hab->cancelarSolicitud();
+			break;
+		case '49':
+			echo $hab->savePDFSolicitud();
+			break;
+		
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;

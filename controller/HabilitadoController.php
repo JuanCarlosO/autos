@@ -343,7 +343,7 @@ class HabilitadoController
 		$pdf->Cell(192,5,'FIRMAS',1,0,'C',1);
 		$pdf->SetFont('Helvetica','',10);
 		$pdf->Ln(5);
-		$pdf->MultiCell(95,12,utf8_decode('Elaboró'.PHP_EOL.'C. GERARDO LOPEZ SALAZAR '.PHP_EOL.'Habilitado de control vehicular'),1,'C');
+		$pdf->MultiCell(95,12,utf8_decode('Elaboró'.PHP_EOL.'C. Gerardo López Salazar '.PHP_EOL.'Habilitado de control vehicular'),1,'C');
 		$x=$pdf->GetX();
 		$y=$pdf->GetY();
 		$pdf->SetXY($x+95,$y-36);
@@ -352,7 +352,14 @@ class HabilitadoController
 		
 		$pdf->Output();
 	}
-	
+	public function cancelarSolicitud()
+	{
+		return $this->model->cancelarSolicitud();
+	}
+	public function savePDFSolicitud()
+	{
+		return $this->model->savePDFSolicitud();
+	}
 }
 
 class PDF2 extends FPDF

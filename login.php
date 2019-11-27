@@ -54,12 +54,7 @@ include 'view/pages/head.php';
         <div class="col-xs-3"></div>
       </div>
     </form>
-    <hr>
-    <div class="row">
-      <div class="col-xs-12 text-center">
-        <a href="registro.php" class="">No tengo cuenta - <b>Deseo registrarme</b>.</a>
-      </div>
-    </div>
+    
   </div>
   <!-- /.login-box-body -->
 </div>

@@ -1077,5 +1077,69 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}
 	}
+
+	public function cancelarSolicitud()
+	{
+		try {
+			$evidencia = "";
+			$solicitud = $_POST['sol'];
+			$this->sql = "
+			UPDATE solicitudes SET estado = 4 WHERE id = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$solicitud,PDO::PARAM_STR);
+			$this->stmt->execute();			
+			
+			return json_encode(array('status'=>'success','message'=>'SOLICITUD CANCELADA DE MANERA EXITOSA' ));
+			
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function savePDFSolicitud()
+	{
+		try {
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf' AND $type != 'image/png' AND $type != 'image/jpeg' ) 
+				{
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "
+					INSERT INTO solicitud_documentos(id,solicitud,tipo_doc,archivo) 
+					VALUES ('',?,?,?);
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$_POST['solicitud_id'],PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$_POST['t_sol'],PDO::PARAM_LOB);
+					$this->stmt->bindParam(3,$content,PDO::PARAM_INT);
+					$this->stmt->execute();
+					unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA SE GUARDO CON ÉXITO.' ));
+				}
+			}
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	
 }
 ?>

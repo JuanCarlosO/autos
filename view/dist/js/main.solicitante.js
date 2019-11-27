@@ -48,7 +48,7 @@ function all_cars() {
 	        { leyenda: 'Vehículo', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Descripcion', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Editar', style: 'width:50px;'},
-	        { leyenda: 'Eliminar', style: 'width:50px;'},
+	        
 	        { leyenda: 'PDF', style: 'width:50px;'},
 	        
 	    ],
@@ -77,18 +77,7 @@ function all_cars() {
 	        		});
 	        	}
 	        } },
-	        { class:'text-center', formato:function(tr,obj,celda){
-	        	if ( obj.estado == 'Creada' ) {
-		        	return anexGrid_boton({
-		        		class: 'btn btn-danger btn-flat',
-		        		contenido: '<i class="fa fa-trash"></i>',
-		        		attr: [
-	                    	'onclick="eliminar_sol('+obj.id+');"'
-	                	]
-		        	});
-	        	}
-	        	
-	        } },
+	        
 	        { class:'text-center', formato:function(tr,obj,celda){
 	        	return anexGrid_link({
 	        		class: 'btn btn-default  btn-flat',

@@ -97,7 +97,7 @@ function sol_by_cost( f_ini,f_fin,placa ) {
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:10%;',ordenable:true, columna:'id' },
-	        { leyenda: 'Datos de la salud', style: 'width:80%;',class:'text-center' },
+	        { leyenda: 'Datos de la solicitud', style: 'width:80%;',class:'text-center' },
 	        { leyenda: 'Monto de cotización',  style:'width:10%;' ,class:'text-center' }, 	        
 	    ],
 	    modelo: [

@@ -28,7 +28,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Su nombre</label>
+                                            <label>Nombre de quien registra</label>
                                             <input type="text" id="vigilante" name="vigilante" value="" placeholder="Ej: Hector" class="form-control" required>
                                             <input type="hidden" id="vigilante_id" name="vigilante_id" value="" required>
                                         </div>
@@ -50,6 +50,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
+                                        <label>Nivel de combustible</label>
                                         <input type="text" class="knob" data-thickness="0.2" data-angleArc="250" data-angleOffset="-125" value="30" data-width="120" data-height="120" data-fgColor="#00c0ef">
                                         <input type="hidden" id="nivel_gas" name="nivel_gas" value="">
                                     </div>

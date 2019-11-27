@@ -51,6 +51,7 @@ function getURL() {
 		frm_cotizar();
 		frm_entrega();
 		frm_solicitud_historica();
+		frm_upload_sol();
 		/*Autocomplete*/
 		autocompletado('sp_entrega','spe_id');
 		autocompletado('sp_recibe','spr_id');
@@ -72,6 +73,7 @@ function getURL() {
 	}else if ( URLsearch == '?menu=add_car' ) {
 		$('#tree_add').addClass('active');
 		$('#add_car').addClass('active');
+		selectTiposDoc();
 		/*autocompletado de nombre*/
 		autocompletado( 'personal','personal_id' );
 
@@ -143,7 +145,7 @@ function all_sol() {
 	        { leyenda: 'Descripcion', columna: 'n_short', style:'width:250px;' },
 	        { leyenda: 'Detalle', style: 'width:15px;'},
 	        { leyenda: 'PDF', style: 'width:15px;'},
-	        
+	        { leyenda: 'SUBIR DOC.', style: 'width:10px;'},
 	    ],
 	    modelo: [
 	        { propiedad: 'id',class:'text-center',formato:function(tr,obj,celda) {
@@ -151,6 +153,8 @@ function all_sol() {
 	        		tr.addClass('bg-yellow');
 	        	}else if (obj.estado =='Historica') {
 	        		tr.addClass('bg-gray-active');
+	        	}else if (obj.estado =='Cancelada') {
+	        		tr.addClass('bg-red-active ');
 	        	}else{
 	        		tr.addClass('bg-aqua');
 	        	}
@@ -197,6 +201,20 @@ function all_sol() {
 	        	
 	        	
 	        } },
+	        { class:'text-center', formato:function(tr,obj,celda){
+	        	return anexGrid_boton({
+		        		contenido:'<i class="fa fa-upload"></i>',
+		        		class: 'btn btn-success btn-flat adjuntar ',
+		        		attr:[
+						'data-toggle="modal" data-target="#UploadFileSol"', 
+						],
+		        		type:'button',
+		        		value:obj.id
+	        	});
+	        	
+	        	
+	        	
+	        } },
 	        
 	    ],
 	    url: 'controller/puente.php?option=8',
@@ -213,6 +231,10 @@ function all_sol() {
 		$('[name="solicitud_id"]').val( $(this).val() );
 		/*Colocar la informacion en el formlario*/
 		getDetalleSol( $(this).val() );
+	});
+	table.tabla().on('click', '.adjuntar', function(event) {
+		event.preventDefault();
+		$('[name="solicitud_id"]').val( $(this).val() );
 	});
 	
 	//return false;
@@ -412,7 +434,7 @@ function all_choferes(){
 function frm_add_car(){
 	$('#frm_add_car').submit(function(e){
 		e.preventDefault();
-		var dataForm = $(this).serialize();
+		var dataForm = new FormData(document.getElementById("frm_add_car"));
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
@@ -420,6 +442,8 @@ function frm_add_car(){
 			data: dataForm,
 			cache:false,
 			async:false,
+			processData:false,
+			contentType:false,
 		})
 		.done(function(response) {
 			alerta(response.status,response.message );
@@ -1881,5 +1905,95 @@ function view_evidencia(){
 		alert("Error: "+jqXHR.textStatus);
 	});
 	
+	return false;
+}
+/*Agregar un campo*/
+function add_file_auto() {
+    $('#field_files').append(
+    	'<div class="row">'+
+    	    '<div class="col-md-2 text-right">'+
+    	        '<label>Tipo de documento</label>'+
+    	    '</div>'+
+    	    '<div class="col-md-3">'+
+    	        '<select id="tipo_doc" name="tipo_doc[]" class="form-control tipos_doc" required >'+
+    	            '<option value="">...</option>'+
+    	        '</select>'+
+    	    '</div>'+
+    	    '<div class="col-md-5">'+
+    	        '<input type="file" name="archivo[]" class="form-control" accept=".pdf">'+
+    	    '</div>'+
+    	    
+    	'</div><br>'
+    );
+    selectTiposDoc();
+}
+//RECUPERAR LOS TIPOS DE DOCUEMENTO DEL VEHICULO
+function selectTiposDoc() {
+	$('select.tipos_doc').html('');
+	$('select.tipos_doc').append('<option value=""></option>');
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '34'},
+	})
+	.done(function(response) {
+		$.each(response, function(i, val) {
+			$('select.tipos_doc').append('<option value="'+val.id+'">'+val.nom+'</option>');
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert("Error: "+jqXHR.responseText);
+	});
+	
+}
+/*Cancelar la solicitud*/
+function cancelaSol() {
+	var sol ;
+	sol = $('#solicitud_id').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '48',sol:sol},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alert(response.message);
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+		location.reload();
+	});
+	
+}
+
+function frm_upload_sol() {
+	$('#frm_upload_sol').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_upload_sol"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			cache:false,
+			async:false,
+			processData:false,
+			contentType:false,
+		})
+		.done(function(response) {
+			alert(response.message);
+			document.getElementById("frm_upload_sol").reset();
+			$('#UploadFileSol').modal('toggle');
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error: "+jqXHR.responseText);
+		});
+		
+	});
 	return false;
 }

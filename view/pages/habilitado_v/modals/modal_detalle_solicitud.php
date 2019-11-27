@@ -5,7 +5,11 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>
         </button>
-        <h4 class="modal-title"> <center>DETALLE DE LA SOLICITUD</center> </h4>
+        <h4 class="modal-title"> 
+          <button type="" class="btn btn-danger btn-flat" onclick="cancelaSol();"> 
+            <i class="fa fa-times"></i> Cancelar solicitud </button>  
+          <center>DETALLE DE LA SOLICITUD</center> 
+        </h4>
       </div>
       <div class="modal-body">
         <input type="hidden" id="solicitud_id" name="solicitud_id" value="">

@@ -77,6 +77,7 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/modals/modal_ingreso_taller.php';
 							  		include 'view/pages/habilitado_v/modals/modal_finalizar_ingreso.php';
 							  		include 'view/pages/habilitado_v/modals/modal_entrega_resguardatario.php';
+							  		include 'view/pages/habilitado_v/modals/modal_subir_solicitud.php';
 							  		#LISTA DE MODALES PARA LA COTIZACION Y FACTURACIÓN
 							  		include 'view/pages/habilitado_v/modals/modal_cotizacion.php';
 							  		#

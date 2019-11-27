@@ -136,6 +136,30 @@
                                     </div>
                                 </div>
                     		</div>
+                            <fieldset>
+                                <legend>Carpeta digital de documentos del vehículo</legend>
+                                <div class="row">
+                                    <div class="col-md-2 text-right">
+                                        <label>Tipo de documento</label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select id="tipo_doc" name="tipo_doc[]" class="form-control tipos_doc" required>
+                                            <option value="">...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="file" name="archivo[]" class="form-control" required="" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success btn-block btn-flat" onclick="add_file_auto();">
+                                            <i class="fa fa-plus"></i> Adjuntar otro docuemnto
+                                        </button>
+                                    </div>
+                                </div>
+                                <br>
+                                <div id="field_files"></div>
+                            </fieldset>
+                            
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">

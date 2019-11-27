@@ -53,7 +53,7 @@
                   <a href="#" class="btn btn-default btn-flat">Perfil</a>
                 </div>
                 <div class="pull-right">
-                  <button type="button" class="btn btn-danger btn-flat" onclick="logout();">Salir de ST</button>
+                  <button type="button" class="btn btn-danger btn-flat" onclick="logout();">Salir</button>
                 </div>
               </li>
             </ul>

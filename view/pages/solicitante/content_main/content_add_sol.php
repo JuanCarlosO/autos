@@ -1,11 +1,22 @@
 <?php 
-include_once 'model/SolicitanteModel.php';
+include_once 'entity/solicitudEntity.php';
+include_once 'model/SolicitudModel.php';
 try {
     if ( isset($_GET['solicitud']) ) {
         $sol = (int)$_GET['solicitud'];
         if ( $sol > 0) {
             /*Recuperar la solicitud*/
-            echo "Modulo para modificar solicitud: ".$sol;
+            $solicitud = new SolicitudModel();
+            $request=(object)$solicitud->getSolicitud($_GET['solicitud']);
+            $entidad = new solicitudEntity;
+            $entidad->__SET('id',$request->id);
+            $entidad->__SET('folio',$request->folio);
+            $entidad->__SET('fecha',$request->f_sol);
+            $entidad->__SET('km',$request->km);
+            $entidad->__SET('solicitante',$request->solicitante);
+            $entidad->__SET('placa',$request->vehiculo);
+            $entidad->__SET('descripcion',$request->descripcion);
+            
         }
     }
 } catch (Exception $e) {
@@ -20,7 +31,7 @@ try {
             <div class="col-md-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Generar una solicitud de prestamo de vehículo.</h3>
+                        <h3 class="box-title">Generar solicitud de reparación / mantenimiento de vehículo.</h3>
                         <div class="box-tools pull-right">
                             <button type="button" class="btn btn-box-tool" data-widget="collapse">
                                 <i class="fa fa-minus"></i>
@@ -47,19 +58,19 @@ try {
                     			<div class="col-md-4">
                     				<div class="form-group">
                     					<label>Folio</label>
-                    					<input type="text" id="folio" name="folio" class="form-control" placeholder="Ej: 0001-2019" required autofocus="on" readonly="on" value="">
+                    					<input type="text" id="folio" name="folio" class="form-control" placeholder="Ej: 0001-2019" required autofocus="on" readonly="on" value="<?=$entidad->__GET('folio')?>">
                     				</div>
                     			</div>
                     			<div class="col-md-4">
                     				<div class="form-group">
                     					<label>Fecha de solicitud</label>
-                    					<input type="date" id="f_sol" name="f_sol" required="" class="form-control" value="<?=date('Y-m-d')?>">
+                    					<input type="date" id="f_sol" name="f_sol" required="" class="form-control" value="<?=$entidad->__GET('fecha')?>">
                     				</div>
                     			</div>
                     			<div class="col-md-4">
                                     <div class="form-group">
                                         <label> Kilometraje </label>
-                                        <input type="text" id="km" name="km" placeholder="Ej: 230123" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;" class="form-control">
+                                        <input type="text" id="km" name="km" placeholder="Ej: 230123" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;" class="form-control" value="<?=$entidad->__GET('km')?>">
                                     </div>
                                 </div>
                     		</div>
@@ -67,7 +78,7 @@ try {
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Nombre del solicitante</label>
-                                        <input type="hidden" id="solicitante_h" name="solicitante_h">
+                                        <input type="hidden" id="solicitante_h" name="solicitante_h" value="<?=$entidad->__GET('solicitante')?>">
                                         <input type="text" id="solicitante_name" name="solicitante_name" class="form-control" autocomplete="off" value="" required="">
                                     </div>
                                 </div>
@@ -95,7 +106,7 @@ try {
                                     <div class="form-group">
                                         <label>Número de placa</label>
                                         <input type="hidden" id="placa_h" name="placa_h" >
-                                        <input type="text" id="placa" name="placa" class="form-control" placeholder="Ej: LXP9680" autocomplete="off">
+                                        <input type="text" id="placa" name="placa" class="form-control" placeholder="Ej: LXP9680" autocomplete="off" value="<?=$entidad->__GET('placa')?>">
                                     </div>
                                 </div>
                             </div>
@@ -114,7 +125,7 @@ try {
                     			<div class="col-md-12">
                     				<div class="form-group">
                     					<label for="">Descripción del servicio</label>
-                    					<textarea style="resize: vertical;" placeholder="Escriba aqui..." class="form-control" rows="5" value="" id="desc" name="desc"></textarea>
+                    					<textarea style="resize: vertical;" placeholder="Escriba aqui..." class="form-control" rows="5" value="" id="desc" name="desc"><?=$entidad->__GET('descripcion')?></textarea>
                     				</div>
                     			</div>
                     		</div>
