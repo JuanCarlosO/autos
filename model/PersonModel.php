@@ -30,8 +30,13 @@ class PersonModel extends Conection
 	public function autoPersonal()
 	{
 		try {
+			if ( isset($_REQUEST['vigilantes']) ) {
+				$this->sql = "SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat) AS value , id FROM personal WHERE (nombre LIKE ? OR ap_pat LIKE ? OR ap_mat = ?) AND t_trabajador = 2";
+			}else{
+				$this->sql = "SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat) AS value , id FROM personal WHERE (nombre LIKE ? OR ap_pat LIKE ? OR ap_mat = ?)";
+			}
 			$data = "%".$_REQUEST['term']."%";
-			$this->sql = "SELECT CONCAT(nombre,' ',ap_pat,' ',ap_mat) AS value , id FROM personal WHERE nombre LIKE ? OR ap_pat LIKE ? OR ap_mat = ? ";
+			
 			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->bindParam(1,$data,PDO::PARAM_STR);
 			$this->stmt->bindParam(2,$data,PDO::PARAM_STR);

@@ -66,6 +66,14 @@
 	        <div class="row">
 	        	<div class="col-md-12">
 	        		<div class="form-group">
+	        			<label>Subir documento</label>
+	        			<input type="file" name="archivo" value="" class="form-control" required accept=".pdf">
+	        		</div>
+	        	</div>
+	        </div>	
+	        <div class="row">
+	        	<div class="col-md-12">
+	        		<div class="form-group">
 	        			<label>Observaciones</label>
 	        			<textarea class="form-control" id="" name="observaciones" style="resize: vertical;" placeholder="Agregar observaciones"></textarea>
 	        		</div>

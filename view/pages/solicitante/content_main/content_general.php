@@ -24,22 +24,13 @@
                             <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                         </div>
                     </div>
-                    <!-- /.box-header -->
                     <div class="box-body">
                         <div class="table-responsive">
                             <div id="all_cars"></div>
                         </div>
                     </div>
-                    <!-- ./box-body -->
-                    
-                    <!-- /.box-footer -->
                 </div>
-                <!-- /.box -->
             </div>
         </div>
-      <!--------------------------
-        | Your Page Content Here |
-        -------------------------->
     </section>
-    <!-- /.content -->
 <div id="pdf"></div>

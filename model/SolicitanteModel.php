@@ -24,11 +24,13 @@ class SolicitanteModel extends Conection
 			}
 			
 			$this->sql = "
-			SELECT s.*,m.nom AS marca,t.nom AS tipo, v.placas, v.modelo, v.niv, CONCAT(p.nombre, ' ', p.ap_pat,' ',p.ap_mat) AS full_name FROM solicitudes AS s
+			SELECT s.*,m.nom AS marca,t.nom AS tipo, v.placas, v.modelo, v.niv, CONCAT(p.nombre, ' ', p.ap_pat,' ',p.ap_mat) AS full_name , i.observaciones AS opinion_hv
+			FROM solicitudes AS s
 			INNER JOIN vehiculos AS v ON v.id = s.vehiculo
 			INNER JOIN personal AS p ON p.id = s.solicitante
 			INNER JOIN tipos_v AS t ON t.id = v.tipo
 			INNER JOIN marcas AS m ON m.id = v.marca
+			INNER JOIN ingreso_taller AS i ON i.solicitud = s.id
 			WHERE
 			".$wh." ORDER BY $anexgrid->columna $anexgrid->columna_orden
             LIMIT $anexgrid->pagina, $anexgrid->limite ";

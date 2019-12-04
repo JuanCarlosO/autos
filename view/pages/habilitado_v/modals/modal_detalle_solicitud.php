@@ -205,6 +205,20 @@
             </button>
           </div>
         </div>
+        <div class="row">
+          <div class="col-md-9">
+            <center><label>AGREGAR FACTURA DE LA REPARACIÓN</label></center>
+            <ol id="list_facturas" type="1" start="1">
+              <li></li>
+            </ol>
+          </div>
+          <div class="col-md-3">
+            <button id="btn_factura" class="btn bg-orange btn-block btn-flat" data-toggle="tooltip" title="Agregar PDF de la factura pagada">
+              <i class="fa fa-plus"></i>
+              Cargar factura
+            </button>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger btn-flat pull-left" data-dismiss="modal">Cerrar</button>

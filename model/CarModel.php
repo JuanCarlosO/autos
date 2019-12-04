@@ -17,7 +17,8 @@ class CarModel extends Conection
 			/*Definir el Where*/
 			if ( isset($_REQUEST['filtros']) ) {
 				$filtros = (object)$_REQUEST['filtros'][0];
-				print_r( $filtros );exit;
+				$wh = ' v.placas LIKE '.'"%'.$filtros->valor.'%"' ;
+
 			}else
 			{
 				$wh = " 1=1 ";

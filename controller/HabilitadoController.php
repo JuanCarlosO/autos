@@ -162,12 +162,19 @@ class HabilitadoController
 	{
 		return $this->model->getEvidencia();
 	}
+	/*Recuperar los datos de 1 vehiculo*/
+	public function getCarEspecifico($id)
+	{
+		return $this->model->getCarEspecifico($id);
+	}
 
 	public function generateBitacora()
 	{
 		#Recuperar el ID de la solicitud 
-		#$solicitud = $this->model->getSolcitudEsp($s);
-
+		$auto = $this->model->getCarEspecifico($_POST['placa_h']);
+		/*
+		 [id] => 3 [tipo] => 1 [marca] => 1 [placas] => MAL8690 [n_resguardo] => 23456789 [color] => VINO [niv] => 987456321 [n_motor] => 567892340987 [modelo] => 2010 [cil] => 4 [resguardatario] => 51 [estado] => ACTIVO [observaciones] => Lorem
+		 */
 		$pdf = new PDF2('L','mm','Letter');
 		$pdf->AliasNbPages();
 		$pdf->AddPage();
@@ -180,31 +187,31 @@ class HabilitadoController
         $pdf->Ln(5);
         $pdf->SetFont('Arial','',8);
         $pdf->Cell(48,5,'Marca:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5, $auto->marca_name ,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,'Modelo:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,$auto->modelo,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,'Tipo:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,$auto->tipo_name,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,'Placas:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,$auto->placas,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,'No. serie:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,$auto->niv,'B',0,'C');
 		$pdf->Ln(5);
-		$pdf->Cell(48,5,'No. inventario:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(48,5,'No. Resguardo:',0,0,'R');
+		$pdf->Cell(148,5,$auto->n_resguardo,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,'Nombre del resguardatario:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,$auto->name_reguardatario,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,'Fecha de resguardo:',0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,$auto->created_at,'B',0,'C');
 		$pdf->Ln(5);
 		$pdf->Cell(48,5,utf8_decode('Período de actualización:'),0,0,'R');
-		$pdf->Cell(148,5,'','B',0,'R');
+		$pdf->Cell(148,5,'','B',0,'C');
 		$pdf->Ln(10);
 		#AGREGAR la tabla 
 		$pdf->Cell(265,5,utf8_decode('R E P A R A C I Ó N   Y   M A N T E N I M I E N T O'),1,0,'C');
@@ -225,22 +232,22 @@ class HabilitadoController
 		$pdf->Cell(25,5,utf8_decode('Comentarios'),1,0,'C');
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','',5);
-		for ($i=0; $i < 15 ; $i++) { 
-			$pdf->Cell(10,5,($i+1),1,0,'C');
-			$pdf->Cell(15,5,'123456',1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('001-2019'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('2019-11-01'),1,0,'C');
-			$pdf->Cell(15,5,utf8_decode('DDS'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('2019-11-01'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('Proveedor'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('123456'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('Fecha factura'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('10,000'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('F. entrada taller'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('Descripción'),1,0,'C');
-			$pdf->Cell(20,5,utf8_decode('No de tarjeton'),1,0,'C');
-			$pdf->Cell(25,5,utf8_decode('Lorem'),1,0,'C');
-			$pdf->Ln(5);
+		for ($i=0; $i < 7 ; $i++) { 
+			$pdf->Cell(10,15,($i+1),1,0,'C');
+			$pdf->Cell(15,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(15,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(20,15,'',1,0,'C');
+			$pdf->Cell(25,15,'',1,0,'C');
+			$pdf->Ln(15);
 		}
 		$pdf->Output();
 	}
@@ -368,6 +375,79 @@ class HabilitadoController
 	{
 		return $this->model->saveGarantia();
 	}
+	public function generalDocumentacion()
+	{
+		return $this->model->generalDocumentacion();
+	}
+	public function getDocumentos()
+	{
+		return $this->model->getDocumentos();
+	}
+	public function getAseguradoras()
+	{
+		return $this->model->getAseguradoras();
+	}
+	public function savePoliza()
+	{
+		return $this->model->savePoliza();
+	}
+	public function getPolizas()
+	{
+		return $this->model->getPolizas();
+	}
+	public function getBajasDocs()
+	{
+		return $this->model->getBajasDocs();
+	}
+	public function getDocsCotizaciones()
+	{
+		return $this->model->getDocsCotizaciones();
+	}
+	public function deleteChofer()
+	{
+		return $this->model->deleteChofer();
+	}
+	public function saveAviso()
+	{
+		return $this->model->saveAviso();
+	}
+	public function list_avisos()
+	{
+		return $this->model->list_avisos();
+	}
+	public function getAvisoPDF()
+	{
+		return $this->model->getAvisoPDF();
+	}
+	public function saveFactura()
+	{
+		return $this->model->saveFactura();
+	}
+	public function getNombreFacturas()
+	{
+		return $this->model->getNombreFacturas();
+	}
+	public function getFacturaPDF()
+	{
+		return $this->model->getFacturaPDF();
+	}
+	public function getDocumentosSolicitud()
+	{
+		return $this->model->getDocumentosSolicitud();
+	}
+	public function documentoSolicitud()
+	{
+		return $this->model->documentoSolicitud();
+	}
+	public function getIMGEventos()
+	{
+		return $this->model->getIMGEventos();
+	}
+	public function getDocSiniestros()
+	{
+		return $this->model->getDocSiniestros();
+	}
+	
 	
 }
 

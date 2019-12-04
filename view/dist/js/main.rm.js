@@ -29,82 +29,199 @@ function getUser() {
 	},'json');
 	return false;
 }
-
+var personal,fallas,talleres;
 /*Listado completo de solicitudes*/
 function all_sol() {
+	var jsonPerson = json_personal();
+	var jsonFallas = json_fallas();
+	var jsonTalleres = json_talleres();
 	var sol = {
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:50px;',ordenable:true, columna:'id' },
-	        { leyenda: 'Detalle de solicitud', style: 'width:300px;',class:'text-center' },
-	        { leyenda: 'Detalle de vehículo',  style:'width:300px;' ,class:'text-center' },
-	        { leyenda: 'Detalle de reparación', style:'width:300px;',class:'text-center' },
-	        { leyenda: 'Reparaciones', style:'width:300px;' }	,
-	        { leyenda: 'Documentos', style:'width:10px;' }	        
+	        { leyenda: 'Folio',class:'text-center', style: 'width:150px;',filtro:true,columna:'s.folio' },
+	        { leyenda: 'Fecha solicitud',class:'text-center', style: 'width:100px;' },
+	        { leyenda: 'Placa',class:'text-center',columna:'placas', style: 'width:150px;',filtro:function(){
+	        	return '<input type="text" id="placa" name="placa" required class="form-control" autocomplete="off">'+
+	        	'<input type="hidden" id="placa_h" name="placa_h" required class="form-control">';
+	        	
+	        }},
+	        { leyenda: 'Resguardatario', columna:'resguardatario', class:'text-center',filtro:function(){
+	        	return anexGrid_select({
+    	            data: jsonPerson
+    	        });
+	        }},
+	        { leyenda: 'Kilometraje',class:'text-center', style: 'width:150px;',columna:'km',filtro:true },
+        	{ leyenda: 'Tipo reparación',class:'text-center',columna:'r.falla',filtro:function(){
+	        	return anexGrid_select({
+    	            data: jsonFallas
+    	        });
+	        }},
+	        { leyenda: 'Fecha salida',class:'text-center' },
+	        { leyenda: 'Fecha entrada',class:'text-center' },
+	        { leyenda: 'Taller', class:'text-center' ,columna:'r.taller', style: 'width:150px;',class:'text-center',filtro:function(){
+	        	return anexGrid_select({
+    	            data: jsonTalleres
+    	        });
+	        }},
+	        { leyenda: 'Cotización',class:'text-center' },
+	        { leyenda: 'Costo factura',class:'text-center' },
+	        { leyenda: 'Fecha de pago',class:'text-center' },
+	        { leyenda: 'Estatus',class:'text-center',columna:'estado',filtro:function(){
+	        	return anexGrid_select({
+    	            data: [{valor:'',contenido:''},{valor:1,contenido:'Pagado'},{valor:2,contenido:'Sin pagar'}],
+    	        });
+	        }},
+	        { leyenda: 'Pagar' , class:'text-center'},
+	        { leyenda: 'Documentos' , class:'text-center'},
 	    ],
 	    modelo: [
-	    	{propiedad:'solicitudes.id'},
-	        {formato: function(tr,obj,celda){
-
-	        	return '<ul>'+
-	        				'<li>'+'<label># de solicitud:</label> '+obj.solicitudes.id+'</li>'+
-	        				'<li>'+'<label>Fecha:</label> '+obj.solicitudes.f_sol+'</li>'+
-	        				'<li>'+'<label>Solicitante:</label> '+obj.solicitudes.solicitante_name+'</li>'+
-	        				'<li>'+'<label>Área:</label> '+obj.solicitudes.area_sol+'</li>'+
-	        		   '<ul>';
-	        }},
-	        {propiedad:'vehiculo',formato: function(tr,obj,celda){
-	        	
-	        	var x = obj.data_vehiculo;
-	        	var pos = parseInt(obj.solicitudes.id);
-	        	//console.log(x[0].id);
-	        	return '<ul>'+
-	        				'<li>'+'<label>Marca:</label> '+x[0].marca_name+'</li>'+
-	        				'<li>'+'<label>Tipo:</label> '+x[0].tipo_name+'</li>'+
-	        				'<li>'+'<label>Placas:</label> '+x[0].placas+'</li>'+
-	        				'<li>'+'<label>Modelo:</label> '+x[0].modelo+'</li>'+
-	        				'<li>'+'<label>KM:</label> '+x[0].niv+'</li>'+
-	        				'<li>'+'<label>NIV:</label> '+x[0].niv+'</li>'+
-	        				'<li>'+'<label>Resguardatario:</label> '+x[0].resguardatario+'</li>'+
-	        				'<li>'+'<label># de verificación:</label> '+x[0].niv+'</li>'+
-	        				'<li>'+'<label>Valor factura:</label> '+x[0].niv+'</li>'+
-	        		   '<ul>';
-	        }},
-	        { formato: function(tr,obj,celda){
-	        	return '<ul>'+
-	        				'<li>'+'<label>Desc. Solicitante:</label> '+obj.solicitudes.descripcion+'</li>'+
-	        				
-	        		   '<ul>';
-	        }},
-	        { formato: function(tr,obj,celda){
-	        	
-	        	var lista = '<ul>';
-	        	for( i=0; i<obj.data_reparaciones.length; i++ ){
-	        		lista += '<li><label>Falla:</label>'+obj.data_reparaciones[i].falla+'<br> <label>Taller:</label>'+obj.data_reparaciones[i].r_social+'</li>';
-	        	}
-	        	lista += '</ul>';
-	        	return lista;
-	        }},
-	        { class:'text-center',formato: function(tr,obj,celda){
-	        	return anexGrid_boton({
-	        		type:'button',
-	        		contenido: '<i class="fa fa-file-pdf-o"></i>',
-	        		class:'btn btn-default btn-flat',
-	        		style: 'color:#ea0a0a;font-size:20px;',
-	        		attr:[
-	        			'onclick="modal_docs('+obj.solicitudes.id+');"'
-	        		]
-	        	});
-	        }}
+	    	{propiedad:'solicitudes.id'		, class:'text-center'},
+	    	{propiedad:'solicitudes.folio'	, class:'text-center'},
+	    	{propiedad:'solicitudes.f_sol'	, class:'text-center'},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		return obj.data_vehiculo[0].placas;
+	    	}},
+	    	{ formato: function(tr,obj,celda){
+	    		return obj.data_vehiculo[0].res_name;
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		return obj.data_vehiculo[0].km;
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.fallas.estado == 'vacio' ){
+	    			return obj.fallas.message;
+	    		}else{
+	    			return obj.fallas.nombre;
+	    		}	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.ingreso_taller.estado == 'vacio' ){
+	    			return obj.ingreso_taller.message;
+	    		}else{
+	    			return obj.ingreso_taller.f_salida;
+	    		}
+	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.ingreso_taller.estado == 'vacio' ){
+	    			return obj.ingreso_taller.message;
+	    		}else{
+	    			return obj.ingreso_taller.f_salida;
+	    		}
+	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.fallas.estado == 'vacio' ){
+	    			return obj.fallas.message;
+	    		}else{
+	    			return obj.fallas.r_social;
+	    		}	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.cotizacion.estado == 'vacio' ){
+	    			return obj.cotizacion.message;
+	    		}else{
+	    			return obj.cotizacion.monto;
+	    		}	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.factura.estado == 'vacio' ){
+	    			return obj.factura.message;
+	    		}else{
+	    			return obj.factura.total;
+	    		}	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.factura.estado == 'vacio' ){
+	    			return obj.factura.message;
+	    		}else{
+	    			return obj.factura.created_at;
+	    		}	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if( obj.factura.estado == 'vacio' ){
+	    			return obj.factura.message;
+	    		}else{
+	    			return obj.factura.estado;
+	    		}	    		
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		if (obj.factura.estado != 'Pagado') {
+	    			return '<button class="btn btn-success btn-flat" onclick="pagar_solicitud('+obj.solicitudes.id+');">'+
+	    				'<i class="fa fa-dollar"></i>'+
+	    				'<i class="fa fa-dollar"></i>'+
+	    				'<i class="fa fa-dollar"></i>'+
+	    			'</button>';
+	    		}
+	    	}},
+	    	{ class:'text-center', formato: function(tr,obj,celda){
+	    		return '<button class="btn btn-info btn-flat" onclick="modal_docs('+obj.solicitudes.id+');">'+
+	    			'<i class="fa fa-eye"></i>'+
+	    		'</button>';
+	    	}},
+	    	
 	    ],
 	    url: 'controller/puente.php?option=13',
 	    limite: [20,50,100],
 	    columna: 'id',
 	    columna_orden: 'DESC',
 	    paginable:true,
+	    filtrable:true
+	    
 	};
 	var table = $("#solicitudes").anexGrid(sol);
-	
+	autocomplete_placas();
+	return table;
+}
+
+function json_personal() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '67'},
+		async:false,
+	})
+	.done(function(response) {
+		personal = response;
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	return personal;	
+}
+function json_fallas() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '68'},
+		async:false,
+	})
+	.done(function(response) {
+		fallas = response;
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	return fallas;	
+}
+function json_talleres() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '69'},
+		async:false,
+	})
+	.done(function(response) {
+		talleres = response;
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	return talleres;	
 }
 
 //Listado completo de entradas y salidas de vehculos 
@@ -276,4 +393,58 @@ function view_factura (){
 	});
 	$('#modal_view_doc').modal('toggle');
 	return false;
+}
+// Autocomplete lista de vehiculos 
+function autocomplete_placas() {
+	$('#placa').autocomplete({
+        autoFocus:true,
+        source: 'controller/puente.php?option=4',
+        select: function( event, ui ){
+            $('#placa_h').val(ui.item.id);
+        },
+        delay:300
+    });
+	return false;
+}
+function pagar_solicitud(solicitud) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '74',sol:solicitud},
+		async:false
+	})
+	.done(function(response) {
+		alerta(response.status,response.message);
+		all_sol().refrescar();
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alerta('error',jqXHR.responseText );
+	});
+	
+	return false;
+}
+
+function alerta( estado , mensaje ) {
+	var clase ;
+	var status;
+	if ( estado == 'success' ) {
+		clase 	= 'alert-success';
+		status 	= 'CORRECTO! ';
+	}else{
+		status 	= 'OCURRIO UN ERROR! ';
+		clase = 'alert-danger';
+	}
+	$('#alerta').removeClass('hidden');
+	$('#alerta').addClass(clase);
+	$('#estado').text(status);
+	$('#message').text(mensaje);
+	//document.location.href = "#alerta";
+	setTimeout(function(){
+		$('#alerta').addClass('hidden');
+		$('#alerta').removeClass(clase);
+		$('#estado').text('');
+		$('#message').text('');
+		//location.reload();
+	},5000);
 }

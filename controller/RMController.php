@@ -22,6 +22,23 @@ class RMController
 	{
 		return $this->model->getPDFactura();
 	}
+	public function getJSONPersonal()
+	{
+		return $this->model->getJSONPersonal();
+	}
+	public function getJSONFallas()
+	{
+		return $this->model->getJSONFallas();
+	}
+	public function getJSONTalleres()
+	{
+		return $this->model->getJSONTalleres();
+	}
+	public function pagarSolicitud()
+	{
+		return $this->model->pagarSolicitud();
+	}
+	
 	
 }
 ?>

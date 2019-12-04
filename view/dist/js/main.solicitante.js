@@ -2,7 +2,6 @@ $(document).ready(function() {
 	$('[data-toggle="tooltip"]').tooltip();
 	getURL();
 	getUser();
-	
 });
 /*RECUPERAR EL NOMBRE Y PERFIL DEL USUARIO*/
 function getUser() {
@@ -46,7 +45,7 @@ function all_cars() {
 	        { leyenda: 'Folio', style: 'width:100px;', columna: 'id',ordenable:true },
 	        { leyenda: 'Solicitante', columna: 'n_short', style:'width:100px;' },
 	        { leyenda: 'Vehículo', columna: 'n_short', style:'width:200px;' },
-	        { leyenda: 'Descripcion', columna: 'n_short', style:'width:200px;' },
+	        { leyenda: 'Descripciones', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Editar', style: 'width:50px;'},
 	        
 	        { leyenda: 'PDF', style: 'width:50px;'},
@@ -65,7 +64,10 @@ function all_cars() {
 	        				'<li>'+'<label>NIV:</label> '+obj.niv+'</li>'
 	        		   '<ul>';
 	        }},
-	        { propiedad: 'descripcion'},
+	        { class:'text-justify',formato:function(tr,obj,celda){
+	        	return '<p><b>Descripción solicitante: </b>'+obj.descripcion+'</p>'+
+	        	'<p><b>Descripción habilitado vehicular: </b>'+obj.opinion_hv+'</p>';
+	        }},
 	        { class:'text-center', formato:function(tr,obj,celda){
 	        	if ( obj.estado == 'Creada' ) {
 	        		return anexGrid_boton({

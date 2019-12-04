@@ -143,11 +143,19 @@ class HabilitadoModel extends Conection
 	{
 		try {
 			$anexgrid = new AnexGrid();
+			
 			/*Definir el Where*/
 			$folio = "";
 			if ( isset($_REQUEST['filtros']) ) {
-				$filtros = (object)$_REQUEST['filtros'][0];
-				$wh = $filtros->columna." LIKE '%".$filtros->valor."%'";
+				/* Si es que hay filtro, tenemos que crear un WHERE dinámico */
+			   $wh = "v.id > 0";
+
+			   foreach($anexgrid->filtros as $f)
+			   {
+			       $wh .= " AND ".$f['columna'] ." LIKE '%". $f['valor'] . "%'";
+			   }
+				
+				
 			}else
 			{
 				$wh = " 1=1 ";
@@ -162,6 +170,7 @@ class HabilitadoModel extends Conection
 			WHERE
 			".$wh." ORDER BY $anexgrid->columna $anexgrid->columna_orden
             LIMIT $anexgrid->pagina, $anexgrid->limite ";
+            
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$modulos = $this->stmt->fetchAll(PDO::FETCH_OBJ);
@@ -169,7 +178,7 @@ class HabilitadoModel extends Conection
 			INNER JOIN vehiculos AS v ON v.id = s.vehiculo
 			LEFT JOIN personal AS p ON p.id = s.solicitante
 			INNER JOIN tipos_v AS t ON t.id = v.tipo
-			INNER JOIN marcas AS m ON m.id = v.marca";
+			INNER JOIN marcas AS m ON m.id = v.marca WHERE $wh";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
@@ -183,55 +192,84 @@ class HabilitadoModel extends Conection
 	public function saveSiniestro($post)
 	{
 		try {
-
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
 			$aseguradora 	= mb_strtoupper($post['name_aseguradora'],'utf-8');
-			$observaciones  = (isset($post['observaciones'])) ? mb_strtoupper($post['observaciones'],'utf-8') : NULL ;
-			$this->sql = "INSERT INTO siniestros (
-				id,
-				aseguradora,
-				f_hechos,
-				f_entrada,
-				f_salida,
-				observaciones,
-				solicitud_id,
-				estatus
-			) VALUES 
-			(
-				'',
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				1
-			);";
-			$this->stmt = $this->pdo->prepare( $this->sql );
-			$this->stmt->bindParam(1,$aseguradora,PDO::PARAM_STR);
-			$this->stmt->bindParam(2,$post['f_hechos'],PDO::PARAM_STR);
-			$this->stmt->bindParam(3,$post['f_entrada'],PDO::PARAM_STR);
-			$this->stmt->bindParam(4,$post['f_salida'],PDO::PARAM_STR);
-			$this->stmt->bindParam(5,$observaciones,PDO::PARAM_STR);
-			$this->stmt->bindParam(6,$post['solicitud_id'],PDO::PARAM_INT);			
-			$this->stmt->execute();
+			$observaciones =(isset($post['observaciones'])) ? mb_strtoupper($post['observaciones'],'utf-8') : NULL ;
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf' ) 
+				{
+					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "INSERT INTO siniestros (
+						id,
+						aseguradora,
+						f_hechos,
+						f_entrada,
+						f_salida,
+						observaciones,
+						solicitud_id,
+						estatus,
+						archivo
+					) VALUES 
+					(
+						'',
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						1,
+						'".$content."'
+					);";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$aseguradora,PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$post['f_hechos'],PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$post['f_entrada'],PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$post['f_salida'],PDO::PARAM_STR);
+					$this->stmt->bindParam(5,$observaciones,PDO::PARAM_STR);
+					$this->stmt->bindParam(6,$post['solicitud_id'],PDO::PARAM_INT);			
+					$this->stmt->execute();
 
-			#Recuperar el ultimo siniestro en el que se dio de alta 
-			$this->sql = "SELECT MAX(id) AS ultimo FROM siniestros";
-			$this->stmt = $this->pdo->prepare($this->sql);
-			$this->stmt->execute();
-			$ultimo = $this->stmt->fetch(PDO::FETCH_OBJ);
+					#Recuperar el ultimo siniestro en el que se dio de alta 
+					$this->sql = "SELECT MAX(id) AS ultimo FROM siniestros";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->execute();
+					$ultimo = $this->stmt->fetch(PDO::FETCH_OBJ);
 
-			#Insertar a los tecnicos
-			$this->sql = "INSERT INTO personal_tecnico (id,nombre,siniestro_id) VALUES ('',?,?)";
-			$this->stmt = $this->pdo->prepare($this->sql);
-			for ($i=0; $i < count($post['tecnico']) ; $i++) { 
-				$tecnico = mb_strtoupper($post['tecnico'][$i],'utf-8');
-				$this->stmt->bindParam(1,$tecnico,PDO::PARAM_STR);
-				$this->stmt->bindParam(2,$ultimo->ultimo,PDO::PARAM_INT);
-				$this->stmt->execute();
+					#Insertar a los tecnicos
+					$this->sql = "INSERT INTO personal_tecnico (id,nombre,siniestro_id) VALUES ('',?,?)";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					for ($i=0; $i < count($post['tecnico']) ; $i++) { 
+						$tecnico = mb_strtoupper($post['tecnico'][$i],'utf-8');
+						$this->stmt->bindParam(1,$tecnico,PDO::PARAM_STR);
+						$this->stmt->bindParam(2,$ultimo->ultimo,PDO::PARAM_INT);
+						$this->stmt->execute();
+					}
+					unlink($destiny.$name);
+					return json_encode( array('status'=>'success','message'=>'SINIESTRO ALMACENADO CORRECTAMENTE.') );
+				}
 			}
 
-			return json_encode( array('status'=>'success','message'=>'SINIESTRO ALMACENADO CORRECTAMENTE.') );
+			
+			
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
@@ -240,6 +278,7 @@ class HabilitadoModel extends Conection
 	public function getDetalleSol($sol)
 	{
 		try {
+
 			$detalle = array();		
 			$this->sql = "
 				SELECT s.*,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS name_sol, a.nombre AS area FROM solicitudes AS s
@@ -251,6 +290,7 @@ class HabilitadoModel extends Conection
 			$this->stmt->execute(array($sol));
 			$solicitud = $this->stmt->fetch(PDO::FETCH_OBJ);
 			$auto = $solicitud->vehiculo;
+
 			#recuperar los datos del vehiculo
 			$this->sql = "
 				SELECT v.*,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS name_reguardatario 
@@ -261,6 +301,7 @@ class HabilitadoModel extends Conection
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute(array($auto));
 			$vehiculo = $this->stmt->fetch(PDO::FETCH_ASSOC);
+			
 			#recupera las reparaciones 
 			$this->sql = "
 				SELECT UPPER(c.nombre) AS falla, t.r_social AS taller 
@@ -284,7 +325,7 @@ class HabilitadoModel extends Conection
 			$atendidas = $this->stmt->fetch(PDO::FETCH_ASSOC);
 			#RECUPERAR LOS SINIESTROS 
 			$this->sql = "
-				SELECT *
+				SELECT id, aseguradora, f_hechos, f_entrada, f_salida, observaciones, solicitud_id, estatus
 				FROM siniestros
 				WHERE solicitud_id = ?
 			";
@@ -292,9 +333,19 @@ class HabilitadoModel extends Conection
 			$this->stmt->execute(array($sol));
 			$siniestros = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-			$detalle['solicitud'] 	= $solicitud;
-			$detalle['vehiculo'] 	= $vehiculo;
+			if ( isset($solicitud) && !empty($solicitud) ) {
+				$detalle['solicitud'] 	= $solicitud;
+			}else{
+				$solicitud = array('estado'=>'empty','message'=>'Sin atender');
+				$detalle['solicitud'] 	= $solicitud;
+			}
+			if ( isset($vehiculo) && !empty($vehiculo) ) {
+				$detalle['vehiculo'] 	= $vehiculo;
+			}else{
+				$vehiculo = array('estado'=>'empty','message'=>'Sin atender');
+				$detalle['vehiculo'] 	= $vehiculo;
+			}
+			
 			if ( isset($atendidas) && !empty($atendidas) ) {
 				$detalle['atendida'] = $atendidas;
 			}else{
@@ -615,14 +666,14 @@ class HabilitadoModel extends Conection
 					cotizaciones 
 						(id, solicitud, fecha, monto, comentario, archivo)
 					VALUES 
-						('',?, ?, ?, ?, ?);
+						('',?, ?, ?, ?, '".$content."');
 					";
 					$this->stmt = $this->pdo->prepare( $this->sql );
 					$this->stmt->bindParam(1,$_POST['solicitud_id'],PDO::PARAM_STR);
 					$this->stmt->bindParam(2,$_POST['fecha'],PDO::PARAM_STR);
 					$this->stmt->bindParam(3,$_POST['costo'],PDO::PARAM_STR);
 					$this->stmt->bindParam(4,$_POST['comentario'],PDO::PARAM_STR);
-					$this->stmt->bindParam(5,$content,PDO::PARAM_LOB);
+					//$this->stmt->bindParam(5,$content,PDO::PARAM_LOB);
 					$this->stmt->execute();
 					unlink($destiny.$name);
 					return json_encode(array('status'=>'success','message'=>'SE GUARDO LA COTIZACIÓN EXITOSAMENTE'));
@@ -853,14 +904,15 @@ class HabilitadoModel extends Conection
 						$this->sql = "
 						INSERT INTO 
 						solicitud_documentos 
-							(id, solicitud, tipo_doc, archivo)
+							(id, solicitud, tipo_doc,formato, archivo)
 						VALUES 
-							('', ?, ?, ?);
+							('', ?, ?, ?, ?);
 						";
 						$this->stmt = $this->pdo->prepare( $this->sql );
 						$this->stmt->bindParam(1,$ultima,PDO::PARAM_INT);
 						$this->stmt->bindParam(2,$t_doc,PDO::PARAM_INT);
-						$this->stmt->bindParam(3,$content,PDO::PARAM_LOB);
+						$this->stmt->bindParam(3,$type,PDO::PARAM_STR);
+						$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
 						$this->stmt->execute();
 						unlink($destiny.$name);
 						
@@ -1081,6 +1133,8 @@ class HabilitadoModel extends Conection
 				foreach ($datos_image as $key => $val) {
 					if ( $val->tipo == "image/jpeg" || $val->tipo == "image/png") {
 						$evidencia .= '<img class="img-responsive pad" src="data:'.$val->tipo.';base64,'.base64_encode(stripslashes($val->archivo)) .' "/>';
+					}else{
+						$evidencia.= '<embed src="data:'.$val->tipo.';base64,'.base64_encode(stripslashes($val->archivo)).'" type="'.$val->tipo.'" width="100%" height="600px" />';
 					}
 				}
 				return $evidencia;
@@ -1096,16 +1150,59 @@ class HabilitadoModel extends Conection
 	public function cancelarSolicitud()
 	{
 		try {
-			$evidencia = "";
-			$solicitud = $_POST['sol'];
-			$this->sql = "
-			UPDATE solicitudes SET estado = 4 WHERE id = ?
-			";
-			$this->stmt = $this->pdo->prepare( $this->sql );
-			$this->stmt->bindParam(1,$solicitud,PDO::PARAM_STR);
-			$this->stmt->execute();			
+			$evidencia = $_POST['observaciones'];
+			$solicitud = $_POST['solicitud_id'];
+			$fecha = $_POST['fecha'];
+
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
 			
-			return json_encode(array('status'=>'success','message'=>'SOLICITUD CANCELADA DE MANERA EXITOSA' ));
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf' ) 
+				{
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					
+					$this->sql = "
+					UPDATE solicitudes SET estado = 4 WHERE id = ?
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$solicitud,PDO::PARAM_INT);
+					$this->stmt->execute();			
+					
+					$this->sql = "
+					INSERT INTO cancelaciones (id,solicitud,fecha,observaciones,archivo)
+					VALUES 
+					('',?,?,?,'".$content."');";
+
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$solicitud,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$fecha,PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$evidencia,PDO::PARAM_STR);
+					$this->stmt->execute();	
+
+					unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'SOLICITUD CANCELADA DE MANERA EXITOSA' ));
+				}
+			}
+			#-------------------------------------------------------------------------------------------
+			
 			
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
@@ -1139,13 +1236,14 @@ class HabilitadoModel extends Conection
 					fclose($file);
 					#Insertar en la BD
 					$this->sql = "
-					INSERT INTO solicitud_documentos(id,solicitud,tipo_doc,archivo) 
-					VALUES ('',?,?,?);
+					INSERT INTO solicitud_documentos(id,solicitud,tipo_doc,formato,archivo) 
+					VALUES ('',?,?,?,?);
 					";
 					$this->stmt = $this->pdo->prepare( $this->sql );
 					$this->stmt->bindParam(1,$_POST['solicitud_id'],PDO::PARAM_STR);
 					$this->stmt->bindParam(2,$_POST['t_sol'],PDO::PARAM_LOB);
-					$this->stmt->bindParam(3,$content,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$type,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$content,PDO::PARAM_INT);
 					$this->stmt->execute();
 					unlink($destiny.$name);
 					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA SE GUARDO CON ÉXITO.' ));
@@ -1191,6 +1289,714 @@ class HabilitadoModel extends Conection
 			$this->stmt->bindParam(3,$o,PDO::PARAM_STR);
 			$this->stmt->execute();
 			return json_encode(array('status'=>'success','message'=>'LA GARANTIA SE CREÓ CON ÉXITO.' ));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function generalDocumentacion()
+	{
+		try {
+			$auto = $_POST['placa_h'];
+
+			$resultados = array();
+			$this->sql = "
+				SELECT COUNT(*) AS cuenta FROM vehiculo_documentos WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$docs = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta; 
+			if ( !empty($docs) ) {
+				$resultados['docs'] = $docs;
+			}else{
+				$resultados['docs'] = '0';
+			}
+
+			$this->sql = "
+			SELECT COUNT(*) AS cuenta FROM asegurados WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$polizas = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta; 			
+			if ( !empty($polizas) ) {
+				$resultados['polizas'] = $polizas;
+			}else{
+				$resultados['polizas'] = '0';
+			}
+			$this->sql = "
+				SELECT id FROM baja_vehiculos WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			if ( !empty($ids) ) {
+				$this->sql = "
+					SELECT COUNT(*) AS cuenta FROM baja_documentos WHERE baja IN (".$ids.") 
+				";
+				$this->stmt = $this->pdo->prepare( $this->sql );
+				$this->stmt->execute();
+				$bajas = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta; 
+				if ( !empty($bajas) ) {
+					$resultados['bajas'] = $bajas;
+				}else{
+					$resultados['bajas'] = '0';
+				}
+			}else{
+				$resultados['bajas'] = '0';
+			}
+#******************************************************************************************************
+			$this->sql = "
+				SELECT id FROM solicitudes WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			if (!empty($ids)) {
+				$this->sql = "
+					SELECT COUNT(*) AS cuenta FROM cotizaciones WHERE solicitud IN (".$ids.") 
+				";
+				$this->stmt = $this->pdo->prepare( $this->sql );
+				$this->stmt->execute();
+				$resultados['cotizaciones'] =  $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
+			}else{
+				$resultados['cotizaciones'] =  '0';
+			}
+			#----------------------------------------------------------------------------------------------
+			if (!empty($ids)) {
+				$this->sql = "
+					SELECT COUNT(*) AS cuenta FROM solicitud_documentos WHERE solicitud IN (".$ids.") 
+				";
+				$this->stmt = $this->pdo->prepare( $this->sql );
+				$this->stmt->execute();
+				$resultados['docs_solicitudes'] =  $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
+			}else{
+				$resultados['docs_solicitudes'] =  '0';
+			}	
+			#----------------------------------------------------------------------------------------------
+			if (!empty($ids)) {
+				$this->sql = "
+					SELECT COUNT(*) AS cuenta FROM siniestros WHERE solicitud_id IN (".$ids.") 
+				";
+				$this->stmt = $this->pdo->prepare( $this->sql );
+				$this->stmt->execute();
+				$resultados['siniestros'] =  $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
+			}else{
+				$resultados['siniestros'] =  '0';
+			}			
+			return json_encode( $resultados );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getDocumentos()
+	{
+		try {
+			$auto = $_POST['placa'];
+			$doc = "";
+			$this->sql = "
+			SELECT * FROM vehiculo_documentos WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			#$vueltas = $this->stmt->columnCount();
+			foreach ($this->result as $key => $value) {
+				$doc .= "<div class='row'>";
+					$doc .= "<div class='col-md-12'>";
+						$doc .= '<object data="data:application/pdf;base64,'.base64_encode($value->archivo).'" type="application/pdf" style="height:500px;width:100%"></object>';
+					$doc .= "</div>";
+				$doc .= "</div>";
+			}
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getPolizas()
+	{
+		try {
+			$auto = $_POST['placa'];
+			$doc = "";
+			$this->sql = "
+			SELECT * FROM asegurados WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			foreach ($this->result as $key => $value) {
+				$doc .= "<div class='row'>";
+					$doc .= "<div class='col-md-12'>";
+					$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($value->archivo).'" type="application/pdf" width="100%" height="600px" />';
+					$doc .= "</div>";
+				$doc .= "</div>";
+			}
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getBajasDocs()
+	{
+		try {
+			$auto = $_POST['placa'];
+			$doc = "";
+			$this->sql = "
+				SELECT id FROM baja_vehiculos WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			
+			$this->sql = "
+				SELECT * FROM baja_documentos WHERE baja IN (".$ids.") 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			foreach ($this->result as $key => $value) {
+				$doc .= "<div class='row'>";
+					$doc .= "<div class='col-md-12'>";
+					$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($value->archivo).'" type="application/pdf" width="100%" height="600px" />';
+					$doc .= "</div>";
+				$doc .= "</div>";
+			}
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getDocsCotizaciones()
+	{
+		try {
+			$auto = $_POST['placa'];
+			$doc = "";
+			$this->sql = "
+				SELECT id FROM solicitudes WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			
+			$this->sql = "
+				SELECT * FROM cotizaciones WHERE solicitud IN (".$ids.") 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			foreach ($this->result as $key => $value) {
+				$doc .= "<div class='row'>";
+					$doc .= "<div class='col-md-12'>";
+					$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($value->archivo).'" type="application/pdf" width="100%" height="600px" />';
+					$doc .= "</div>";
+				$doc .= "</div>";
+			}
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getCarEspecifico($id)
+	{
+		try {
+			$auto = $_POST['placa'];
+			$doc = "";
+			$this->sql = "
+			SELECT *,m.nom AS 'marca_name', t.nom AS 'tipo_name', CONCAT(p.nombre,' ',p.ap_pat,' ', p.ap_mat) AS name_reguardatario
+			FROM vehiculos AS v
+			INNER JOIN marcas AS m ON m.id = v.marca
+			INNER JOIN tipos_v AS t ON t.id = v.tipo
+			INNER JOIN personal AS p ON p.id = v.resguardatario
+			WHERE v.id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ); 
+						
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getAseguradoras()
+	{
+		try {
+			
+			$this->sql = "
+			SELECT * FROM aseguradoras
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function deleteChofer()
+	{
+		try {
+			$id = $_POST['chofer'];
+			$this->sql = "DELETE FROM licencias WHERE id = ?";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$cuenta = $this->stmt->rowCount();
+			if ( $cuenta > 0 ) {
+				return json_encode(array('status'=>'success','message'=>'CONDUCTOR ELIMINADO EXITOSAMENTE.' ));
+			}else{
+				throw new Exception("NO SE PUDO ELMINAR EL REGISTRO.", 1);
+				
+			}
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	
+	public function savePoliza()
+	{
+		try {
+			header("Content-type:application/pdf");
+
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf' AND $type != 'image/png' AND $type != 'image/jpeg' ) 
+				{
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "
+					INSERT INTO asegurados(id,afianzadora,monto,cobertura,vehiculo,archivo) 
+					VALUES ('',?,?,?,?,'".$content."');
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$_POST['afianzador'],PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$_POST['monto'],PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$_POST['cobertura'],PDO::PARAM_INT);
+					$this->stmt->bindParam(4,$_POST['vehiculo_id'],PDO::PARAM_INT);
+					//$this->stmt->bindParam(5,$content,PDO::PARAM_LOB);
+					$this->stmt->execute();
+					//unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA DEL SEGURO SE GUARDO CON ÉXITO.' ));
+				}
+			}
+
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function saveAviso()
+	{
+		try {
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf' ) 
+				{
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "
+					INSERT INTO licencias_avisos(id,persona,tipo_doc,archivo) 
+					VALUES ('',?,?,'".$content."');
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$_POST['sp_id'],PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$_POST['t_aviso'],PDO::PARAM_STR);
+					$this->stmt->execute();
+					//unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA DEL SEGURO SE GUARDO CON ÉXITO.' ));
+				}
+			}
+
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function list_avisos()
+	{
+		try {
+			$avisos = array();
+			$this->sql = "
+			SELECT l.id,l.tipo_doc,l.created_at,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS full_name FROM licencias_avisos  AS l
+			INNER JOIN personal AS p ON p.id = l.persona
+			WHERE persona = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$_POST['sp'],PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			$avisos['sp'] = $this->result[0]->full_name;
+			$avisos['archivos'] = $this->result;
+			
+			return json_encode( $avisos );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getAvisoPDF()
+	{
+		try {
+			$aviso = $_POST['id'];
+			$doc="";
+			$this->sql = "
+				SELECT archivo FROM licencias_avisos  WHERE id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$aviso,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ); 
+			$doc .= "<div class='row'>";
+				$doc .= "<div class='col-md-12'>";
+				$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($this->result->archivo).'" type="application/pdf" width="100%" height="600px" />';
+				$doc .= "</div>";
+			$doc .= "</div>";
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getNombreFacturas()
+	{
+		try {
+			$solicitud = $_POST['solicitud'];
+
+			$this->sql = "
+				SELECT id,name,total,solicitud,created_at FROM facturas WHERE solicitud = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$solicitud,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+
+	public function saveFactura()
+	{
+		try {
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf') 
+				{
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "
+					INSERT INTO facturas (id,name,total,solicitud,archivo) 
+					VALUES ('',?,?,?,'".$content."');
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$_POST['name_doc'],PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$_POST['costo'],PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$_POST['solicitud_id'],PDO::PARAM_INT);
+					$this->stmt->execute();
+					unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'LA FACTURA SE GUARDO CON ÉXITO.' ));
+				}
+			}
+
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+
+	public function getFacturaPDF()
+	{
+		try {
+			$id = $_POST['id'];
+			$doc="";
+			$this->sql = "
+				SELECT archivo FROM facturas  WHERE id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ); 
+			$doc .= "<div class='row'>";
+				$doc .= "<div class='col-md-12'>";
+				$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($this->result->archivo).'" type="application/pdf" width="100%" height="600px" />';
+				$doc .= "</div>";
+			$doc .= "</div>";
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getDocumentosSolicitud()
+	{
+		try {
+			#con el vehiculo obtener las solciitudes
+			$auto = $_POST['auto'];
+			$this->sql = "
+				SELECT id FROM solicitudes WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			
+			$doc="";
+			$this->sql = "
+				SELECT s.*,t.nom AS documento,folio FROM solicitud_documentos AS s
+				INNER JOIN t_doc AS t ON t.id = s.tipo_doc  
+				INNER JOIN solicitudes AS so ON so.id = s.solicitud
+				WHERE s.solicitud IN (".$ids.") 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			$doc .= "<ol>";
+			foreach ($this->result as $key => $value) {
+				if( $value->formato == 'application/pdf' ){
+					$formato = "(PDF)";
+				}elseif ($value->formato == 'image/png' OR $value->formato == 'image/jpeg') {
+					$formato = "(IMAGEN)";
+				}else{
+					$formato = "(DESCONOCIDO)";
+				}
+				if ($formato != "(DESCONOCIDO)") {
+					$doc .= "<li>"."<a href='#documentacion_vehicular' onclick='ver_documento_solicitud(".$value->id.")'>"."<b>".$value->folio."</b> - ".$value->documento." - ".$formato."</a>"."</li>";
+				}else{
+					$doc .= "<li>".$value->documento." - ".$formato."</li>";
+				}
+				
+			}
+			$doc .= "</ol>";
+			$doc .= "<div id='archivo_solicitud'></div>";
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function documentoSolicitud()
+	{
+		try {
+			#con el vehiculo obtener las solciitudes
+			$id = $_POST['id'];
+			$doc="";
+			$this->sql = "
+				SELECT * FROM solicitud_documentos WHERE id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ); 
+			if($this->result->formato == 'application/pdf'){
+				$doc .= "<div class='row'>";
+					$doc .= "<div class='col-md-12'>";
+					$doc.= '<embed src="data:'.$this->result->formato.';base64,'.base64_encode($this->result->archivo).'" type="'.$this->result->formato.'" width="100%" height="600px" />';
+					$doc .= "</div>";
+				$doc .= "</div>";
+			}else{
+				$doc .= "<div class='row'>";
+					$doc .= "<div class='col-md-12'>";
+					$doc.= "<img class='img-responsive pad' src='data:".$this->result->formato.";base64,".base64_encode(stripslashes($this->result->archivo))."' alt='Evidencia' />";
+					$doc .= "</div>";
+				$doc .= "</div>";
+			}
+			
+			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getIMGEventos()
+	{
+		try {
+			$f_ini = $_POST['f_ini'];
+			$f_fin = $_POST['f_fin'];
+
+			$doc="";
+			$this->sql = "
+				SELECT * FROM eventos WHERE  fecha BETWEEN ? AND ?; 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$f_ini,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$f_fin,PDO::PARAM_STR);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			
+			$this->sql = "
+				SELECT ev.*,e.titulo FROM eventos_evidencia AS ev 
+				INNER JOIN eventos AS e ON e.id = ev.evento
+				WHERE ev.evento IN (".$ids.") 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			#print_r($this->result[0]->archivo);exit;
+			foreach ($this->result as $key => $value) {
+				
+				if( $value->tipo != 'application/pdf' ){
+					$doc .= "<div class='col-md-3'>";
+                       	$doc .=	"<img class='img-responsive pad' src='data:".$value->tipo.";base64,".base64_encode(stripslashes($value->archivo))."' alt='Evidencia' width='700' height='700'>";
+
+                        $doc .= "<p class='text-center'>";
+                          	$doc .= $value->titulo;
+                        $doc .= "</p>";
+                     $doc .= "</div>";
+				}else{
+					$doc .= "<div class='col-md-6'>";
+                       	
+                       	$doc.= '<embed src="data:'.$value->tipo.';base64,'.base64_encode(stripslashes($value->archivo)).'" type="'.$value->tipo.'" width="100%" height="600px" />';
+
+                        $doc .= "<p class='text-center'>";
+                          	$doc .= $value->titulo;
+                        $doc .= "</p>";
+                     $doc .= "</div>";
+				}
+				
+			}			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getDocSiniestros()
+	{
+		try {
+
+			$auto = $_POST['auto'];
+			$this->sql = "
+				SELECT id FROM solicitudes WHERE vehiculo = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$auto,PDO::PARAM_INT);
+			$this->stmt->execute();
+
+			$ids_res =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+			$ids = array();
+			foreach ($ids_res as $key => $val) {# code...
+				array_push($ids, $val->id);
+			}				
+			$ids = implode(',',$ids);
+			$doc = "";
+			$this->sql = "
+				SELECT * FROM siniestros WHERE solicitud_id IN (".$ids.") 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ); 
+			#print_r($this->result);exit;
+			foreach ($this->result as $key => $value) {
+				$doc .= "<div class='col-md-6'>";
+                   	$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($value->archivo).'" type="application/pdf" width="100%" height="600px" />';
+                 $doc .= "</div>";
+				
+			}			
+			return $doc;
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}

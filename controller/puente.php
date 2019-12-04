@@ -221,7 +221,73 @@ if ( isset( $_POST['option'] ) )
 		case '52':
 			echo $hab->saveGarantia();
 			break;
-		
+		case '53':
+			echo $hab->generalDocumentacion();
+			break;
+		case '54':
+			echo $hab->getDocumentos();
+			break;
+		case '55':
+			echo $hab->getAseguradoras();
+			break;
+		case '56':
+			echo $hab->savePoliza();
+			break;
+		case '57':
+			echo $hab->getPolizas();
+			break;
+		case '58':
+			echo $hab->getBajasDocs();
+			break;
+		case '59':
+			echo $hab->getDocsCotizaciones();
+			break;
+		case '60':
+			echo $hab->deleteChofer();
+			break;
+		case '61':
+			echo $hab->saveAviso();
+			break;
+		case '62':
+			echo $hab->list_avisos();
+			break;
+		case '63':
+			echo $hab->getAvisoPDF();
+			break;
+		case '64':
+			echo $hab->saveFactura();
+			break;
+		case '65':
+			echo $hab->getNombreFacturas();
+			break;
+		case '66':
+			echo $hab->getFacturaPDF();
+			break;	
+		case '67':
+			echo $rm->getJSONPersonal();
+			break;	
+		case '68':
+			echo $rm->getJSONFallas();
+			break;	
+		case '69':
+			echo $rm->getJSONTalleres();
+			break;	
+		case '70':
+			echo $hab->getDocumentosSolicitud();
+			break;	
+		case '71':
+			echo $hab->documentoSolicitud();
+			break;	
+		case '72':
+			echo $hab->getIMGEventos();
+			break;	
+		case '73':
+			echo $hab->getDocSiniestros();
+			break;	
+		case '74':
+			echo $rm->pagarSolicitud();
+			break;	
+			
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
 			break;

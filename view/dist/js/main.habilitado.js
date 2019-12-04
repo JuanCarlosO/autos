@@ -32,19 +32,15 @@ function getURL() {
 			event.preventDefault();
 			$('#modal_add_garantia').modal('toggle');
 		});
-		$('#s_aceptacion').change(function(e){
-			e.preventDefault();
-			if ( $(this).val() == '2' ) {
-				$('#motivo').removeClass('hidden');
-				$('#txt_motivo').attr('required', '');
-			}else{
-				$('#motivo').addClass('hidden');
-				$('#txt_motivo').removeAttr('required');
-			}
+		$('#btn_factura').click(function(event) {
+			event.preventDefault();
+			$('#modal_add_factura').modal('toggle');
 		});
+		
 		//getTipoFalla('t_falla_h','falla_h');
 		//Recuperar los talleres
 		getTalleres('ingreso_taller');
+		
 		/*Carga de formularios*/
 		frm_add_siniestro();
 		frm_atender_sol();
@@ -57,6 +53,8 @@ function getURL() {
 		frm_solicitud_historica();
 		frm_upload_sol();
 		frm_add_garantia();
+		frm_add_factura();
+		frm_cancelar_solicitud();
 		/*Autocomplete*/
 		autocompletado('sp_entrega','spe_id');
 		autocompletado('sp_recibe','spr_id');
@@ -66,15 +64,17 @@ function getURL() {
 		$.each(docs, function(i, doc) {
 			options += "<option value='"+doc.id+"'>"+doc.nom+"</option>";
 		});
-		$('#t_doc').html(options);
+		$('#t_doc,[name="t_sol"]').html(options);
 	}else if ( URLsearch == '?menu=list_car' || URLsearch == '?menu=general' ) {
 		$('#tree_list').addClass('active');
 		$('#list_car').addClass('active');
 		autocomplete_placas();
+		getAseguradoras('afianzador');
 		/*Carga el listado completo de vehiculos*/
 		all_cars();
 		/*Carga de formularios*/
 		frm_baja_v();
+		frm_seguros();
 	}else if ( URLsearch == '?menu=add_car' ) {
 		$('#tree_add').addClass('active');
 		$('#add_car').addClass('active');
@@ -106,6 +106,8 @@ function getURL() {
 		$('#tree_list').addClass('active');
 		$('#list_chofer').addClass('active');
 		all_choferes();
+		/*Formularios*/
+		frm_add_avisos();
 	}
 	else if ( URLsearch == '?menu=eventos' )
 	{
@@ -131,8 +133,14 @@ function getURL() {
 		save_solicitud();
 		generateFolio();
 	}
+	else if ( URLsearch == '?menu=c_digital' )
+	{
+		$('#carpeta_dig').addClass('active');
+		autocomplete_placas();
+		frm_carpeta_dig();
+		frm_get_evidencia();
+	}
 	else{
-
 		frm_add_taller();
 	}
 
@@ -145,12 +153,12 @@ function all_sol() {
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
 	        { leyenda: 'Folio', style: 'width:100px;', columna: 'folio',ordenable:true, filtro:true },
-	        { leyenda: 'Solicitante', columna: 'n_short', style:'width:100px;' },
-	        { leyenda: 'Vehículo', columna: 'n_short', style:'width:200px;' },
-	        { leyenda: 'Descripcion', columna: 'n_short', style:'width:250px;' },
+	        { leyenda: 'Solicitante', style:'width:100px;' },
+	        { leyenda: 'Vehículo', columna: 'placas', style:'width:200px;' ,filtro:true,ordenable:true},
+	        { leyenda: 'Descripcion', style:'width:250px;' },
 	        { leyenda: 'Detalle', style: 'width:15px;'},
 	        { leyenda: 'PDF', style: 'width:15px;'},
-	        { leyenda: 'SUBIR DOC.', style: 'width:10px;'},
+	        { leyenda: 'Subir Doc.', style: 'width:10px;'},
 	    ],
 	    modelo: [
 	        { propiedad: 'id',class:'text-center',formato:function(tr,obj,celda) {
@@ -220,6 +228,7 @@ function all_sol() {
 	        	
 	        	
 	        } },
+
 	        
 	    ],
 	    url: 'controller/puente.php?option=8',
@@ -236,6 +245,7 @@ function all_sol() {
 		$('[name="solicitud_id"]').val( $(this).val() );
 		/*Colocar la informacion en el formlario*/
 		getDetalleSol( $(this).val() );
+		getFacturas();
 	});
 	table.tabla().on('click', '.adjuntar', function(event) {
 		event.preventDefault();
@@ -252,12 +262,13 @@ function all_cars(){
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
 	        { leyenda: 'Resguardatario', style: 'width:100px;', columna: 'id',ordenable:true },
-	        { leyenda: 'Tipo / Marca / Placa', columna: 'n_short', style:'width:100px;' },
+	        { leyenda: 'Tipo / Marca / Placa', columna: 'placa', style:'width:100px;', filtro:true },
 	        { leyenda: 'Color / Modelo / Cilindros', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'NIV / No. Motor / Estado', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Observaciones', columna: 'n_short', style:'width:200px;' },
 	        
 	        { leyenda: 'Baja', style: 'width:50px;'},
+	        { leyenda: 'Póliza', style: 'width:50px;'},
 	        
 	    ],
 	    modelo: [
@@ -304,16 +315,28 @@ function all_cars(){
 	        	}
 	        	
 	        } },
+	        { class:'text-center', formato:function(tr,obj,celda){
+	        	return anexGrid_boton({
+		        		class: 'btn btn-success btn-flat poliza',
+		        		contenido: '<i class="fa fa-upload"></i>',
+		        		attr: [
+	                    	'data-toggle="modal" data-target="#modal_seguros"',
+	                    	'onclick="setVehiculo('+obj.id+');"'
+	                	]
+		        	});	        	
+	        } },
 	    ],
 	    url: 'controller/puente.php?option=6',
 	    type:'POST',
 	    limite: [20,50,100],
 	    columna: 'id',
 	    columna_orden: 'DESC',
-	    paginable:true
+	    paginable:true,
+	    filtrable:true,
 
 	};
 	$("#all_vehiculos").anexGrid(sol);
+	
 }
 /*Listado completo de talleres*/
 function all_talleres() {
@@ -377,7 +400,8 @@ function all_talleres() {
 }
 /*Listado completo de choferes*/
 function all_choferes(){
-	var choferes = {
+	var anexGrid = $("#all_choferes").anexGrid(
+		{
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
@@ -385,7 +409,7 @@ function all_choferes(){
 	        { leyenda: 'Área', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Datos de la licencia', columna: 'n_short', style:'width:200px;' },
 	        { leyenda: 'Actualizar licencia', columna: 'n_short', style:'width:10px;' },
-	        { leyenda: 'Descargar licencia', columna: 'n_short', style:'width:10px;' },
+	        { leyenda: 'Avisos', style:'width:10px;' },
 	        { leyenda: 'Eliminar', style: 'width:10px;'},
 	        
 	    ],
@@ -413,18 +437,23 @@ function all_choferes(){
 	        }},
 	        
 	        { class:'text-center', formato:function(tr,obj,celda){
+
 	        	return anexGrid_boton({
 	        		class: 'btn btn-warning btn-flat',
-	        		contenido: '<i class="fa fa-arrow-down"></i>',
-	        		
+	        		contenido: '<i class="fa fa-file-word-o" style="color:#000000;"></i>',
+	        		attr:[
+	        		'data-toggle="modal"',
+	        		'data-target="#modal_avisos"',
+	        		'onclick="setServidor('+obj.id+')"'
+	        		]
 	        	});
 	        } },
-	        { class:'text-center', formato:function(tr,obj,celda){
-	        	return anexGrid_boton({
-	        		class: 'btn btn-danger btn-flat',
-	        		contenido: '<i class="fa fa-trash"></i>',
-	        	});
-	        } },
+	        { class:'text-center', formato: function(tr, obj, celda){
+    			var fila_id = tr.data('fila');
+    			return '<button value="' + fila_id + '" type="button" class="btn btn-danger btn-flat btn-eliminar">'+
+    					'<i class="fa fa-trash"></i>'+
+    			'</button>';
+			} },
 	    ],
 	    url: 'controller/puente.php?option=18',
 	    type:'POST',
@@ -433,8 +462,25 @@ function all_choferes(){
 	    columna_orden: 'DESC',
 	    paginable:true
 
-	};
-	$("#all_choferes").anexGrid(choferes);
+	}
+	);
+
+	anexGrid.tabla().on('click', '.btn-eliminar', function(e) {
+		e.preventDefault();
+		var obj = anexGrid.obtener( $(this).val() );
+		deleteChofer(obj.id);
+		anexGrid.refrescar();
+	});
+	
+}
+function setServidor(id) {
+	$('#sp_id').val(id);
+	return false;
+}
+function deleteChofer(id) {
+	$.post('controller/puente.php', {option: '60',chofer:id}, function(data, textStatus, xhr) {
+		alert(data.message);
+	},'json');
 }
 function frm_add_car(){
 	$('#frm_add_car').submit(function(e){
@@ -712,17 +758,16 @@ function add_tecnico()
 function frm_add_siniestro() {
 	$('#frm_add_siniestro').submit(function(event) {
 		event.preventDefault();
-		
-		var dataForm = $(this).serialize();
-
+		var dataForm = new FormData(document.getElementById("frm_add_siniestro"));
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
 			dataType: 'json',
 			data: dataForm,
-			cache:false,
 			async:false,
-			
+			cache:false,
+			processData: false,
+			contentType: false,
 		})
 		.done(function(response) {
 			var clase_estado;
@@ -1974,25 +2019,8 @@ function selectTiposDoc() {
 }
 /*Cancelar la solicitud*/
 function cancelaSol() {
-	var sol ;
-	sol = $('#solicitud_id').val();
-	$.ajax({
-		url: 'controller/puente.php',
-		type: 'POST',
-		dataType: 'json',
-		data: {option: '48',sol:sol},
-		async:false,
-		cache:false,
-	})
-	.done(function(response) {
-		alert(response.message);
-	})
-	.fail(function() {
-		console.log("error");
-	})
-	.always(function() {
-		location.reload();
-	});
+	$('#modal_cancelar_solicitud').modal('toggle');
+	return false;
 	
 }
 
@@ -2036,7 +2064,7 @@ function terminar_garantia(id) {
 		var s = $('#solicitud_id').val();
 		getDetalleSol( s );
 	})
-	.fail(function() {
+	.fail(function(jqXHR,textStatus,errorThrown) {
 		console.log("error");
 	});
 	
@@ -2076,10 +2104,452 @@ function frm_add_garantia() {
 				getDetalleSol( s );
 			},5000);
 		})
-		.fail(function() {
+		.fail(function(jqXHR,textStatus,errorThrown) {
 			console.log("error");
 		});
 		
 	});
+	return false;
+}
+
+function frm_carpeta_dig() {
+	$('#frm_carpeta_dig').submit(function(e) {
+		e.preventDefault();
+		$('#documentacion_vehicular').html('');
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+		})
+		.done(function(response) {
+			$('#total_doc_veh').text(response.docs);
+			$('#total_polizas').text(response.polizas);
+			$('#total_bajas').text(response.bajas);
+			$('#total_cotizaciones').text(response.cotizaciones);
+			$('#total_docs_sol').text(response.docs_solicitudes);
+			$('#total_siniestros').text(response.siniestros);
+						
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert("Error: "+jqXHR.responseText);
+		});
+		
+	});
+	return false;
+}
+function obtener_documentos() {
+	var placa = $('#placa_h').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '54',placa:placa},
+		async:false,
+	})
+	.done(function(response) {
+		$('#documentacion_vehicular').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	
+	return false;
+}
+function obtener_polizas() {
+	var placa = $('#placa_h').val();
+
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '57',placa:placa},
+		async:false,
+	})
+	.done(function(response) {
+		$('#documentacion_vehicular').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	
+	return false;
+}
+function getAseguradoras(input)
+{
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '55'},
+		async:false
+	})
+	.done(function(response) {
+		$('#'+input).html('');
+		$('#'+input).append('<option value=""></option>');
+		$.each(response, function(i, val) {
+			$('#'+input).append('<option value="'+val.id+'">'+val.nom+'</option>');
+		});
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+		console.log("complete");
+	});
+	
+	return false;
+}
+function frm_seguros() {
+	$('#frm_seguros').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_seguros"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			contentType: false,
+   			processData: false
+		})
+		.done(function(response) {
+			alert(response.message);
+		})
+		.fail(function() {
+			console.log("error");
+		})
+		.always(function() {
+			console.log("complete");
+		});
+		
+	});
+	return false;
+}
+function setVehiculo(id) {
+	$('[name="vehiculo_id"]').val(id);
+	return false;
+}
+function obtener_bajas_docs() {
+	var placa = $('#placa_h').val();
+
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '58',placa:placa},
+		async:false,
+	})
+	.done(function(response) {
+		$('#documentacion_vehicular').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	return false;
+}
+function obtener_cotizaciones() {
+	var placa = $('#placa_h').val();
+
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '59',placa:placa},
+		async:false,
+	})
+	.done(function(response) {
+		$('#documentacion_vehicular').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	return false;
+}
+function obtener_solicitudes(){
+	var id = $('#placa_h').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '70',auto:id},
+		async:false
+	})
+	.done(function(response) {
+		$('#documentacion_vehicular').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("Error:"+jqXHR.responseText);
+	});
+	return false;
+}
+function frm_add_avisos() {
+	$('#frm_add_avisos').submit(function(e) {
+		e.preventDefault();
+		
+		var dataForm = new FormData(document.getElementById("frm_add_avisos"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			cache:false,
+			async:false,
+			processData:false,
+			contentType:false,
+		})
+		.done(function(response) {
+			if (response.status == 'success') {
+				clase = 'alert-success';
+				estado = 'Exito!';
+			}else{
+				clase = 'alert-danger';
+				estado = 'Aviso!';
+			}
+			$('#alert_avisos').removeClass('hidden');
+			$('#alert_avisos').addClass(clase);
+			$('#estado_avisos').text(estado);
+			$('#message_avisos').text(response.message);
+			setTimeout(function() {
+				$('#alert_avisos').addClass('hidden');
+				$('#alert_avisos').removeClass(clase);
+				$('#estado_avisos').text('');
+				$('#message_avisos').text('');
+			},5000);
+
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('error',jqXHR.responseText );
+		});
+	});
+	return false;
+}
+/*Cargar la lista de avisos de actualzacion de licencia*/
+function lista_avisos() {
+	$('#modal_vista_avisos').modal('toggle');
+	var sp = $('#sp_id').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '62',sp:sp},
+		async:false,
+		cache:false
+	})
+	.done(function(response) {
+		$('#list_aviso').html('');
+		$('#name_sp').text(response.sp);
+		$.each(response.archivos, function(i, val) {
+			$('#list_aviso').append('<li><a href="#" onclick="mostrar_aviso('+val.id+');">'+val.tipo_doc+' - '+val.created_at+'</a></li>')
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error:'+jqXHR.responseText );
+	});
+	
+	return false;
+}
+
+function mostrar_aviso(aviso) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '63',id:aviso},
+		async:false,
+	})
+	.done(function(response) {
+		$('#aviso_pdf').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error:'+jqXHR.responseText );
+	});
+	return false;
+}
+
+function frm_add_factura() {
+	$('#frm_add_factura').submit(function(e) {
+		e.preventDefault();
+		alert('Hola mundo');
+		var dataForm = new FormData(document.getElementById("frm_add_factura"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData:false,
+			contentType:false
+		})
+		.done(function(response) {
+			if (response.status == 'success') {
+				clase = 'alert-success';
+				estado = 'Exito!';
+			}else{
+				clase = 'alert-danger';
+				estado = 'Aviso!';
+			}
+			$('#alert_factura').removeClass('hidden');
+			$('#alert_factura').addClass(clase);
+			$('#estado_factura').text(estado);
+			$('#message_factura').text(response.message);
+			setTimeout(function() {
+				$('#alert_factura').addClass('hidden');
+				$('#alert_factura').removeClass(clase);
+				$('#estado_factura').text('');
+				$('#message_factura').text('');
+				getFacturas();
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert('Error:'+jqXHR.responseText );
+		});
+		
+	});
+	return false;
+}
+function getFacturas() {
+	var s = $('#solicitud_id').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '65',solicitud:s},
+		async:false,
+		cache:false
+	})
+	.done(function(response) {
+		$('#list_facturas').html('');
+		$.each(response, function(index, val) {
+			$('#list_facturas').append('<li><a hrf="#" onclick="vista_factura('+val.id+');" title="Mostrar PDF de factura"><b>'+val.name+'</b> Creado: '+val.created_at+'</a> </li>');
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error:'+jqXHR.responseText );
+	});
+	
+	return false;
+}
+function vista_factura(id) {
+	$('#modal_ver_factura').modal('toggle');
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '66',id:id},
+		async:false,
+	})
+	.done(function(response) {
+		$('#vista_factura').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error:'+jqXHR.responseText );
+	});
+	
+	return false;
+}
+function frm_cancelar_solicitud() {
+	$('#frm_cancelar_solicitud').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_cancelar_solicitud"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData:false,
+			contentType:false
+		})
+		.done(function(response) {
+			if (response.status == 'success') {
+				clase = 'alert-success';
+				estado = 'Exito!';
+			}else{
+				clase = 'alert-danger';
+				estado = 'Aviso!';
+			}
+			$('#alert_cancelar').removeClass('hidden');
+			$('#alert_cancelar').addClass(clase);
+			$('#estado_cancelar').text(estado);
+			$('#message_cancelar').text(response.message);
+			setTimeout(function() {
+				$('#alert_cancelar').addClass('hidden');
+				$('#alert_cancelar').removeClass(clase);
+				$('#estado_cancelar').text('');
+				$('#message_cancelar').text('');
+				//getFacturas();
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert('Error:'+jqXHR.responseText );
+		});
+		
+	});
+	return false;
+}
+function frm_get_evidencia() {
+	$('#frm_get_evidencia').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'html',
+			data: dataForm,
+			async:false
+		})
+		.done(function(response) {
+			$('#carga_img').html(response);
+			//$('#documentacion_vehicular').html(response);
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alert('Error:'+jqXHR.responseText );
+		});
+		
+	});
+}
+function ver_documento_solicitud(id) {
+
+	$('#archivo_solicitud').html('');
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '71',id:id},
+		async:false
+	})
+	.done(function(response) {
+		$('#archivo_solicitud').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("Error:"+jqXHR.responseText);
+	});
+	
+	return false;
+}
+
+function obtener_siniestros() {
+	var auto = $('#placa_h').val();
+	$('#documentacion_vehicular').html('');
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '73',auto:auto},
+		async:false
+	})
+	.done(function(response) {
+		$('#documentacion_vehicular').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("Error:"+jqXHR.responseText);
+	});
+	
 	return false;
 }

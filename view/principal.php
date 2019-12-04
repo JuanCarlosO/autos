@@ -56,12 +56,15 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_main/content_general.php';
 							  		include 'view/pages/habilitado_v/modals/modal_baja_vehiculo.php';
 							  		include 'view/pages/habilitado_v/modals/modal_generate_bitacora.php';
+							  		include 'view/pages/habilitado_v/modals/modal_seguros.php';
 							  		break;
 							  	case 'list_car':
 							  		include 'view/pages/habilitado_v/content_header/header_general.php';
 							  		include 'view/pages/habilitado_v/content_main/content_general.php';
 							  		include 'view/pages/habilitado_v/modals/modal_baja_vehiculo.php';
 							  		include 'view/pages/habilitado_v/modals/modal_generate_bitacora.php';
+							  		include 'view/pages/habilitado_v/modals/modal_seguros.php';
+
 							  		break;
 							  	case 'add_car':
 							  		include 'view/pages/habilitado_v/content_header/header_add_car.php';
@@ -78,8 +81,11 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/modals/modal_finalizar_ingreso.php';
 							  		include 'view/pages/habilitado_v/modals/modal_entrega_resguardatario.php';
 							  		include 'view/pages/habilitado_v/modals/modal_subir_solicitud.php';
+							  		include 'view/pages/habilitado_v/modals/modal_cancelar_solicitud.php';
 							  		#LISTA DE MODALES PARA LA COTIZACION Y FACTURACIÓN
 							  		include 'view/pages/habilitado_v/modals/modal_cotizacion.php';
+							  		include 'view/pages/habilitado_v/modals/modal_facturas.php';
+							  		include 'view/pages/habilitado_v/modals/modal_vista_factura.php';
 							  		#
 							  		include 'view/pages/habilitado_v/modals/modal_solicitud_historica.php';
 							  		include 'view/pages/habilitado_v/modals/modal_add_garantia.php';
@@ -116,13 +122,17 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/content_header/header_list_chofer.php';
 							  		include 'view/pages/habilitado_v/content_main/content_list_chofer.php';
 							  		include 'view/pages/habilitado_v/modals/modal_actualiza_licencia.php';
+							  		include 'view/pages/habilitado_v/modals/modal_avisos.php';
+							  		include 'view/pages/habilitado_v/modals/modal_vista_avisos.php';
 							  		break;
 							  	case 'add_solicitud':
 							  		include 'view/pages/habilitado_v/content_header/header_add_solicitud.php';
 							  		include 'view/pages/habilitado_v/content_main/content_add_solicitud.php';
-							  		#include 'view/pages/habilitado_v/modals/modal_actualiza_licencia.php';
 							  		break;
-							  		
+							  	case 'c_digital':
+							  		include 'view/pages/habilitado_v/content_header/header_carpeta_digital.php';
+							  		include 'view/pages/habilitado_v/content_main/content_carpeta_digital.php';
+							  		break;	
 							}
 						}
 						else

@@ -84,7 +84,7 @@
 		      				</div>
 		      			</div>
 		      		</div>
-		      		<div id="motivo" class="row hidden">
+		      		<div id="motivo" class="row">
 		      			<div class="col-md-12">
 		      				<div class="form-group">
 		      					<label> Motivo por el cual no se acepto el vehículo </label>

@@ -68,7 +68,7 @@
               <li id="list_car"><a href="index.php?menu=list_car"><i class="fa fa-car"></i> Vehículo</a></li>
               <li id="list_taller"><a href="index.php?menu=list_taller"><i class="fa fa-building-o"></i> Taller</a></li>
               <li id="list_sol"><a href="index.php?menu=list_sol"><i class="fa fa-book"></i> Solicitudes</a></li>
-              <li id="list_chofer"><a href="index.php?menu=list_chofer"><i class="fa fa-users"></i> Choferes</a></li>
+              <li id="list_chofer"><a href="index.php?menu=list_chofer"><i class="fa fa-users"></i> Conductores</a></li>
             </ul>
           </li>
           <li id="eventos">
@@ -79,6 +79,11 @@
           <li id="registro_es">
             <a href="index.php?menu=es">
               <i class="fa fa-calendar"></i> <span> Registro E/S </span>
+            </a>
+          </li>
+          <li id="carpeta_dig">
+            <a href="index.php?menu=c_digital">
+              <i class="fa fa-folder-open"></i> <span> Carpeta digital </span>
             </a>
           </li>       
         </ul>

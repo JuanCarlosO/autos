@@ -27,13 +27,24 @@ function getUser() {
 }
 /*Autocompletado de personal de la unidad de asuntos internos */
 function autocompletado(input,hidden) {
-	$('#'+input).autocomplete({
-		source: "controller/puente.php?option=9",
-		minLength: 2,
-		select: function( event, ui ) {
-        	$('#'+hidden).val(ui.item.id);
-      	},
-	});
+	if ( input == 'vigilante' ) {
+		$('#'+input).autocomplete({
+			source: "controller/puente.php?option=9&vigilantes=true",
+			minLength: 2,
+			select: function( event, ui ) {
+	        	$('#'+hidden).val(ui.item.id);
+	      	},
+		});
+	}else{
+		$('#'+input).autocomplete({
+			source: "controller/puente.php?option=9",
+			minLength: 2,
+			select: function( event, ui ) {
+	        	$('#'+hidden).val(ui.item.id);
+	      	},
+		});
+	}
+	
 	return false;
 }
 /*Autocompletado de placas */
