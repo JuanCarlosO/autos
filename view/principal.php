@@ -203,6 +203,21 @@ date_default_timezone_set('America/Mexico_City');
 						}
 					  	#--------------------------------------------------------------------------------------
 						break;
+					case 'Sistemas':#Perfil Directivo
+						#--------------------------------------------------------------------------------------
+						if ( isset($_GET['menu'] ) )
+						{
+							switch ( $_GET['menu'] )
+							{
+								case 'general':
+							  		include 'view/pages/sistemas/content_header/header_general.php';
+							  		include 'view/pages/sistemas/content_main/content_general.php';
+							  		break;
+							  	
+							}
+						}
+					  	#--------------------------------------------------------------------------------------
+						break;
 					default:
 						echo " <script> alert('El perfil logeado no existe'); location.href = 'http://localhost/autos/denegado.php'; </script> ";
 						break;

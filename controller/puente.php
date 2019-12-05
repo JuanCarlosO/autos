@@ -13,6 +13,7 @@ $hab 	= new HabilitadoController;
 $vig 	= new VigilanteController;
 $rm 	= new RMController;
 $dir 	= new DirectivoController;
+$sis 	= new SistemasController;
 /***/
 
 
@@ -286,6 +287,12 @@ if ( isset( $_POST['option'] ) )
 			break;	
 		case '74':
 			echo $rm->pagarSolicitud();
+			break;	
+		case '75':
+			echo $sis->generateUser();
+			break;	
+		case '76':
+			echo $sis->InsertAccount();
 			break;	
 			
 		default:

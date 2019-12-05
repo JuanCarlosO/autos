@@ -136,6 +136,16 @@
             </ul>
           </li>       
         </ul>
+      <?php elseif ( $_SESSION['perfil'] == 'Sistemas' ): ?>
+        <ul class="sidebar-menu" data-widget="tree">
+          <li class="header">Perfil: Sistemas </li>
+          <li id="listado_sol">
+            <a href="index.php?menu=general">
+              <i class="fa fa-user"></i> <span> Crear cuenta de usuarios </span>
+            </a>
+          </li>
+                
+        </ul>
       <?php endif ?>
     </section>
   </aside>
