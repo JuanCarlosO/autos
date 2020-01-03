@@ -41,7 +41,7 @@ function frm_insert_account() {
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
-			dataType: 'html',
+			dataType: 'json',
 			data: dataForm,
 			async:false
 		})

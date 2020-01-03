@@ -254,7 +254,9 @@ class HabilitadoController
 	public function generateFullSol()
 	{
 		#Recuperar el ID de la solicitud 
-		#$solicitud = $this->model->getSolcitudEsp($s);
+		$s = $_POST['solicitud_id'];
+		$solicitud = $this->model->getSolcitudEsp($s);
+		$reparaciones = $this->model->getReparaciones($s);
 
 		$pdf = new PDF3('P','mm','Letter');
 		$pdf->AliasNbPages();
@@ -273,7 +275,7 @@ class HabilitadoController
 		$pdf->Ln(5);
 		$pdf->Cell(148,5,'',0,0,'R');
         $pdf->Cell(20,5,'Folio:',1,0,'R');
-		$pdf->Cell(30,5, 'Mi-Folio' ,1,0,'R');
+		$pdf->Cell(30,5, $solicitud->folio ,1,0,'R');
 		$pdf->Ln(10);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->SetFillColor(105, 227, 251);
@@ -285,45 +287,45 @@ class HabilitadoController
 		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','B',12);
-		$pdf->Cell(60,5,utf8_decode('Subdirección:'),1,0,'R');
+		$pdf->Cell(60,5,utf8_decode('Area:'),1,0,'R');
 		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Cell(132,5,utf8_decode(''),1,0,'C');
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','B',12);
-		$pdf->Cell(60,5,utf8_decode('Departamento:'),1,0,'R');
+		$pdf->Cell(60,5,utf8_decode('Localidad:'),1,0,'R');
 		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
-		$pdf->Ln(5);
-		$pdf->SetFont('Helvetica','B',12);
-		$pdf->Cell(60,5,utf8_decode('Oficina:'),1,0,'R');
-		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Cell(132,5,utf8_decode('Metepec;Estado de México'),1,0,'C');
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(60,5,utf8_decode('Resguardatario:'),1,0,'R');
 		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
+		$pdf->Cell(132,5,utf8_decode($solicitud->reguardatario_name),1,0,'C');
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(60,5,utf8_decode('Nombre de usuario:'),1,0,'R');
 		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Cell(132,5,utf8_decode('Unidad de Asuntos Internos'),1,0,'C');
-		$pdf->Ln(7);$pdf->SetFillColor(105, 227, 251);
+		$pdf->Cell(132,5,utf8_decode($solicitud->solicitante_name),1,0,'C');
+		$pdf->Ln(5);
+		$pdf->SetFillColor(105, 227, 251);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(192,5,'',1,0,'R',1);
-		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Ln(7);
-		$pdf->Cell(48,12,'',1,0,'R');
-		$pdf->Cell(48,12,'',1,0,'R');
-		$pdf->Cell(48,12,'',1,0,'R');
-		$pdf->Cell(48,12,'',1,0,'R');
-		$pdf->Ln(12);
-		$pdf->Cell(38,12,'',1,0,'R');
-		$pdf->Cell(38,12,'',1,0,'R');
-		$pdf->Cell(40,12,'',1,0,'R');
-		$pdf->Cell(38,12,'',1,0,'R');
-		$pdf->Cell(38,12,'',1,0,'R');
-		$pdf->Ln(12);
+		$pdf->SetFont('Helvetica','',7 );
+		$pdf->Ln(5);
+		$pdf->Cell(48,8,"# Resguardo:\n".PHP_EOL.$solicitud->n_resguardo,1,0,'R');
+		$pdf->Cell(48,8,"Placas: ".$solicitud->placas,1,0,'R');
+		$pdf->Cell(48,8,"Marca: ".$solicitud->marca_name,1,0,'R');
+		$pdf->Cell(48,8,"Tipo: ".$solicitud->tipo_name,1,0,'R');
+		$pdf->Ln(8);
+		$pdf->Cell(48,8,"Modelo: ".$solicitud->modelo,1,0,'R');
+		$pdf->Cell(48,8,"Motor: ".utf8_decode($solicitud->n_motor),1,0,'R');
+		$pdf->Cell(48,8,"Serie: ".$solicitud->niv,1,0,'R');
+		$pdf->Cell(48,8,'Combustible: Gasolina',1,0,'R');
+		$pdf->Ln(8);
+		$pdf->Cell(48,8,"Cilindros: ".$solicitud->cil,1,0,'R');
+		$pdf->Cell(48,8,"KM: ".utf8_decode($solicitud->km),1,0,'R');
+		$pdf->Cell(48,8,"Uso: Oficial",1,0,'R');
+		$pdf->Cell(48,8,'',1,0,'R');
+		$pdf->Ln(8);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(192,5,'SERVICIO SOLICITADO',1,0,'C',1);
 		$pdf->Ln(5);
@@ -341,11 +343,10 @@ class HabilitadoController
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(192,5,'OTRAS REPARACIONES',1,0,'C',1);
 		$pdf->Ln(5);
-		$pdf->SetFont('Helvetica','',10);
-		$pdf->MultiCell(192,10,'esto es una reparacion diferente',1);
-		$pdf->MultiCell(192,10,'esto es una reparacion diferente',1);
-		$pdf->MultiCell(192,10,'esto es una reparacion diferente',1);
-
+		$pdf->SetFont('Helvetica','',8);
+		foreach ($reparaciones as $key => $value) {
+			$pdf->MultiCell(192,8,(++$key).".- ".$value->nombre,1);
+		}
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(192,5,'FIRMAS',1,0,'C',1);
 		$pdf->SetFont('Helvetica','',10);
@@ -353,8 +354,8 @@ class HabilitadoController
 		$pdf->MultiCell(95,12,utf8_decode('Elaboró'.PHP_EOL.'C. Gerardo López Salazar '.PHP_EOL.'Habilitado de control vehicular'),1,'C');
 		$x=$pdf->GetX();
 		$y=$pdf->GetY();
-		$pdf->SetXY($x+95,$y-36);
-		$pdf->MultiCell(95,12,utf8_decode('Autorizó'.PHP_EOL.'Sergio Lara Ahuatzi'.PHP_EOL.'Titular de apoyo administrativo.'),1,'C');
+		$pdf->SetXY($x+96,$y-36);
+		$pdf->MultiCell(96,12,utf8_decode('Autorizó'.PHP_EOL.'Sergio Lara Ahuatzi'.PHP_EOL.'Titular de apoyo administrativo.'),1,'C');
 		$pdf->MultiCell(192,12,utf8_decode('Vo. Bo. '.PHP_EOL.'Mtra. Maria de la Luz Nuñes Camacho'.PHP_EOL.'Titular de la UAI'),1,'C');
 		
 		$pdf->Output();

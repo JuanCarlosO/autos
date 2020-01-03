@@ -141,7 +141,7 @@ class SolicitanteModel extends Conection
 	public function getFolio($p)
 	{
 		try {
-			$this->sql = "SELECT COUNT(id) AS cuenta FROM solicitudes WHERE solicitante = ? GROUP BY solicitante";
+			$this->sql = "SELECT COUNT(id) AS cuenta FROM solicitudes WHERE solicitante = ?";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$p,PDO::PARAM_INT);
 			$this->stmt->execute();	

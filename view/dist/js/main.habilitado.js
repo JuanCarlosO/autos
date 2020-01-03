@@ -37,7 +37,8 @@ function getURL() {
 			$('#modal_add_factura').modal('toggle');
 		});
 		
-		//getTipoFalla('t_falla_h','falla_h');
+		getTipoFalla('t_falla_h','falla_h');
+		buscar_auto('auto','auto_h');
 		//Recuperar los talleres
 		getTalleres('ingreso_taller');
 		
@@ -206,6 +207,7 @@ function all_sol() {
 	        { class:'text-center', formato:function(tr,obj,celda){
 	        	return '<form action="controller/puente.php" method="post" target="_blank">'+
 							'<input type="hidden" name="option" value="47">'+
+							'<input type="hidden" name="solicitud_id" value="'+obj.id+'">'+
 							'<button type="submit" class="btn btn-default btn-flat">'+
 								'<i class="fa fa-file-pdf-o" style="font-size: 20px; color:#dd4b39;"></i>'+
 							'</button>'+
@@ -1816,6 +1818,17 @@ function autocomplete_placas() {
         select: function( event, ui ){
             $('#placa_h').val(ui.item.id);
             detalle_v(ui.item.id);
+        },
+        delay:300
+    });
+	return false;
+}
+function buscar_auto(input,hidden) {
+	$('#'+input).autocomplete({
+        autoFocus:true,
+        source: 'controller/puente.php?option=4',
+        select: function( event, ui ){
+            $('#'+hidden).val(ui.item.id);
         },
         delay:300
     });

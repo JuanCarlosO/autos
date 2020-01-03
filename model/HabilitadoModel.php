@@ -2001,6 +2001,80 @@ class HabilitadoModel extends Conection
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}
 	}
+	public function getSolcitudEsp($s)
+	{
+		try {
+			$this->sql = "
+				SELECT
+				  s.folio,
+				  CONCAT(
+				    p.nombre,
+				    ' ',
+				    p.ap_pat,
+				    ' ',
+				    p.ap_mat
+				  ) AS solicitante_name,
+				  v.*,
+				  (
+				  SELECT CONCAT
+				    (nombre,
+				    ' ',
+				    ap_pat,
+				    ' ',
+				    ap_mat)
+				  FROM
+				    personal
+				  WHERE
+				    id = v.resguardatario
+				) AS reguardatario_name,
+				m.nom AS marca_name,
+				tv.nom AS tipo_name
+				FROM
+				  solicitudes AS s
+				INNER JOIN
+				  personal AS p ON p.id = s.solicitante
+				INNER JOIN
+				  vehiculos AS v ON v.id = s.vehiculo
+				INNER JOIN
+				  marcas AS m ON m.id = v.marca
+				INNER JOIN
+				  tipos_v AS tv ON tv.id = v.tipo
+				WHERE
+				  s.id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$s,PDO::PARAM_INT);
+			$this->stmt->execute();	
+			$this->result = $this->stmt->fetch(PDO::FETCH_OBJ);	
+
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getReparaciones($s)
+	{
+		try {
+			$this->sql = "
+				SELECT
+				  cf.nombre
+				FROM
+				  reparaciones AS r
+				INNER JOIN
+				  catalogo_fallas AS cf ON cf.id = r.falla
+				WHERE
+				  r.solicitud = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$s,PDO::PARAM_INT);
+			$this->stmt->execute();	
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);	
+
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
 	
 }
 ?>

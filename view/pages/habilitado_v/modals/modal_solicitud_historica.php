@@ -29,7 +29,8 @@
 	      		<div class="col-md-8">
 	      			<div class="form-group">
 	      				<label>Buscar vehículo</label>
-	      				<input type="text" id="auto" name="auto" class="form-control" placeholder="Ej: LXP8690">
+	      				<input type="text" id="auto" name="auto" class="form-control" placeholder="Ej: LXP8690" autocomplete="off">
+	      				<input type="hidden" id="auto_h" name="auto_h" value="">
 	      			</div>
 	      		</div>
 	      	</div>
