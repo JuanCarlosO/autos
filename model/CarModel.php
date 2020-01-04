@@ -132,7 +132,9 @@ class CarModel extends Conection
 	public function saveCar($post)
 	{
 		try {
-
+			if ( isset($_POST['personal_id']) && empty($_POST['personal_id'])) {
+				throw new Exception("DEBE BUSCAR Y SELECCIONAR EL NOMBRE DE USUARIO.", 1);
+			}
 			$obs = ( isset($post['obs']) ) ? mb_strtoupper($post['obs']) : '' ;
 			$estado = ( isset($post['estado']) ) ? mb_strtoupper($post['estado']) : 0 ;
 			$this->sql = "INSERT INTO vehiculos (

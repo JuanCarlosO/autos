@@ -13,6 +13,9 @@ class SolicitanteModel extends Conection
 	public function getSolicitudes()
 	{
 		try {
+			session_start(); 
+			#print_r( $_SESSION );die();
+
 			$anexgrid = new AnexGrid();
 			/*Definir el Where*/
 			if ( isset($_REQUEST['filtros']) ) {
@@ -21,6 +24,9 @@ class SolicitanteModel extends Conection
 			}else
 			{
 				$wh = " 1=1 ";
+			}
+			if ( $_SESSION['perfil'] == 'Solicitante' ) {
+				$wh .= " AND s.solicitante = ".$_SESSION['person_id']." ";
 			}
 			
 			$this->sql = "
@@ -141,7 +147,7 @@ class SolicitanteModel extends Conection
 	public function getFolio($p)
 	{
 		try {
-			$this->sql = "SELECT COUNT(id) AS cuenta FROM solicitudes WHERE solicitante = ?";
+			$this->sql = "SELECT COUNT(id) AS cuenta FROM solicitudes WHERE YEAR(f_sol) = YEAR(NOW())";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$p,PDO::PARAM_INT);
 			$this->stmt->execute();	

@@ -37,7 +37,7 @@ function getURL() {
 			$('#modal_add_factura').modal('toggle');
 		});
 		
-		getTipoFalla('t_falla_h','falla_h');
+		//getTipoFalla('t_falla_h','falla_h');
 		buscar_auto('auto','auto_h');
 		//Recuperar los talleres
 		getTalleres('ingreso_taller');
@@ -500,6 +500,7 @@ function frm_add_car(){
 		})
 		.done(function(response) {
 			alerta(response.status,response.message );
+			document.getElementById('frm_add_car').reet();
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			alerta('error',jqXHR.responseText );
@@ -791,6 +792,7 @@ function frm_add_siniestro() {
 				$('#a_mod_sin_message').text('');
 				document.getElementById('frm_add_siniestro').reset();
 				$('#modal_siniestro').modal('toggle');
+				getDetalleSol();
 			},5000);
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
@@ -898,7 +900,9 @@ function atender_sol() {
 	$('#modal_atender_solicitud').modal('toggle');
 }
 function getTipoFalla(id,fallas) { //Obtener t_fallas (BD)
-	$('#'+id).html('');
+	$('#'+id).html("");
+	$('#'+fallas).html("");
+	//alert('Fallas limpiadas');
 	$.post('controller/puente.php', {option: '21'}, function(data, textStatus, xhr) {
 		$('#'+id).append('<option value="">...</option>');
 		$.each(data, function(i, val) {
@@ -907,12 +911,14 @@ function getTipoFalla(id,fallas) { //Obtener t_fallas (BD)
 	},'json');
 	$('#'+id).change( function(e){
 		e.preventDefault();
+		$('#'+fallas).html("");
 		getFallas( fallas,$(this).val() );
 	} );
 	return false;
 }
+
 function getFallas( id,tipo ){// Obtener catalogo_fallas (BD)
-	$('#'+id).html('');
+	$('#'+id).html("");
 	$.post('controller/puente.php', {option: '20',t:tipo}, function(data, textStatus, xhr) {
 		$('#'+id).append('<option value="">...</option>');
 		$.each(data, function(i, val) {
@@ -992,8 +998,11 @@ function getTalleres(select) {
 function add_reparacion() {
 	//Recuperar la solicitud 
 	$('#modal_add_reparacion').modal('toggle');
+	$('[name="t_falla"]').html("");
+	$('[name="falla"]').html("");
 	getTipoFalla('t_falla','falla');
 	getTalleres('taller');
+	return false;
 }
 /*Guardar la reparacion de la solicitud*/
 function frm_add_reparacion() {
@@ -1031,6 +1040,8 @@ function frm_add_reparacion() {
 				$('#modal_add_reparacion').modal('toggle');
 				
 			},5000);
+			var sol = $('#solicitud_id').val();
+			getDetalleSol(sol);
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			label_estado = 'ERROR!';
@@ -1882,6 +1893,8 @@ function save_solicitud(){
 		})
 		.done(function(request) {
 			alerta( request.status,request.message );
+			document.getElementById('frm_add_sol').reset();
+			generateFolio();
 		})
 		.fail(function(jqXHR, textStatus,errorThrow) {
 			alerta('error',jqXHR.responseText );

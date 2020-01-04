@@ -234,6 +234,8 @@ function save_solicitud(){
 		})
 		.done(function(request) {
 			alerta( request.status,request.message );
+			document.getElementById('frm_add_sol').reset();
+			generateFolio();
 		})
 		.fail(function(jqXHR, textStatus,errorThrow) {
 			alerta('error',jqXHR.responseText );

@@ -50,7 +50,7 @@
                     				<div class="form-group">
                     					<label>Marca del vehículo</label>
                     					<div class="input-group input-group-md">
-                                            <select id="m_veh" name="m_veh" class="form-control" >
+                                            <select id="m_veh" name="m_veh" class="form-control" required>
                                                 <option value="">...</option>           
                                             </select>
                                             <span class="input-group-btn">
@@ -63,7 +63,7 @@
                     				<div class="form-group">
                     					<label>Tipo de vehículo</label>
                                         <div class="input-group input-group-md">
-                                            <select id="t_veh" name="t_veh" class="form-control" >
+                                            <select id="t_veh" name="t_veh" class="form-control" required>
                                                 <option value="">...</option>           
                                             </select>
                                             <span class="input-group-btn">
@@ -79,19 +79,19 @@
                     			<div class="col-md-3">
                     				<div class="form-group">
                     					<label for="">Serie de placas</label>
-                    					<input type="text" class="form-control" placeholder="Escriba sin guiones" id="placas" name="placas">
+                    					<input type="text" class="form-control" placeholder="Escriba sin guiones" id="placas" name="placas" required>
                     				</div>
                     			</div>
                     			<div class="col-md-4">
                     				<div class="form-group">
                     					<label for="">Número de resguardo</label>
-                    					<input type="text" class="form-control" maxlength="10" placeholder="Ej: 1234567890" id="resguardo" name="resguardo">
+                    					<input type="text" class="form-control" maxlength="10" placeholder="Ej: 1234567890" id="resguardo" name="resguardo" required>
                     				</div>
                     			</div>
                     			<div class="col-md-5">
                     				<div class="form-group">
                     					<label for="">NIV o Serie</label>
-                    					<input type="text" class="form-control" maxlength="20" id="niv" name="niv">
+                    					<input type="text" class="form-control" maxlength="20" id="niv" name="niv" required>
                     				</div>
                     			</div>
                     			
@@ -100,25 +100,25 @@
                     			<div class="col-md-4">
                     				<div class="form-group">
                     					<label for="">Número de motor</label>
-                    					<input type="text" class="form-control" id="n_motor" name="n_motor">
+                    					<input type="text" class="form-control" id="n_motor" name="n_motor" required>
                     				</div>
                     			</div>
                     			<div class="col-md-2">
                     				<div class="form-group">
                     					<label>Cilindros</label>
-                    					<input type="number" class="form-control" maxlength="2" max="10" min="4" step="2" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;"  id="cilindros" name="cilindros" value="4">
+                    					<input type="number" class="form-control" maxlength="2" max="10" min="4" step="2" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;"  id="cilindros" name="cilindros" value="4" required>
                     				</div>
                     			</div>
                     			<div class="col-md-3">
                     				<div class="form-group">
                     					<label>Modelo</label>
-                    					<input type="text" class="form-control" maxlength="4" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;" placeholder="Ej: 2010"  id="modelo" name="modelo" >
+                    					<input type="text" class="form-control" maxlength="4" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;" placeholder="Ej: 2010"  id="modelo" name="modelo" required>
                     				</div>
                     			</div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Color</label>
-                                        <select id="color" name="color" class="form-control">
+                                        <select id="color" name="color" class="form-control" required>
                                             <option value="">...</option>
                                             <option value="ROJO">ROJO</option>
                                             <option value="AZUL">AZUL</option>
