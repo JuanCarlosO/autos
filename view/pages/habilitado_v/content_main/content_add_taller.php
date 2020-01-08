@@ -8,6 +8,7 @@ if (isset($_GET['taller'])) {
     $tel = (isset($t[0]->telefono)) ? $t[0]->telefono : NULL;
     $email = (isset($t[0]->correo)) ? $t[0]->correo : NULL;
     $dir = (isset($t[0]->domicilio)) ? $t[0]->domicilio : NULL;
+    $edo = (isset($t[0]->estado)) ? $t[0]->estado : NULL;
 }
 else
 {
@@ -18,6 +19,7 @@ else
     $email  = NULL;
     $dir    = NULL;
 }
+
 ?>
 <section class="content container-fluid">
     <div class="row">
@@ -25,12 +27,7 @@ else
             <div class="box">
                 <div class="box-header with-border">
                     <h3 class="box-title">Formulario de alta de talleres.</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-                    </div>
+                    
                 </div>
                 <div class="box-body">
                     <form action="#" method="post" id="frm_add_taller">
@@ -48,11 +45,26 @@ else
                         <input type="hidden" name="id" value="<?=$_GET['taller']?>">
                         <?php endif ?>
                         <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-md-10">
                                 <div class="form-group">
                                     <label for="">Razón social</label>
                                     <input type="text" id="r_social" name="r_social" value="<?=$rs?>" placeholder="Ej: Coca Cola S.A de C.V." required class="form-control" maxlength="255" >
                                 </div>
+                            </div>
+                            <div class="col-md-2">
+                              <div class="form-group">
+                                  <label for="">Estado</label>
+                                  <select name="estado" class="form-control" required="">
+                                    <option value="">...</option>
+                                    <?php if ($edo == 'Activa'): ?>
+                                      <option value="1" selected>Activo</option>
+                                      <option value="2">Baja</option>
+                                    <?php else: ?>
+                                      <option value="1">Activo</option>
+                                      <option value="2" selected>Baja</option>
+                                    <?php endif ?>
+                                  </select>
+                              </div>
                             </div>
                         </div>
                         <div class="row">

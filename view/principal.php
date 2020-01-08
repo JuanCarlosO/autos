@@ -82,6 +82,7 @@ date_default_timezone_set('America/Mexico_City');
 							  		include 'view/pages/habilitado_v/modals/modal_entrega_resguardatario.php';
 							  		include 'view/pages/habilitado_v/modals/modal_subir_solicitud.php';
 							  		include 'view/pages/habilitado_v/modals/modal_cancelar_solicitud.php';
+							  		include 'view/pages/habilitado_v/modals/modal_documentacion_solicitud.php';
 							  		#LISTA DE MODALES PARA LA COTIZACION Y FACTURACIÓN
 							  		include 'view/pages/habilitado_v/modals/modal_cotizacion.php';
 							  		include 'view/pages/habilitado_v/modals/modal_facturas.php';

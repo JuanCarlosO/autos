@@ -106,7 +106,7 @@ if ( isset( $_POST['option'] ) )
 			echo $person->getPerfil();#Recuperar la informacion del usuario logeado
 			break;
 		case '14':
-			echo $hab->saveTaller($_POST);#Recuperar la informacion del usuario logeado
+			echo $hab->saveTaller($_POST);#Recuperar la data
 			break;
 		case '15':
 			echo $hab->delTaller($_POST['t']);#Dar de baja el taller
@@ -293,6 +293,18 @@ if ( isset( $_POST['option'] ) )
 			break;	
 		case '76':
 			echo $sis->InsertAccount();
+			break;	
+		case '77':
+			echo $hab->delFactura();
+			break;	
+		case '78':
+			echo $hab->reactiveSol();
+			break;	
+		case '79':
+			echo $hab->delEvento();
+			break;	
+		case '80':
+			echo $hab->addFalla();
 			break;	
 			
 		default:

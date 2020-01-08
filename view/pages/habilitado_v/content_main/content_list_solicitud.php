@@ -4,17 +4,12 @@
 			<div class="box">
 				<div class="box-header with-border">
 					<h3 class="box-title">Listado de solicitudes.</h3>
-					<div class="box-tools pull-right">
-						<button type="button" class="btn btn-box-tool" data-widget="collapse">
-							<i class="fa fa-minus"></i>
-						</button>
-						<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-					</div>
+					
 				</div>
 				<div class="box-body">
 					<div class="row">
 						<div class="col-md-3 pull-right">
-							<button type="submit" class="btn btn-success btn-flat btn-block" data-toggle="modal" data-target="#modal_solicitud_historica">
+							<button type="submit" class="btn btn-success btn-flat btn-block" data-toggle="modal" data-target="#modal_solicitud_historica" onclick="getTipoFalla('t_falla_h','falla_h');">
 								<i class="fa fa-plus"></i> Agregar solicitud historica
 							</button>
 						</div>

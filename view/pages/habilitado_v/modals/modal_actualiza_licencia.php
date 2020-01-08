@@ -37,10 +37,13 @@
 	      			<div class="form-group">
 	      				<label>Tipo</label>
 	      				<select id="tipo" name="tipo" class="form-control" required>
-	      					<option value="">...</option>
-	      					<option value="1" selected>A - Automovilista</option>
-	      					<option value="2">C - Motociclista</option>
-	      					<option value="3">E - Chofer</option>
+	      					<option value="" selected>...</option>
+        					<option value="1">A - Automovilista</option>
+                            <option value="4">B - Chofer</option>
+        					<option value="2">C - Chofer carga</option>
+                            <option value="5">D - Chofer turismo</option>
+        					<option value="3">E - Chofer de carga general y especifica </option>
+                            <option value="6">F - Chofer transporte de pasajeros</option>
 	      				</select>
 	      			</div>
 	      		</div>

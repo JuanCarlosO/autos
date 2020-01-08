@@ -10,16 +10,22 @@
 			<div class="modal-body">
 				<input type="hidden" id="evento_id" name="" value="evento_id">	
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<button type="button" class="btn btn-success btn-lg btn-flat btn-block"  onclick="view_evidencia();">
 							<i class="fa fa-eye" style=" font-size: 25px;"></i>
 							Ver evidencia
 						</button>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<button type="button" class="btn btn-success btn-lg btn-flat btn-block" onclick="add_evidencia();">
 							<i class="fa fa-plus" style=" font-size: 25px;"></i>
-							Agregar evidencia
+							Agreg. evidencia
+						</button>
+					</div>
+					<div class="col-md-4">
+						<button type="button" class="btn btn-danger btn-lg btn-flat btn-block" onclick="del_evento();">
+							<i class="fa fa-trash" style=" font-size: 25px;"></i>
+							Eliminar Evento
 						</button>
 					</div>
 				</div>

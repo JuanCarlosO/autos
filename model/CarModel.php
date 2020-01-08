@@ -82,7 +82,7 @@ class CarModel extends Conection
 			FROM
 			    vehiculos
 			WHERE
-			    placas LIKE :term 
+			    placas LIKE :term AND estado != 'BAJA'
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(':term',$valor,PDO::PARAM_STR);

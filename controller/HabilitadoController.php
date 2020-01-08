@@ -345,7 +345,7 @@ class HabilitadoController
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','',8);
 		foreach ($reparaciones as $key => $value) {
-			$pdf->MultiCell(192,8,(++$key).".- ".$value->nombre,1);
+			$pdf->MultiCell(192,8,(++$key).".- ".utf8_decode($value->nombre),1);
 		}
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(192,5,'FIRMAS',1,0,'C',1);
@@ -447,6 +447,22 @@ class HabilitadoController
 	public function getDocSiniestros()
 	{
 		return $this->model->getDocSiniestros();
+	}
+	public function delFactura()
+	{
+		return $this->model->delFactura();
+	}
+	public function reactiveSol()
+	{
+		return $this->model->reactiveSol();
+	}
+	public function delEvento()
+	{
+		return $this->model->delEvento();
+	}
+	public function addFalla()
+	{
+		return $this->model->addFalla();
 	}
 	
 	

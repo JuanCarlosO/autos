@@ -8,7 +8,7 @@
 	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 	          <span aria-hidden="true">×</span>
 	        </button>
-	        <h4 class="modal-title">Subir formato firmado del solicitante </h4>
+	        <h4 class="modal-title">Subir formato firmado del solicitante (Solor PDF) </h4>
 	      </div>
 	      <div class="modal-body">
 	      	<div  class="row">
@@ -37,7 +37,7 @@
 	      		<div class="col-md-6">
 		      		<div class="form-group">
 		      			<label for="doc">Buscar el documento</label>
-		      			<input type="file" id="doc" name="archivo" value="" class="form-control" required>
+		      			<input type="file" id="doc" name="archivo" value="" class="form-control" accept=".pdf" required>
 		      		</div>
 	      		</div>
 	      	</div>

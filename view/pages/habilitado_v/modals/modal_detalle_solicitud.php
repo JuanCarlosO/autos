@@ -6,8 +6,12 @@
           <span aria-hidden="true">×</span>
         </button>
         <h4 class="modal-title"> 
-          <button type="" class="btn btn-danger btn-flat" onclick="cancelaSol();"> 
-            <i class="fa fa-times"></i> Cancelar solicitud </button>  
+          <button id="cancelar_sol" type="" class="btn btn-danger btn-flat hidden" onclick="cancelaSol();"> 
+            <i class="fa fa-times"></i> Cancelar solicitud 
+          </button>  
+          <button id="btn_reactive" type="" class="btn btn-primary btn-flat hidden" onclick="reactiveSol();"> 
+              <i class="fa fa-clock-o"></i> Reactivar solicitud 
+            </button>  
           <center>DETALLE DE LA SOLICITUD</center> 
         </h4>
       </div>

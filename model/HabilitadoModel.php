@@ -17,13 +17,15 @@ class HabilitadoModel extends Conection
 			$tel 		= $post['tel'] ;
 			$email 		= mb_strtolower($post['email'],'utf-8');
 			$dir 		= mb_strtoupper($post['direccion'],'utf-8');
-			$this->sql = "INSERT INTO talleres (id,r_social,contacto,telefono,correo,domicilio) VALUES ('',?,?,?,?,?);";
+			$edo 		= $post['estado'] ;
+			$this->sql = "INSERT INTO talleres (id,r_social,contacto,telefono,correo,domicilio,estado) VALUES ('',?,?,?,?,?,?);";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$razon,PDO::PARAM_STR);
 			$this->stmt->bindParam(2,$contacto,PDO::PARAM_STR);
 			$this->stmt->bindParam(3,$tel,PDO::PARAM_STR);
 			$this->stmt->bindParam(4,$email,PDO::PARAM_STR);
 			$this->stmt->bindParam(5,$dir,PDO::PARAM_STR);
+			$this->stmt->bindParam(6,$edo,PDO::PARAM_STR);
 			$this->stmt->execute();
 
 			return json_encode( array('status'=>'success','message'=>'TALLER ALMACENADO CORRECTAMENTE.') );
@@ -40,14 +42,17 @@ class HabilitadoModel extends Conection
 			$email 		= mb_strtolower($post['email'],'utf-8');
 			$dir 		= mb_strtoupper($post['direccion'],'utf-8');
 			$id 		= $post['id'];
-			$this->sql = "UPDATE talleres SET r_social=?,contacto = ?,telefono = ?, correo = ? , domicilio = ? WHERE id = ?;";
+			$edo 		= $post['estado'] ;
+
+			$this->sql = "UPDATE talleres SET r_social=?,contacto = ?,telefono = ?, correo = ? , domicilio = ? , estado = ? WHERE id = ?;";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$razon,PDO::PARAM_STR);
 			$this->stmt->bindParam(2,$contacto,PDO::PARAM_STR);
 			$this->stmt->bindParam(3,$tel,PDO::PARAM_STR);
 			$this->stmt->bindParam(4,$email,PDO::PARAM_STR);
 			$this->stmt->bindParam(5,$dir,PDO::PARAM_STR);
-			$this->stmt->bindParam(6,$id,PDO::PARAM_INT);
+			$this->stmt->bindParam(6,$edo,PDO::PARAM_INT);
+			$this->stmt->bindParam(7,$id,PDO::PARAM_INT);
 			$this->stmt->execute();
 
 			return json_encode( array('status'=>'success','message'=>'TALLER ACTUALIZADO CORRECTAMENTE.') );
@@ -249,18 +254,14 @@ class HabilitadoModel extends Conection
 					$this->stmt->execute();
 
 					#Recuperar el ultimo siniestro en el que se dio de alta 
-					$this->sql = "SELECT MAX(id) AS ultimo FROM siniestros";
-					$this->stmt = $this->pdo->prepare($this->sql);
-					$this->stmt->execute();
-					$ultimo = $this->stmt->fetch(PDO::FETCH_OBJ);
-
+					$ultimo = $this->pdo->lastInsertId();
 					#Insertar a los tecnicos
 					$this->sql = "INSERT INTO personal_tecnico (id,nombre,siniestro_id) VALUES ('',?,?)";
 					$this->stmt = $this->pdo->prepare($this->sql);
 					for ($i=0; $i < count($post['tecnico']) ; $i++) { 
 						$tecnico = mb_strtoupper($post['tecnico'][$i],'utf-8');
 						$this->stmt->bindParam(1,$tecnico,PDO::PARAM_STR);
-						$this->stmt->bindParam(2,$ultimo->ultimo,PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$ultimo,PDO::PARAM_INT);
 						$this->stmt->execute();
 					}
 					unlink($destiny.$name);
@@ -417,7 +418,7 @@ class HabilitadoModel extends Conection
 	{
 		try {
 			$this->sql = "
-			SELECT * FROM tipo_fallas 
+			SELECT id,UPPER(nombre) AS nombre FROM tipo_fallas 
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
@@ -433,7 +434,7 @@ class HabilitadoModel extends Conection
 	{
 		try {
 			$this->sql = "
-			SELECT * FROM catalogo_fallas WHERE tipo_id = ?
+			SELECT id, UPPER(nombre) AS nombre FROM catalogo_fallas WHERE tipo_id = ?
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->bindParam(1,$t);
@@ -633,9 +634,9 @@ class HabilitadoModel extends Conection
 			#Validar que la reparacion no sea mayor al 30% del vehiculo
 			$cv =(int) $_POST['costo_veh'];
 			$cc =(int) $_POST['costo'];
-			$limite = (($cv * 30 )/100);
+			$limite = (($cv * 35 )/100);
 			if ( $cc > $limite ) {
-				throw new Exception("EL COSTO DE LA REPARACIÓN EXCEDE EL 30%", 1);
+				throw new Exception("EL COSTO DE LA REPARACIÓN EXCEDE EL 35%", 1);
 			}
 			$size = $_FILES['archivo']['size'];
 			$type = $_FILES['archivo']['type'];
@@ -812,13 +813,13 @@ class HabilitadoModel extends Conection
 						baja_documentos 
 							(id, baja, tipo, nombre	, archivo)
 						VALUES 
-							('', ?, ?, ?, ?);
+							('', ?, ?, ?, '".$content."');
 						";
 						$this->stmt = $this->pdo->prepare( $this->sql );
 						$this->stmt->bindParam(1,$ultimo,PDO::PARAM_INT);
 						$this->stmt->bindParam(2,$t_doc,PDO::PARAM_INT);
 						$this->stmt->bindParam(3,$name_doc,PDO::PARAM_STR);
-						$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
+						//$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
 						$this->stmt->execute();
 						unlink($destiny.$name);
 						
@@ -906,13 +907,13 @@ class HabilitadoModel extends Conection
 						solicitud_documentos 
 							(id, solicitud, tipo_doc,formato, archivo)
 						VALUES 
-							('', ?, ?, ?, ?);
+							('', ?, ?, ?, '".$content."');
 						";
 						$this->stmt = $this->pdo->prepare( $this->sql );
 						$this->stmt->bindParam(1,$ultima,PDO::PARAM_INT);
 						$this->stmt->bindParam(2,$t_doc,PDO::PARAM_INT);
 						$this->stmt->bindParam(3,$type,PDO::PARAM_STR);
-						$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
+						//$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
 						$this->stmt->execute();
 						unlink($destiny.$name);
 						
@@ -943,7 +944,8 @@ class HabilitadoModel extends Conection
 			$type = $_FILES['archivo']['type'];
 			$name = $_FILES['archivo']['name'];
 			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
-			
+			$f_exp = ( isset($_POST['f_exp']) ) ? $_POST['f_exp'] : NULL;
+			$f_ven = ( isset($_POST['f_ven']) ) ? $_POST['f_ven'] : NULL;
 			if ( $size > 10485760 ) 
 			{
 				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
@@ -967,17 +969,18 @@ class HabilitadoModel extends Conection
 					$this->sql = "
 					INSERT INTO 
 					licencias 
-						(id, persona, f_expedicion, f_vencimiento, tipo, numero, archivo)
+						(id, persona, f_expedicion, f_vencimiento, tipo, numero, archivo,vigencia)
 					VALUES 
-						('',?, ?, ?, ?, ?, ?);
+						('',?, ?, ?, ?, ?, '".$content."',?);
 					";
 					$this->stmt = $this->pdo->prepare( $this->sql );
 					$this->stmt->bindParam(1,$_POST['sp_id'],PDO::PARAM_INT);
-					$this->stmt->bindParam(2,$_POST['f_exp'],PDO::PARAM_STR);
-					$this->stmt->bindParam(3,$_POST['f_ven'],PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$f_exp,PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$f_ven,PDO::PARAM_STR);
 					$this->stmt->bindParam(4,$_POST['tipo'],PDO::PARAM_INT);
 					$this->stmt->bindParam(5,$_POST['num_lic'],PDO::PARAM_STR);
-					$this->stmt->bindParam(6,$content,PDO::PARAM_LOB);
+					$this->stmt->bindParam(6,$_POST['vigencia'],PDO::PARAM_INT);
+					//$this->stmt->bindParam(6,$content,PDO::PARAM_LOB);
 					$this->stmt->execute();
 					unlink($destiny.$name);
 					return json_encode(array('status'=>'success','message'=>'SE GUARDO EL CONDUCTOR EXITOSAMENTE'));
@@ -1004,11 +1007,14 @@ class HabilitadoModel extends Conection
 			
 			$this->sql = "
 				SELECT CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS chofer, a.nombre AS area, 
-					l.id,l.persona,l.f_expedicion,l.f_vencimiento,l.tipo,
-					IF ( l.f_vencimiento <= DATE(NOW()),'VENCIDA','ACTIVA' ) AS estado
+					l.id,l.persona,l.f_expedicion,l.f_vencimiento,l.tipo,l.numero,
+					IF ( l.f_vencimiento <= DATE(NOW()),'VENCIDA','ACTIVA' ) AS estado,
+					DATEDIFF( l.f_vencimiento,DATE(NOW()) ) AS diferencia
 				FROM licencias AS l
 				INNER JOIN personal AS p ON p.id = l.persona 
 				INNER JOIN area AS a ON a.id = p.area_id
+				 ORDER BY $anexgrid->columna $anexgrid->columna_orden
+            			LIMIT $anexgrid->pagina, $anexgrid->limite
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
@@ -1072,19 +1078,21 @@ class HabilitadoModel extends Conection
 	public function saveEvidencia()
 	{
 		try {
+
 			$evento = $_POST['evento'];
 			for ($i=0; $i < count($_FILES['archivo']['name']); $i++) { 
 				$size = $_FILES['archivo']['size'][$i];
 				$type = $_FILES['archivo']['type'][$i];
 				$name = $_FILES['archivo']['name'][$i];
 				$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
-				
+				#print_r( $_FILES['archivo']['type'][$i] );exit;
 				if ( $size > 10485760 ) 
 				{
 					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
 				}
 				else
 				{
+
 					if ( $type != 'application/pdf' AND $type != 'image/png' AND $type != 'image/jpeg' ) 
 					{
 						throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
@@ -1237,13 +1245,13 @@ class HabilitadoModel extends Conection
 					#Insertar en la BD
 					$this->sql = "
 					INSERT INTO solicitud_documentos(id,solicitud,tipo_doc,formato,archivo) 
-					VALUES ('',?,?,?,?);
+					VALUES ('',?,?,?,'".$content."');
 					";
 					$this->stmt = $this->pdo->prepare( $this->sql );
 					$this->stmt->bindParam(1,$_POST['solicitud_id'],PDO::PARAM_STR);
 					$this->stmt->bindParam(2,$_POST['t_sol'],PDO::PARAM_LOB);
 					$this->stmt->bindParam(3,$type,PDO::PARAM_STR);
-					$this->stmt->bindParam(4,$content,PDO::PARAM_INT);
+					//$this->stmt->bindParam(4,$content,PDO::PARAM_INT);
 					$this->stmt->execute();
 					unlink($destiny.$name);
 					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA SE GUARDO CON ÉXITO.' ));
@@ -2071,6 +2079,102 @@ class HabilitadoModel extends Conection
 			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);	
 
 			return $this->result;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+
+	public function delFactura()
+	{
+		try {
+			$f = ( isset($_POST) ) ? $_POST['factura']:0 ;
+			if ($f == 0) {
+				throw new Exception("NO SE ENCONTRO LA FACTURA SELECCIONADA.", 1);
+			}
+			$this->sql = "
+				DELETE FROM facturas WHERE id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$f,PDO::PARAM_INT);
+			$this->stmt->execute();	
+
+			return json_encode(array('status'=>'success','message'=>'LA FACTURA A SIDO ELIMINADA EXITOSAMENTE.'));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function delEvento()
+	{
+		try {
+			$evento = ( isset($_POST) ) ? $_POST['e']:0 ;
+			if ($evento == 0) {
+				throw new Exception("NO SE ENCONTRO EL EVENTO SELECCIONADO.", 1);
+			}
+			$this->sql = "
+				DELETE FROM eventos_evidencia WHERE evento = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$evento,PDO::PARAM_INT);
+			$this->stmt->execute();	
+			$this->sql = "
+				DELETE FROM eventos WHERE id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$evento,PDO::PARAM_INT);
+			$this->stmt->execute();	
+			
+			return json_encode(array('status'=>'success','message'=>'EL EVENTO A SIDO ELIMINADO EXITOSAMENTE.'));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function reactiveSol()
+	{
+		try {
+			$s = ( isset($_POST) ) ? $_POST['s']:0 ;
+			if ($s == 0) {
+				throw new Exception("NO SE ENCONTRO LA SOLICITUD SELECCIONADA.", 1);
+			}
+			$this->sql = "
+				DELETE FROM cancelaciones WHERE solicitud = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$s,PDO::PARAM_INT);
+			$this->stmt->execute();	
+
+			$this->sql = "
+				UPDATE solicitudes SET estado = 1 WHERE id = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$s,PDO::PARAM_INT);
+			$this->stmt->execute();	
+			return json_encode(array('status'=>'success','message'=>'LA SOLICITUD SE A REACTIVADO EXITOSAMENTE.'));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function addFalla()
+	{
+		try {
+			#print_r( $_POST );exit;
+			if (!isset($_POST['val'])) {
+				throw new Exception("DEBE DE ESCRIBIR UNA FALLA.", 1);
+			}
+			if (!isset($_POST['g'])) {
+				throw new Exception("NO SE ENCONTRO EL GRUPO DE LAS FALLAS.", 1);
+			}
+			$v = $_POST['val'];
+			$g = $_POST['g'];
+			
+			$this->sql = "
+				INSERT INTO catalogo_fallas(id, nombre, tipo_id) VALUES ('',?,?)
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$v,PDO::PARAM_STR);
+			$this->stmt->bindParam(2,$g,PDO::PARAM_INT);
+			$this->stmt->execute();	
+
+			return json_encode(array('status'=>'success','message'=>'EL NUEVO TIPO DE FALLA SE INSERTÓ EXITOSAMENTE.'));
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}

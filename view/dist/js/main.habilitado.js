@@ -103,6 +103,7 @@ function getURL() {
 		$('#add_chofer').addClass('active');
 		autocompletado('sp','sp_id');
 		frm_add_chofer();
+		vigencia_lic();
 	}else if ( URLsearch == '?menu=list_chofer' ){
 		$('#tree_list').addClass('active');
 		$('#list_chofer').addClass('active');
@@ -160,6 +161,7 @@ function all_sol() {
 	        { leyenda: 'Detalle', style: 'width:15px;'},
 	        { leyenda: 'PDF', style: 'width:15px;'},
 	        { leyenda: 'Subir Doc.', style: 'width:10px;'},
+	        { leyenda: 'Ver Documentos', style: 'width:10px;'},
 	    ],
 	    modelo: [
 	        { propiedad: 'id',class:'text-center',formato:function(tr,obj,celda) {
@@ -226,12 +228,20 @@ function all_sol() {
 		        		type:'button',
 		        		value:obj.id
 	        	});
-	        	
-	        	
-	        	
 	        } },
+	        { class:'text-center', formato:function(tr,obj,celda){
 
-	        
+	        	return anexGrid_boton({
+		        		contenido:'<i class="fa fa-eye"></i>',
+		        		class: 'btn btn-default btn-flat documentacion',
+		        		attr:[
+		        		'data-toggle="tooltip"',
+						'title="Este botón permite visualizar toda la documentación relacionada a esta solicitud."'
+						],
+		        		type:'button',
+		        		value:obj.id
+	        	});
+	        } },
 	    ],
 	    url: 'controller/puente.php?option=8',
 	    limite: [20,50,100],
@@ -253,9 +263,18 @@ function all_sol() {
 		event.preventDefault();
 		$('[name="solicitud_id"]').val( $(this).val() );
 	});
-	
+	table.tabla().on('click', '.documentacion', function(event) {
+		$('[data-toggle="tooltip"]').tooltip();
+		event.preventDefault();
+		$('[name="solicitud_id"]').val( $(this).val() );
+		$('#modal_documentacion_solicitud').modal('toggle');
+		documentos_solicitud();
+		//alert( $(this).val() );
+	});
 	//return false;
 }
+
+
 
 /*Listado completo de vehiculos*/
 function all_cars(){
@@ -278,6 +297,10 @@ function all_cars(){
 	        { formato: function(tr,obj,celda){
 	        	if ( obj.estado == 'BAJA' ) {
 	        		tr.css('background','red');
+	        	}else if( obj.estado == 'ACTIVO' ){
+	        		tr.addClass('bg-green-active ');
+	        	}else if( obj.estado == 'DESCOMPUESTO' ){
+	        		tr.addClass('bg-yellow ');
 	        	}
 	        	return '<ul>'+
 	        				'<li> <b>Nombre:</b>'+obj.responsable+'</li>'+
@@ -402,6 +425,7 @@ function all_talleres() {
 }
 /*Listado completo de choferes*/
 function all_choferes(){
+
 	var anexGrid = $("#all_choferes").anexGrid(
 		{
 	    class: 'table-striped table-bordered table-hover',
@@ -420,6 +444,11 @@ function all_choferes(){
 	        { propiedad: 'chofer' },
 	        { propiedad: 'area'},
 	        { formato: function(tr,obj,celda){
+	        	if ( obj.diferencia <= 15 && obj.diferencia > 0 ) {
+	        		tr.addClass('bg-yellow-active ');
+	        	}else if( obj.diferencia == 0 ){
+	        		tr.addClass('bg-red-active');
+	        	}
 	        	return '<ul>'+
 	        				'<li>'+'<label>Fecha de expedición:</label> '+obj.f_expedicion+'</li>'+
 	        				'<li>'+'<label>Fecha de vencimiento:</label> '+obj.f_vencimiento+'</li>'+
@@ -792,16 +821,49 @@ function frm_add_siniestro() {
 				$('#a_mod_sin_message').text('');
 				document.getElementById('frm_add_siniestro').reset();
 				$('#modal_siniestro').modal('toggle');
-				getDetalleSol();
+				getSiniestros();
+				//getDetalleSol();
 			},5000);
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			alert(jqXHR.responseText);
 		});
+		
+		
 	});
-	
-	
 	return false;
+}
+/*Funcion que recupera los siniestros*/
+function getSiniestros() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '18',sol:$('#solicitud_id').val()},
+		async:false,
+	})
+	.done(function(response) {
+		$('#list_siniestros').html('');
+		if (response.siniestro.estado == 'empty') {
+			$('#list_siniestros').html('');
+		}else{
+			$.each(response.siniestro, function(i, val) {
+				$('#list_siniestros').append(
+					'<li>  '+val.aseguradora+
+					'<ol type="a">'+
+						
+						'<li> <label> Fecha de hechos: </label> '+val.f_hechos+'</li>'+
+						'<li> <label> Entró al taller el:  </label> '+val.f_entrada+'</li>'+
+						'<li> <label> Salió del taller el:  </label> '+val.f_salida+'</li>'+
+						'<li> <label> Observaciones: </label> '+val.observaciones+'</li>'+
+					'</ol></li>'
+				);
+			});
+		}
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert("Error: "+jqXHR.responseText);
+	});
 }
 /*Recuperar la informacion del detalle */
 function getDetalleSol( solicitud ) 
@@ -823,6 +885,12 @@ function getDetalleSol( solicitud )
 			$('#f_sol').val(response.solicitud.f_sol);
 			$('#km').val(response.solicitud.km);
 			$('#desc_sol').val(response.solicitud.descripcion);
+			/*  */
+			if ( response.solicitud.estado == 'Cancelada' ) {
+				$('#btn_reactive').removeClass('hidden');
+			}else{
+				$('#cancelar_sol').removeClass('hidden');
+			}
 			/*AGREGAR LAS REPARACIONES*/
 			$('#reparaciones').html('');
 			$.each(response.reparaciones, function(i, val) {
@@ -914,17 +982,58 @@ function getTipoFalla(id,fallas) { //Obtener t_fallas (BD)
 		$('#'+fallas).html("");
 		getFallas( fallas,$(this).val() );
 	} );
+	$('#'+fallas).change( function(e){
+		e.preventDefault();
+		if ( $(this).val() == 0 ) {
+			add_falla(id,fallas);
+		}	
+	});
 	return false;
 }
 
 function getFallas( id,tipo ){// Obtener catalogo_fallas (BD)
 	$('#'+id).html("");
-	$.post('controller/puente.php', {option: '20',t:tipo}, function(data, textStatus, xhr) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '20',t:tipo},
+		async:false,
+	})
+	.done(function(data) {
 		$('#'+id).append('<option value="">...</option>');
+		$('#'+id).append('<option value="0">OTRO</option>');
 		$.each(data, function(i, val) {
 			$('#'+id).append('<option value="'+val.id+'">'+val.nombre+'</option>');
 		});
-	},'json');
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error: '+jqXHR.responseText);
+	});
+
+	return false;
+}
+/*AGREGAR FALLAS A LA TABLA DE catalogo_fallas*/
+function add_falla(id,fallas) {
+	var value = prompt('Ingresa una nueva opcion para '+$('#'+id+' option:selected').text() );
+	value = value.toUpperCase();
+	var grupo = $('#'+id).val();
+
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '80', val:value,g:grupo},
+		async:false,
+	})
+	.done(function(response) {
+		alert(response.message);
+		getFallas(fallas,grupo);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert('Error: '+jqXHR.responseText);
+	});
+	
 	return false;
 }
 /*Funcion para atender solicitud*/
@@ -1163,6 +1272,8 @@ function frm_ingreso() {
 				document.getElementById('frm_add_fallas').reset();
 				$('#modal_ingreso').modal('toggle');
 				document.getElementById('frm_ingreso').reset();
+				var s = $('#solicitud_id').val();
+				getDetalleSol(s);
 			},5000);
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
@@ -1954,16 +2065,20 @@ function frm_save_evidencia() {
 			cache:false,
 			processData:false,
 			contentType:false,
-			timeout:3000,
-			beforeSend:function(){
-				$('#loader').removeClass('hidden');
-
-			}
+			//timeout:3000,
 		})
 		.done(function(response) {
+			var estado , clase;
+			if( response.status == 'error'){
+				estado = "ERROR!";
+				clase = 'alert-danger';
+			}else{
+				estado = "ÉXITO!";
+				clase = 'alert-success';
+			}
 			$('#alert_evidencia').removeClass('hidden');
-			$('#alert_evidencia').addClass('alert-success');
-			$('#estado_evidencia').text('Éxito');
+			$('#alert_evidencia').addClass(clase);
+			$('#estado_evidencia').text(estado);
 			$('#mensaje_evidencia').text(response.message);
 			
 			//document.location.href = "#alerta";
@@ -2126,6 +2241,8 @@ function frm_add_garantia() {
 				$('#alert_garantia').removeClass(clase);
 				$('#estado_garantia').text('');
 				$('#message_garantia').text('');
+				document.getElementById("frm_add_garantia").reset();
+				$('#modal_add_garantia').modal('toggle');
 				var s = $('#solicitud_id').val();
 				getDetalleSol( s );
 			},5000);
@@ -2399,7 +2516,6 @@ function mostrar_aviso(aviso) {
 function frm_add_factura() {
 	$('#frm_add_factura').submit(function(e) {
 		e.preventDefault();
-		alert('Hola mundo');
 		var dataForm = new FormData(document.getElementById("frm_add_factura"));
 		$.ajax({
 			url: 'controller/puente.php',
@@ -2428,6 +2544,9 @@ function frm_add_factura() {
 				$('#alert_factura').removeClass(clase);
 				$('#estado_factura').text('');
 				$('#message_factura').text('');
+				document.getElementById("frm_add_factura").reset();
+				$('#modal_add_factura').modal('toggle');
+
 				getFacturas();
 			},5000);
 		})
@@ -2470,6 +2589,7 @@ function vista_factura(id) {
 		async:false,
 	})
 	.done(function(response) {
+		$('#factura_id').val(id);
 		$('#vista_factura').html(response);
 	})
 	.fail(function(jqXHR,textStatus,errorThrown) {
@@ -2577,5 +2697,101 @@ function obtener_siniestros() {
 		console.log("Error:"+jqXHR.responseText);
 	});
 	
+	return false;
+}
+/*ELIMINAR LA FACTURA */
+function DelFactura() {
+	var id = $('#factura_id').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '77',factura:id},
+		async:false,
+	})
+	.done(function(response) {
+		var clase = '', estado= '';
+		if (response.status == 'success') {
+			clase = 'alert-success';
+			estado = '¡Éxito!';
+		}else{
+			clase = 'alert-danger';
+			estado = '¡Aviso!';
+		}
+		$('#alerta_factura').removeClass('hidden');
+		$('#alerta_factura').addClass(clase);
+		$('#est_factura').text(estado);
+		$('#mess_factura').text(response.message);
+		setTimeout(function(){
+			$('#alerta_factura').addClass('hidden');
+			$('#alerta_factura').removeClass(clase);
+			$('#est_factura').text('');
+			$('#mess_factura').text('');	
+			$('#modal_ver_factura').modal('toggle');
+			getFacturas();
+		},5000);
+		return false;
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert("Error: "+jqXHR.responseText);
+	});
+	
+}
+
+/*FUNCION PARA REACTIVAR LA SOLICITUD*/
+function reactiveSol() {
+	var solicitud = $('#solicitud_id').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '78',s:solicitud},
+		async:false,
+	})
+	.done(function(response) {
+		alert('Solicitud reactivada exitosamente.');
+		var sol = $('#solicitud_id').val();
+		getDetalleSol(sol);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert("Error: "+jqXHR.responseText);
+	});
+	
+	return false;
+}
+/*Metodo para eliminar evento*/
+function del_evento() {
+	var evento = $('#evento_id').val();
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '79',e:evento},
+		async:false,
+	})
+	.done(function(response) {
+		alert(response.message);
+		$('#modal_add_evidencia').modal('toggle');
+		location.reload();
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert("Error: "+jqXHR.responseText);
+	});
+	
+	return false;
+}
+/*Vigencia de la licencia*/
+function vigencia_lic() {
+	$('[name="vigencia"]').change(function(e) {
+		e.preventDefault();
+		var v = $(this).val();
+		if ( v == '2') {
+			$('#f_exp').attr('disabled','disabled');
+			$('#f_ven').attr('disabled','disabled');
+		}else{
+			$('#f_exp').removeAttr('disabled');
+			$('#f_ven').removeAttr('disabled');
+		}
+	});
 	return false;
 }

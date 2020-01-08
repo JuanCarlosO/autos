@@ -62,20 +62,20 @@
 	      			</div>
 	      		</div>
 	      	</div>
-	      	<div class="row">
+	      	<!-- <div class="row">
 	      		<div class="col-md-3">
 	      			<button type="button" class="btn btn-success btn-flat" onclick="add_field_document('documentacion');">
 	      				<i class="fa fa-file-o"></i>
 	      				Adjuntar otro documento
 	      			</button>
 	      		</div>
-	      	</div>
+	      	</div> -->
 	      	<div id="documentacion">
 	      		<div class="row">
 	      			<div class="col-md-6">
 	      				<div class="form-group">
 	      					<label>Tipo de documento</label>
-	      					<select id="t_doc" name="tipo_doc[]" class="form-control file" required></select>
+	      					<select id="t_doc" name="tipo_doc[]" class="form-control file" ></select>
 	      				</div>
 	      			</div>
 	      			<div class="col-md-6">
