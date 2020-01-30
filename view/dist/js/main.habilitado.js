@@ -110,6 +110,7 @@ function getURL() {
 		all_choferes();
 		/*Formularios*/
 		frm_add_avisos();
+		frm_update_licencia();
 	}
 	else if ( URLsearch == '?menu=eventos' )
 	{
@@ -230,7 +231,7 @@ function all_sol() {
 	        	});
 	        } },
 	        { class:'text-center', formato:function(tr,obj,celda){
-
+	        	var fila_id =  tr.data('fila');
 	        	return anexGrid_boton({
 		        		contenido:'<i class="fa fa-eye"></i>',
 		        		class: 'btn btn-default btn-flat documentacion',
@@ -239,7 +240,7 @@ function all_sol() {
 						'title="Este botón permite visualizar toda la documentación relacionada a esta solicitud."'
 						],
 		        		type:'button',
-		        		value:obj.id
+		        		value:fila_id
 	        	});
 	        } },
 	    ],
@@ -266,15 +267,59 @@ function all_sol() {
 	table.tabla().on('click', '.documentacion', function(event) {
 		$('[data-toggle="tooltip"]').tooltip();
 		event.preventDefault();
-		$('[name="solicitud_id"]').val( $(this).val() );
+		var obj = table.obtener($(this).val());
+		//console.log(obj);
 		$('#modal_documentacion_solicitud').modal('toggle');
-		documentos_solicitud();
-		//alert( $(this).val() );
+		documentos_solicitud(obj.id);
 	});
 	//return false;
 }
 
+function documentos_solicitud(id) { //Faltante
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '82',id:id},
+		async:false,
+	})
+	.done(function(response) {
+		//console.log(response);
+		$('#listado_documentos').html("");
+		if ( response.status == 'empty' ) {
+			$('#listado_documentos').html(response.message);
+		}else{
+			$.each(response, function(index, val) {
+				$('#listado_documentos').append("<li> <a href='#' onclick='ver_doc_sol("+val.id+")'> "+val.tipo_d+" </a> </li>");
+			});
+		}
+		//console.log(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert( jqXHR.responseText );
+	});
+	
+	return false;
+}
 
+function ver_doc_sol(id) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '83',id:id},
+		async:false,
+	})
+	.done(function(response) {
+		$('#content_solicitud').html("");
+		$('#content_solicitud').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alert( jqXHR.responseText );
+	});
+	
+	return false;
+}
 
 /*Listado completo de vehiculos*/
 function all_cars(){
@@ -431,13 +476,25 @@ function all_choferes(){
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	        { leyenda: 'ID', class:'text-center', style: 'width:50px;', columna: 'id',ordenable:true },
-	        { leyenda: 'Nombre completo', style: 'width:200px;' },
-	        { leyenda: 'Área', columna: 'n_short', style:'width:200px;' },
-	        { leyenda: 'Datos de la licencia', columna: 'n_short', style:'width:200px;' },
+	        { leyenda: 'Nombre completo', style: 'width:200px;',columna:'chofer',ordenable:true,filtro:true },
+	        { leyenda: 'Área', columna: 'a.nombre', style:'width:200px;',ordenable:true , filtro:true},
+	        { leyenda: 'Datos de la licencia', columna: 'estado', style:'width:200px;',ordenable:true, filtro:function(){
+	        	return anexGrid_select({
+	        		//class:'form-control',
+	        		data:[
+		        		{ valor: 1, contenido: ''},
+		        		{ valor: 2, contenido: 'Por vencer'},
+		        		{ valor: 3, contenido: 'Vencidas'}
+	        		],
+	        		attr:[
+	        		'required'
+	        		]
+	        	});
+	        } },
 	        { leyenda: 'Actualizar licencia', columna: 'n_short', style:'width:10px;' },
 	        { leyenda: 'Avisos', style:'width:10px;' },
 	        { leyenda: 'Eliminar', style: 'width:10px;'},
-	        
+	        { leyenda: 'Ver licencia', style: 'width:10px;',class:'text-center'},
 	    ],
 	    modelo: [
 	        { propiedad: 'id',class:'text-center' },
@@ -458,12 +515,14 @@ function all_choferes(){
 	        		   '<ul>';
 	        }},
 	        {class:'text-center', formato: function(tr,obj,celda){
+	        	var fila_id = tr.data('fila');
 	        	return anexGrid_boton({
-	        		class: 'btn btn-primary btn-flat',
+	        		class: 'btn btn-primary btn-flat update-lic',
 	        		contenido: '<i class="fa fa-refresh"></i>',
 	        		attr: [
 	        			'data-toggle="modal"', 'data-target="#modal_update_licencia"'
-                	]
+                	],
+                	value: fila_id
 	        	});
 	        }},
 	        
@@ -475,7 +534,7 @@ function all_choferes(){
 	        		attr:[
 	        		'data-toggle="modal"',
 	        		'data-target="#modal_avisos"',
-	        		'onclick="setServidor('+obj.id+')"'
+	        		'onclick="setServidor('+obj.sp_id+')"'
 	        		]
 	        	});
 	        } },
@@ -485,13 +544,26 @@ function all_choferes(){
     					'<i class="fa fa-trash"></i>'+
     			'</button>';
 			} },
+			{ class:'text-center', formato:function(tr,obj,celda){
+	        	return anexGrid_boton({
+	        		class: 'btn btn-default btn-flat ver-licencia',
+	        		contenido: '<i class="fa fa-eye" style="color:#000000;"></i>',
+	        		attr:[
+	        		'data-toggle="modal"',
+	        		'data-target="#modal_view_licencia"'
+	        		],
+	        		value:tr.data('fila')
+	        	});
+	        } },
 	    ],
 	    url: 'controller/puente.php?option=18',
 	    type:'POST',
 	    limite: [10,20,50,100],
 	    columna: 'id',
 	    columna_orden: 'DESC',
-	    paginable:true
+	    paginable:true,
+	    filtrable:true,
+
 
 	}
 	);
@@ -502,7 +574,35 @@ function all_choferes(){
 		deleteChofer(obj.id);
 		anexGrid.refrescar();
 	});
+	anexGrid.tabla().on('click', '.ver-licencia', function(e) {
+		e.preventDefault();
+		var obj = anexGrid.obtener( $(this).val() );
+		getPDFlicencia(obj.id);
+		anexGrid.refrescar();
+	});
+	anexGrid.tabla().on('click', '.update-lic', function(e) {
+		e.preventDefault();
+		var obj = anexGrid.obtener( $(this).val() );
+		$('[name="l_id"]').val(obj.id);
+	});
 	
+}
+function getPDFlicencia(id) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'html',
+		data: {option: '81',id:id},
+		async:false,
+	})
+	.done(function(response) {
+		$('#licencia').html(response);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		alerta('error',jqXHR.responseText );
+	});
+	
+	return false;
 }
 function setServidor(id) {
 	$('#sp_id').val(id);
@@ -529,7 +629,7 @@ function frm_add_car(){
 		})
 		.done(function(response) {
 			alerta(response.status,response.message );
-			document.getElementById('frm_add_car').reet();
+			document.getElementById('frm_add_car').reset();
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			alerta('error',jqXHR.responseText );
@@ -880,6 +980,24 @@ function getDetalleSol( solicitud )
 		if ( response.status == 'error') {
 			alert('Error: '+response.message);
 		}else{
+			/*Ocultar el boton de ingreso al taller*/
+			if(response.atendida.estado != 'empty'){
+				$('#btn_ingreso').addClass('hidden');
+			}
+			/*Ocultar el boton de entrega del taller*/
+			/*if(response.atendida.estado != 'empty'){
+				$('#btn_final').removeClass('hidden');
+			}else if(response.atendida.estado == 'empty'){
+				$('#btn_final').addClass('hidden');
+			}*/
+			/*Ocultar el boton de entrega a resguardatario*/
+			if(response.e_vehiculo.estado != 'empty'){
+				$('#btn_entrega').addClass('hidden');
+				$('#btn_final').addClass('hidden');
+			}else if( response.e_vehiculo.estado == 'empty'){
+				$('#btn_entrega').removeClass('hidden');
+				$('#btn_final').removeClass('hidden');
+			}
 			$('#id').val(response.solicitud.id);
 			$('#folio').val(response.solicitud.folio);
 			$('#f_sol').val(response.solicitud.f_sol);
@@ -907,7 +1025,7 @@ function getDetalleSol( solicitud )
 			}else{
 
 				if (response.atendida.estado == "Reparado" || response.atendida.estado == "Entregado") {$('#btn_final').addClass('hidden');}
-				if (response.atendida.estado == "Entregado") {$('#btn_entrega').addClass('hidden');}
+				//if (response.atendida.estado != "Entregado") {$('#btn_entrega').removeClass('hidden');}
 				$('#ingreso_id').val(response.atendida.id);
 				$('#f_auto').val(response.atendida.f_ingreso);
 				$('#f_salida').val(response.atendida.f_salida);
@@ -1698,11 +1816,12 @@ function frm_historico_es() {
 		        { propiedad: 'id'},
 		        {  formato:function (tr,obj,celda) {
 		        	return  '<ul>'+
-		        			'<li> <b>PLACAS:</b> '+obj.placa+'</li>'+
-		        			'<li> <b>MARCA:</b> '+obj.marca+'<l/i>'+
-		        			'<li> <b>TIPO:</b> '+obj.t_vehiculo+'</li>'+
-		        			'<li> <b>¿QUIEN CONDUCE?:</b> '+obj.chofer+'</li>'+
-		        		'</ul>';
+	        			'<li> <b>PLACAS:</b> '+obj.placa+'</li>'+
+	        			'<li> <b>MARCA:</b> '+obj.marca+'<l/i>'+
+	        			'<li> <b>TIPO:</b> '+obj.t_vehiculo+'</li>'+
+	        			'<li> <b>¿QUIEN REGISTRO?:</b> '+obj.registro+'</li>'+
+	        			'<li> <b>¿QUIEN CONDUCE?:</b> '+obj.chofer+'</li>'+
+	        		'</ul>';
 		        	} 
 		        },
 		       {  formato:function (tr,obj,celda) {
@@ -1716,10 +1835,11 @@ function frm_historico_es() {
 		       {formato:function (tr,obj,celda) {
 			       	if ( obj.entrada != null ) {
 			       		return  '<ul>'+
-			       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
-			       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
-			       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
-			       			'</ul>';
+		       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
+		       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
+		       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
+		       				'<li> <b>RECORRIDO:</b> '+(obj.km_entrada - obj.km_salida)+'</li>'+
+		       			'</ul>';
 			       	}else{
 			       		return  '<ul>'+
 		        			'<li> <b>FECHA Y HORA:</b> SIN REGISTRAR</li>'+
@@ -1762,8 +1882,10 @@ function all_es() {
 	        			'<li> <b>PLACAS:</b> '+obj.placa+'</li>'+
 	        			'<li> <b>MARCA:</b> '+obj.marca+'<l/i>'+
 	        			'<li> <b>TIPO:</b> '+obj.t_vehiculo+'</li>'+
+	        			'<li> <b>¿QUIEN REGISTRO?:</b> '+obj.registro+'</li>'+
 	        			'<li> <b>¿QUIEN CONDUCE?:</b> '+obj.chofer+'</li>'+
 	        		'</ul>';
+	        
 	        	} 
 	        },
 	       {  formato:function (tr,obj,celda) {
@@ -1776,16 +1898,19 @@ function all_es() {
 	        },
 	       {formato:function (tr,obj,celda) {
 		       	if ( obj.entrada != null ) {
+		       		var recorrido = obj.km_entrada - obj.km_salida;
 		       		return  '<ul>'+
 		       				'<li> <b>FECHA Y HORA:</b> '+obj.entrada+'</li>'+
 		       				'<li> <b>NIVEL DE GAS:</b> '+obj.gas_entrada+' % <l/i>'+
 		       				'<li> <b>KILOMETRAJE:</b> '+obj.km_entrada+'</li>'+
+		       				'<li> <b>RECORRIDO:</b> '+recorrido+'</li>'+
 		       			'</ul>';
 		       	}else{
 		       		return  '<ul>'+
 	        			'<li> <b>FECHA Y HORA:</b> SIN REGISTRAR</li>'+
 	        			'<li> <b>NIVEL DE GAS:</b> SIN REGISTRAR <l/i>'+
 	        			'<li> <b>KILOMETRAJE:</b> SIN REGISTRAR </li>'+
+	        			'<li> <b>RECORRIDO:</b>SIN IDENTIFICAR</li>'+
 	        		'</ul>';
 		       	}
 	        	
@@ -2486,11 +2611,11 @@ function lista_avisos() {
 		$('#list_aviso').html('');
 		$('#name_sp').text(response.sp);
 		$.each(response.archivos, function(i, val) {
-			$('#list_aviso').append('<li><a href="#" onclick="mostrar_aviso('+val.id+');">'+val.tipo_doc+' - '+val.created_at+'</a></li>')
+			$('#list_aviso').append('<li><a href="#" onclick="mostrar_aviso('+val.id+');">'+val.tipo_doc+' - '+val.created_at+'</a><br> <p><b>'+val.descripcion+' </b></p> </li>')
 		});
 	})
 	.fail(function(jqXHR,textStatus,errorThrown) {
-		alert('Error:'+jqXHR.responseText );
+		console.log('Error:'+jqXHR.responseText );
 	});
 	
 	return false;
@@ -2794,4 +2919,30 @@ function vigencia_lic() {
 		}
 	});
 	return false;
+}
+
+/*Formulario de actualizar la licencia*/
+function frm_update_licencia() {
+	$('#frm_update_licencia').submit(function(e){
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_update_licencia"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			cache:false,
+			async:false,
+			processData:false,
+			contentType:false,
+		})
+		.done(function(response) {
+			alert(response.message);
+			$('#modal_update_licencia').modal('toggle');
+			document.getElementById('frm_update_licencia').reset();
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('error',jqXHR.responseText );
+		});
+	});
 }

@@ -84,7 +84,7 @@ class HabilitadoModel extends Conection
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$modulos = $this->stmt->fetchAll(PDO::FETCH_OBJ);
-			$this->sql = "SELECT COUNT(*) AS cuenta FROM modulos ";
+			$this->sql = "SELECT COUNT(*) AS cuenta FROM talleres WHERE".$wh."";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
@@ -324,6 +324,15 @@ class HabilitadoModel extends Conection
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute(array($sol));
 			$atendidas = $this->stmt->fetch(PDO::FETCH_ASSOC);
+			#Recuperar info de las entregas de vehiculos
+			$this->sql = "
+				SELECT *
+				FROM entrega_vehiculos
+				WHERE ingreso = ?
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute(array($atendidas['id']));
+			$e_vehiculo = $this->stmt->fetch(PDO::FETCH_ASSOC);
 			#RECUPERAR LOS SINIESTROS 
 			$this->sql = "
 				SELECT id, aseguradora, f_hechos, f_entrada, f_salida, observaciones, solicitud_id, estatus
@@ -353,6 +362,14 @@ class HabilitadoModel extends Conection
 				$atendidas = array('estado'=>'empty','message'=>'Sin atender');
 				$detalle['atendida'] = $atendidas;
 			}
+
+			if ( isset($e_vehiculo) && !empty($e_vehiculo) ) {
+				$detalle['e_vehiculo'] = $e_vehiculo;
+			}else{
+				$e_vehiculos = array('estado'=>'empty','message'=>'Sin atender');
+				$detalle['e_vehiculo'] = $e_vehiculo;
+			}
+
 			if ( isset($siniestros) && !empty($siniestros) ) {
 				$detalle['siniestro'] = $siniestros;
 			}else{
@@ -377,6 +394,8 @@ class HabilitadoModel extends Conection
 				$garantias = array('estado'=>'empty','message'=>'Sin garantias');
 				$detalle['garantias'] = $garantias;
 			}
+			#Agregar las entregas del taller 
+			
 			return json_encode($detalle);
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage() ) );
@@ -996,23 +1015,34 @@ class HabilitadoModel extends Conection
 		try {
 			$anexgrid = new AnexGrid();
 			/*Definir el Where*/
+			$wh = "1=1";
 			$folio = "";
-			if ( isset($_REQUEST['filtros']) ) {
-				$filtros = (object)$_REQUEST['filtros'][0];
-				$wh = $filtros->columna." LIKE '%".$filtros->valor."%'";
-			}else
-			{
-				$wh = " 1=1 ";
+			if ( count($anexgrid->filtros) >= 1 ) {
+					#$wh .= $v->columna." LIKE '%".$v->valor."%'";
+				foreach ($anexgrid->filtros as $key => $v) {
+					if ( $v['columna'] == 'chofer' ) {
+						$wh .= " AND CONCAT( p.nombre,' ',p.ap_pat,' ',p.ap_mat ) LIKE '%".$v['valor']."%' ";
+					}elseif( $v['columna'] == 'estado' ){
+						if ( $v['valor'] == 2 ) {//A punto de expirar 
+							$wh .= " AND DATEDIFF( l.f_vencimiento,DATE(NOW()) ) > 0 AND DATEDIFF( l.f_vencimiento,DATE(NOW()) ) <= 15";
+						}elseif( $v['valor'] == 3 ){//Vencidas
+							$wh .= " AND DATEDIFF( l.f_vencimiento,DATE(NOW()) ) = 0";
+						}
+					}else{
+						$wh .= " AND ".$v['columna']." LIKE '%".$v['valor']."%' ";
+					}
+					
+				}
 			}
-			
 			$this->sql = "
 				SELECT CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS chofer, a.nombre AS area, 
 					l.id,l.persona,l.f_expedicion,l.f_vencimiento,l.tipo,l.numero,
 					IF ( l.f_vencimiento <= DATE(NOW()),'VENCIDA','ACTIVA' ) AS estado,
-					DATEDIFF( l.f_vencimiento,DATE(NOW()) ) AS diferencia
+					DATEDIFF( l.f_vencimiento,DATE(NOW()) ) AS diferencia, p.id AS sp_id
 				FROM licencias AS l
 				INNER JOIN personal AS p ON p.id = l.persona 
 				INNER JOIN area AS a ON a.id = p.area_id
+				WHERE $wh
 				 ORDER BY $anexgrid->columna $anexgrid->columna_orden
             			LIMIT $anexgrid->pagina, $anexgrid->limite
 			";
@@ -1022,7 +1052,8 @@ class HabilitadoModel extends Conection
 			//print_r($modulos);exit;
 			$this->sql = "SELECT COUNT(*) AS cuenta FROM licencias AS l
 				INNER JOIN personal AS p ON p.id = l.persona 
-				INNER JOIN area AS a ON a.id = p.area_id";
+				INNER JOIN area AS a ON a.id = p.area_id
+				WHERE $wh";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
@@ -1650,43 +1681,59 @@ class HabilitadoModel extends Conection
 	public function saveAviso()
 	{
 		try {
-			$size = $_FILES['archivo']['size'];
-			$type = $_FILES['archivo']['type'];
-			$name = $_FILES['archivo']['name'];
-			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
-			
-			if ( $size > 10485760 ) 
-			{
-				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
-			}
-			else
-			{
-				if ( $type != 'application/pdf' ) 
+			$desc = mb_strtoupper($_POST['desc'],'utf-8');
+
+			if ( empty($_FILES['archivo']['name']) ) {
+				$this->sql = "
+				INSERT INTO licencias_avisos(id,persona,tipo_doc,archivo,descripcion) 
+				VALUES ('',?,?,NULL,?);
+				";
+				$this->stmt = $this->pdo->prepare( $this->sql );
+				$this->stmt->bindParam(1,$_POST['sp_id'],PDO::PARAM_INT);
+				$this->stmt->bindParam(2,$_POST['t_aviso'],PDO::PARAM_STR);
+				$this->stmt->bindParam(3,$desc,PDO::PARAM_STR);
+				$this->stmt->execute();
+				return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA DEL SEGURO SE GUARDO CON ÉXITO SIN DOCUMENTO.' ));
+			}else{
+				$size = $_FILES['archivo']['size'];
+				$type = $_FILES['archivo']['type'];
+				$name = $_FILES['archivo']['name'];
+				$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+				
+				if ( $size > 10485760 ) 
 				{
-					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
 				}
 				else
 				{
-					#convertir a bytes
-					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
-					$file = fopen($destiny.$name,'r');
-					$content = fread($file,$size);
-					$content = addslashes($content);
-					fclose($file);
-					#Insertar en la BD
-					$this->sql = "
-					INSERT INTO licencias_avisos(id,persona,tipo_doc,archivo) 
-					VALUES ('',?,?,'".$content."');
-					";
-					$this->stmt = $this->pdo->prepare( $this->sql );
-					$this->stmt->bindParam(1,$_POST['sp_id'],PDO::PARAM_INT);
-					$this->stmt->bindParam(2,$_POST['t_aviso'],PDO::PARAM_STR);
-					$this->stmt->execute();
-					//unlink($destiny.$name);
-					return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA DEL SEGURO SE GUARDO CON ÉXITO.' ));
+					if ( $type != 'application/pdf' ) 
+					{
+						throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+					}
+					else
+					{
+						#convertir a bytes
+						move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+						$file = fopen($destiny.$name,'r');
+						$content = fread($file,$size);
+						$content = addslashes($content);
+						fclose($file);
+						#Insertar en la BD
+						$this->sql = "
+						INSERT INTO licencias_avisos(id,persona,tipo_doc,archivo) 
+						VALUES ('',?,?,'".$content."',?);
+						";
+						$this->stmt = $this->pdo->prepare( $this->sql );
+						$this->stmt->bindParam(1,$_POST['sp_id'],PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$_POST['t_aviso'],PDO::PARAM_STR);
+						$this->stmt->bindParam(3,$_POST['desc'],PDO::PARAM_STR);
+						$this->stmt->execute();
+						//unlink($destiny.$name);
+						return json_encode(array('status'=>'success','message'=>'LA EVIDENCIA DEL SEGURO SE GUARDO CON ÉXITO.' ));
+					}
 				}
 			}
-
+			
 			return json_encode( $this->result );
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
@@ -1697,7 +1744,7 @@ class HabilitadoModel extends Conection
 		try {
 			$avisos = array();
 			$this->sql = "
-			SELECT l.id,l.tipo_doc,l.created_at,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS full_name FROM licencias_avisos  AS l
+			SELECT l.id,l.tipo_doc,l.created_at,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS full_name, l.descripcion FROM licencias_avisos  AS l
 			INNER JOIN personal AS p ON p.id = l.persona
 			WHERE persona = ?
 			";
@@ -2031,12 +2078,21 @@ class HabilitadoModel extends Conection
 				    ' ',
 				    ap_mat)
 				  FROM
-				    personal
+				    personal as per
 				  WHERE
-				    id = v.resguardatario
+				    per.id = v.resguardatario
 				) AS reguardatario_name,
 				m.nom AS marca_name,
-				tv.nom AS tipo_name
+				tv.nom AS tipo_name,
+				s.km AS kilo,
+				(
+				  SELECT UPPER(a.nombre) as area
+				  FROM
+				    personal as pe
+				  INNER JOIN area as a on a.id = pe.area_id
+				  WHERE
+				    pe.id = v.resguardatario
+				) AS area
 				FROM
 				  solicitudes AS s
 				INNER JOIN
@@ -2175,6 +2231,117 @@ class HabilitadoModel extends Conection
 			$this->stmt->execute();	
 
 			return json_encode(array('status'=>'success','message'=>'EL NUEVO TIPO DE FALLA SE INSERTÓ EXITOSAMENTE.'));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+
+	public function getLicencia()
+	{
+		try {
+			$doc  = "";
+			$id = $_POST['id'];
+			$this->sql = "
+				SELECT archivo FROM licencias WHERE id	 = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$res = $this->stmt->fetch( PDO::FETCH_OBJ );
+			$doc .= "<div class='col-md-12'>";
+               	$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($res->archivo).'" type="application/pdf" width="100%" height="600px" />';
+            $doc .= "</div>";			
+			return $doc;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function updateLicencia()
+	{
+		try {
+			#print_r( $_POST );exit;
+
+			$size = $_FILES['archivo']['size'];
+			$type = $_FILES['archivo']['type'];
+			$name = $_FILES['archivo']['name'];
+			$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+			
+			if ( $size > 10485760 ) 
+			{
+				throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
+			}
+			else
+			{
+				if ( $type != 'application/pdf') 
+				{
+					throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+				}
+				else
+				{
+					#convertir a bytes
+					move_uploaded_file($_FILES['archivo']['tmp_name'],$destiny.$name);
+					$file = fopen($destiny.$name,'r');
+					$content = fread($file,$size);
+					$content = addslashes($content);
+					fclose($file);
+					#Insertar en la BD
+					$this->sql = "
+					UPDATE licencias SET f_expedicion = ?, f_vencimiento = ?, archivo='".$content."', tipo = ? WHERE id = ? 
+					";
+					$this->stmt = $this->pdo->prepare( $this->sql );
+					$this->stmt->bindParam(1,$_POST['f_exp'],PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$_POST['f_ven'],PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$_POST['tipo'],PDO::PARAM_INT);
+					$this->stmt->bindParam(4,$_POST['l_id'],PDO::PARAM_INT);
+					$this->stmt->execute();
+					unlink($destiny.$name);
+					return json_encode(array('status'=>'success','message'=>'LICENCIA ACTUALIZADA DE MANERA EXITOSA.'));
+				}
+			}
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function getDocsSol()
+	{
+		try {
+			$id = $_POST['id'];
+			$this->sql = "
+				SELECT sd.id, sd.solicitud, sd.tipo_doc,td.nom AS tipo_d FROM solicitud_documentos AS sd
+				INNER JOIN t_doc AS td ON td.id = sd.tipo_doc
+				WHERE sd.solicitud = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll( PDO::FETCH_OBJ );
+			
+			if ( count($this->result) == 0 ) {
+				return json_encode(array('status'=>'empty','message'=>'NO HAY DOCUMENTOS PARA MOSTRAR.'));
+			}else{
+				return json_encode( $this->result );
+			}
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
+		}
+	}
+	public function verDocSol()
+	{
+		try {
+			$id = $_POST['id'];
+			$doc = "";
+			$this->sql = "
+				SELECT archivo FROM solicitud_documentos
+				WHERE id = ? 
+			";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$res = $this->stmt->fetch( PDO::FETCH_OBJ );
+			$doc .= "<div class='col-md-12'>";
+               	$doc.= '<embed src="data:application/pdf;base64,'.base64_encode($res->archivo).'" type="application/pdf" width="100%" height="600px" />';
+            $doc .= "</div>";			
+			return $doc;
 		} catch (Exception $e) {
 			return json_encode(array('status'=>'error','message'=>$e->getMessage() ));
 		}

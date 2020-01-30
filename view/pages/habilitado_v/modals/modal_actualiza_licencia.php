@@ -1,5 +1,5 @@
 <form id="frm_update_licencia" method="post" action="#">
-	<input type="hidden" name="option" value="">	
+	<input type="hidden" name="option" value="84">	
 	<input type="hidden" name="l_id" value="">	
 	<div class="modal fade" id="modal_update_licencia">
 	  <div class="modal-dialog">

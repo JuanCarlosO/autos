@@ -23,6 +23,7 @@ class CarModel extends Conection
 			{
 				$wh = " 1=1 ";
 			}
+
 			
 			$this->sql = "
 			SELECT v.*, m.nom AS mar, t.nom AS tip,  
@@ -33,10 +34,16 @@ class CarModel extends Conection
 							INNER JOIN personal AS p ON p.id = v.resguardatario
 						WHERE".$wh." ORDER BY $anexgrid->columna $anexgrid->columna_orden
             			LIMIT $anexgrid->pagina, $anexgrid->limite ";
+
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$modulos = $this->stmt->fetchAll(PDO::FETCH_OBJ);
-			$this->sql = "SELECT COUNT(*) AS cuenta FROM modulos ";
+
+			$this->sql = "SELECT COUNT(*) AS cuenta FROM vehiculos AS v
+							INNER JOIN marcas AS m ON m.id = v.marca
+							INNER JOIN tipos_v AS t ON t.id = v.tipo 
+							INNER JOIN personal AS p ON p.id = v.resguardatario
+						WHERE".$wh." ";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute();
 			$cuenta = $this->stmt->fetch(PDO::FETCH_OBJ)->cuenta;
@@ -132,6 +139,7 @@ class CarModel extends Conection
 	public function saveCar($post)
 	{
 		try {
+			
 			if ( isset($_POST['personal_id']) && empty($_POST['personal_id'])) {
 				throw new Exception("DEBE BUSCAR Y SELECCIONAR EL NOMBRE DE USUARIO.", 1);
 			}
@@ -184,48 +192,54 @@ class CarModel extends Conection
 			#El que se inserto
 			$vehiculo = $this->pdo->lastInsertId();
 			#insertar los documentos 
-			for ($i=0; $i < count($_FILES['archivo']['name']); $i++) { 
-				$size = $_FILES['archivo']['size'][$i];
-				$type = $_FILES['archivo']['type'][$i];
-				$name = $_FILES['archivo']['name'][$i];
-				$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
-				//echo $type;
-				#Tipo de documento
-				$t_doc = $_POST['tipo_doc'][$i];
-				if ( $size > 10485760 ) 
-				{
-					throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
-				}
-				else
-				{
-					if ( $type != 'application/pdf' ) 
+			if ( !empty($_FILES['archivo']['name'][0]) ) {
+				for ($i=0; $i < count($_FILES['archivo']['name']); $i++) { 
+					$size = $_FILES['archivo']['size'][$i];
+					$type = $_FILES['archivo']['type'][$i];
+					$name = $_FILES['archivo']['name'][$i];
+					$destiny = $_SERVER['DOCUMENT_ROOT'].'/autos/uploads/';
+					//echo $type;
+					#Tipo de documento
+					$t_doc = $_POST['tipo_doc'][$i];
+					if ( $size > 10485760 ) 
 					{
-						throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+						throw new Exception("EL ARCHIVO EXCEDE EL TAMAÑO ADMITIDO (10MB)", 1);
 					}
 					else
 					{
-						#convertir a bytes
-						move_uploaded_file($_FILES['archivo']['tmp_name'][$i],$destiny.$name);
-						$file = fopen($destiny.$name,'r');
-						$content = fread($file,$size);
-						$content = addslashes($content);
-						fclose($file);
-						#Insertar en la BD
-						$this->sql = "
-						INSERT INTO vehiculo_documentos(id,t_doc,vehiculo,archivo) 
-						VALUES ('',?,?,?);
-						";
-						$this->stmt = $this->pdo->prepare( $this->sql );
-						$this->stmt->bindParam(1,$t_doc,PDO::PARAM_STR);
-						$this->stmt->bindParam(2,$vehiculo,PDO::PARAM_INT);
-						$this->stmt->bindParam(3,$content,PDO::PARAM_LOB);
-						$this->stmt->execute();
-						unlink($destiny.$name);
-						
+						if ( $type != 'application/pdf' ) 
+						{
+							throw new Exception("EL FORMATO DEL ARCHIVO ES INCORRECTO.", 1);
+						}
+						else
+						{
+							#convertir a bytes
+							move_uploaded_file($_FILES['archivo']['tmp_name'][$i],$destiny.$name);
+							$file = fopen($destiny.$name,'r');
+							$content = fread($file,$size);
+							$content = addslashes($content);
+							fclose($file);
+							#Insertar en la BD
+							$this->sql = "
+							INSERT INTO vehiculo_documentos(id,t_doc,vehiculo,archivo) 
+							VALUES ('',?,?,?);
+							";
+							$this->stmt = $this->pdo->prepare( $this->sql );
+							$this->stmt->bindParam(1,$t_doc,PDO::PARAM_STR);
+							$this->stmt->bindParam(2,$vehiculo,PDO::PARAM_INT);
+							$this->stmt->bindParam(3,$content,PDO::PARAM_LOB);
+							$this->stmt->execute();
+							unlink($destiny.$name);
+							
+						}
 					}
 				}
+				$message_file = " Y SE ALMACENARON 1 O MÁS ARCHIVOS."; 
+			}else{
+				$message_file = " PERO NO SE ALMACENO NINGUN ARCHIVO."; 
 			}
-			return json_encode( array('status'=>'success','message'=>'SE A GUARDADO EL VEHÍCULO CORRECTAMENTE.' ) );
+			
+			return json_encode( array('status'=>'success','message'=>'SE A GUARDADO EL VEHÍCULO CORRECTAMENTE.'.$message_file ) );
 
 			
 		} catch (Exception $e) {

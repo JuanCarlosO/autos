@@ -31,13 +31,13 @@
             </button>
           </div>
           <div class="col-md-3">
-            <button id="btn_final" value=""  class="btn btn-info btn-block btn-flat" data-toggle="modal" data-target="#modal_ingreso_fin">
+            <button id="btn_final" value=""  class="btn btn-info btn-block btn-flat hidden" data-toggle="modal" data-target="#modal_ingreso_fin">
               <i class="fa fa-check-square-o"></i>
               Entrega taller (3)
             </button>
           </div>
           <div class="col-md-3">
-            <button id="btn_entrega" value="" class="btn btn-success btn-block btn-flat " data-toggle="modal" data-target="#modal_entrega">
+            <button id="btn_entrega" value="" class="btn btn-success btn-block btn-flat hidden" data-toggle="modal" data-target="#modal_entrega">
               <i class="fa fa-car"></i>
               Entrega a resguardatario (4)
             </button>

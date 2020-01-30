@@ -11,6 +11,9 @@
 			</div>
 			<div class="modal-body">
 				<input type="hidden" id="solicitud_id" name="solicitud_id" value="">
+				<ol id="listado_documentos">
+					<li> <a href="#"> Mi archivo </a> </li>
+				</ol>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger btn-flat pull-left" data-dismiss="modal">Cerrar</button>

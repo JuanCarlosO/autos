@@ -288,8 +288,8 @@ class HabilitadoController
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(60,5,utf8_decode('Area:'),1,0,'R');
-		$pdf->SetFont('Helvetica','',12 );
-		$pdf->Cell(132,5,utf8_decode(''),1,0,'C');
+		$pdf->SetFont('Helvetica','',9 );
+		$pdf->Cell(132,5,utf8_decode($solicitud->area),1,0,'C');
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','B',12);
 		$pdf->Cell(60,5,utf8_decode('Localidad:'),1,0,'R');
@@ -322,7 +322,7 @@ class HabilitadoController
 		$pdf->Cell(48,8,'Combustible: Gasolina',1,0,'R');
 		$pdf->Ln(8);
 		$pdf->Cell(48,8,"Cilindros: ".$solicitud->cil,1,0,'R');
-		$pdf->Cell(48,8,"KM: ".utf8_decode($solicitud->km),1,0,'R');
+		$pdf->Cell(48,8,"KM: ".utf8_decode($solicitud->kilo),1,0,'R');
 		$pdf->Cell(48,8,"Uso: Oficial",1,0,'R');
 		$pdf->Cell(48,8,'',1,0,'R');
 		$pdf->Ln(8);
@@ -330,17 +330,17 @@ class HabilitadoController
 		$pdf->Cell(192,5,'SERVICIO SOLICITADO',1,0,'C',1);
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','',10);
-		$pdf->Cell(48,12,utf8_decode('TRANSMISIÓN'),1,0,'R');
-		$pdf->Cell(48,12,'FRENOS',1,0,'R');
-		$pdf->Cell(48,12,'LLANTAS',1,0,'R');
-		$pdf->Cell(48,12,utf8_decode('SUSPENSIÓN'),1,0,'R');
-		$pdf->Ln(12);
-		$pdf->Cell(48,12,utf8_decode('VERIFICACIÓN'),1,0,'R');
-		$pdf->Cell(48,12,utf8_decode('AFINACIÓN MENOR'),1,0,'R');
-		$pdf->Cell(48,12,utf8_decode('AFINACIÓN MAYOR'),1,0,'R');
-		$pdf->Cell(48,12,utf8_decode('HOJALATERÍA Y PINTURA'),1,0,'R');
-		$pdf->Ln(12);
-		$pdf->SetFont('Helvetica','B',12);
+		$pdf->Cell(48,10,utf8_decode('TRANSMISIÓN'),1,0,'R');
+		$pdf->Cell(48,10,'FRENOS',1,0,'R');
+		$pdf->Cell(48,10,'LLANTAS',1,0,'R');
+		$pdf->Cell(48,10,utf8_decode('SUSPENSIÓN'),1,0,'R');
+		$pdf->Ln(10);
+		$pdf->Cell(48,10,utf8_decode('VERIFICACIÓN'),1,0,'R');
+		$pdf->Cell(48,10,utf8_decode('AFINACIÓN MENOR'),1,0,'R');
+		$pdf->Cell(48,10,utf8_decode('AFINACIÓN MAYOR'),1,0,'R');
+		$pdf->Cell(48,10,utf8_decode('HOJALATERÍA Y PINTURA'),1,0,'R');
+		$pdf->Ln(10);
+		$pdf->SetFont('Helvetica','B',10);
 		$pdf->Cell(192,5,'OTRAS REPARACIONES',1,0,'C',1);
 		$pdf->Ln(5);
 		$pdf->SetFont('Helvetica','',8);
@@ -351,13 +351,17 @@ class HabilitadoController
 		$pdf->Cell(192,5,'FIRMAS',1,0,'C',1);
 		$pdf->SetFont('Helvetica','',10);
 		$pdf->Ln(5);
-		$pdf->MultiCell(95,12,utf8_decode('Elaboró'.PHP_EOL.'C. Gerardo López Salazar '.PHP_EOL.'Habilitado de control vehicular'),1,'C');
+		$pdf->MultiCell(95,8,utf8_decode('Elaboró'.PHP_EOL.'C. Gerardo López Salazar '.PHP_EOL.'Habilitado de control vehicular'),1,'C');
 		$x=$pdf->GetX();
 		$y=$pdf->GetY();
-		$pdf->SetXY($x+96,$y-36);
-		$pdf->MultiCell(96,12,utf8_decode('Autorizó'.PHP_EOL.'Sergio Lara Ahuatzi'.PHP_EOL.'Titular de apoyo administrativo.'),1,'C');
-		$pdf->MultiCell(192,12,utf8_decode('Vo. Bo. '.PHP_EOL.'Mtra. Maria de la Luz Nuñes Camacho'.PHP_EOL.'Titular de la UAI'),1,'C');
-		
+		$pdf->SetXY($x+95,$y-24);
+		$pdf->MultiCell(97,8,utf8_decode('Autorizó'.PHP_EOL.'Sergio Lara Ahuatzi'.PHP_EOL.'Titular de apoyo administrativo.'),1,'C');
+		$pdf->MultiCell(192,10,utf8_decode('Vo. Bo. '.PHP_EOL.'Mtra. Maria de la Luz Nuñez Camacho'.PHP_EOL.'Titular de la UAI'),1,'C');
+		$pdf->MultiCell(95,12,utf8_decode('Nombre'.PHP_EOL.'Firma del taller'),1,'C');
+		$x=$pdf->GetX();
+		$y=$pdf->GetY();
+		$pdf->SetXY($x+95,$y-24);
+		$pdf->MultiCell(97,12,utf8_decode('Nombre/Firma/Fecha de recepción'.PHP_EOL.'Usuario y/o resguardatario.'),1,'C');
 		$pdf->Output();
 	}
 	public function cancelarSolicitud()
@@ -464,8 +468,23 @@ class HabilitadoController
 	{
 		return $this->model->addFalla();
 	}
-	
-	
+	public function getLicencia()
+	{
+		return $this->model->getLicencia();
+	}
+	public function getDocsSol()
+	{
+		return $this->model->getDocsSol();
+	}
+	public function verDocSol()
+	{
+		return $this->model->verDocSol();
+	}
+	public function updateLicencia()
+	{
+		return $this->model->updateLicencia();
+	}
+		
 }
 
 class PDF2 extends FPDF

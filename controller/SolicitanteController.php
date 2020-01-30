@@ -97,7 +97,7 @@ class SolicitanteController
 		$pdf->Text(12,65,utf8_decode('ÁREA:'));
 		$pdf->Text(15,70, utf8_decode($solicitud->area_name) );
 		$pdf->Text(12,75,utf8_decode('RESGUARDATARIO:'));
-		$pdf->Text(40,75,utf8_decode('RESGUARDATARIO:'));
+		$pdf->Text(40,75,utf8_decode($solicitud->solicitante_name));
 		$pdf->Cell(60,30,'',1,0);
 		$pdf->Text(142,65,utf8_decode('KILOMETRAJE'));
 		$pdf->Text(142,75,$solicitud->km);
@@ -140,8 +140,8 @@ class SolicitanteController
 		$pdf->Cell(95,7,'NOMBRE:',0,0,'L');
 		$pdf->Cell(95,7,'NOMBRE:',0,0,'L');
 		$pdf->Ln(9);
-		$pdf->Cell(95,7,'FRIMA Y TALLER:',0,0,'L');
-		$pdf->Cell(95,7,'FRIMA Y TALLER:',0,0,'L');
+		$pdf->Cell(95,7,'FIRMA Y TALLER:',0,0,'L');
+		$pdf->Cell(95,7,'FIRMA Y TALLER:',0,0,'L');
 		$pdf->Ln(12);
 		$pdf->Cell(190,30,'',1,0);
 		$pdf->Ln(0);

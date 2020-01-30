@@ -306,6 +306,18 @@ if ( isset( $_POST['option'] ) )
 		case '80':
 			echo $hab->addFalla();
 			break;	
+		case '81':
+			echo $hab->getLicencia();
+			break;	
+		case '82':
+			echo $hab->getDocsSol();
+			break;	
+		case '83':
+			echo $hab->verDocSol();
+			break;	
+		case '84':
+			echo $hab->updateLicencia();
+			break;	
 			
 		default:
 			echo json_encode(array('estado'=>'error','message'=>'El puente en POST no encontro la ruta a la que desea enlazarse.'));
