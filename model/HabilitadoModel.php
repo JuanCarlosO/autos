@@ -332,7 +332,9 @@ class HabilitadoModel extends Conection
 			";
 			$this->stmt = $this->pdo->prepare( $this->sql );
 			$this->stmt->execute(array($atendidas['id']));
+			$cuenta_ev = $this->stmt->rowCount();
 			$e_vehiculo = $this->stmt->fetch(PDO::FETCH_ASSOC);
+
 			#RECUPERAR LOS SINIESTROS 
 			$this->sql = "
 				SELECT id, aseguradora, f_hechos, f_entrada, f_salida, observaciones, solicitud_id, estatus
@@ -363,10 +365,10 @@ class HabilitadoModel extends Conection
 				$detalle['atendida'] = $atendidas;
 			}
 
-			if ( isset($e_vehiculo) && !empty($e_vehiculo) ) {
+			if ( $cuenta_ev > 0  ) {
 				$detalle['e_vehiculo'] = $e_vehiculo;
 			}else{
-				$e_vehiculos = array('estado'=>'empty','message'=>'Sin atender');
+				$e_vehiculo = array('estado'=>'empty','message'=>'Sin atender');
 				$detalle['e_vehiculo'] = $e_vehiculo;
 			}
 
@@ -2092,7 +2094,8 @@ class HabilitadoModel extends Conection
 				  INNER JOIN area as a on a.id = pe.area_id
 				  WHERE
 				    pe.id = v.resguardatario
-				) AS area
+				) AS area,
+				s.f_sol
 				FROM
 				  solicitudes AS s
 				INNER JOIN

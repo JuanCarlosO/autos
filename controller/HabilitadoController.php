@@ -256,6 +256,7 @@ class HabilitadoController
 		#Recuperar el ID de la solicitud 
 		$s = $_POST['solicitud_id'];
 		$solicitud = $this->model->getSolcitudEsp($s);
+		
 		$reparaciones = $this->model->getReparaciones($s);
 
 		$pdf = new PDF3('P','mm','Letter');
@@ -271,7 +272,7 @@ class HabilitadoController
         $pdf->SetFont('Helvetica','',8);
         $pdf->Cell(148,5,'',0,0,'R');
         $pdf->Cell(20,5,'Fecha:',1,0,'R');
-		$pdf->Cell(30,5, date('d-m-Y') ,1,0,'R');
+		$pdf->Cell(30,5, $solicitud->f_sol ,1,0,'R');
 		$pdf->Ln(5);
 		$pdf->Cell(148,5,'',0,0,'R');
         $pdf->Cell(20,5,'Folio:',1,0,'R');

@@ -991,12 +991,12 @@ function getDetalleSol( solicitud )
 				$('#btn_final').addClass('hidden');
 			}*/
 			/*Ocultar el boton de entrega a resguardatario*/
-			if(response.e_vehiculo.estado != 'empty'){
-				$('#btn_entrega').addClass('hidden');
-				$('#btn_final').addClass('hidden');
-			}else if( response.e_vehiculo.estado == 'empty'){
+			if(response.e_vehiculo.estado == 'empty'){
 				$('#btn_entrega').removeClass('hidden');
 				$('#btn_final').removeClass('hidden');
+			}else if( response.e_vehiculo.estado == 'empty'){
+				$('#btn_entrega').addClass('hidden');
+				$('#btn_final').addClass('hidden');
 			}
 			$('#id').val(response.solicitud.id);
 			$('#folio').val(response.solicitud.folio);
